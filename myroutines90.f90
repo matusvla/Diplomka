@@ -612,7 +612,7 @@
           end subroutine minimumordering    
 
 !-------------------------------------------------------------------- 
-! subroutine ordervertices
+! subroutine orderverticess
 ! (c) Vladislav Matus
 ! last edit: 12. 08. 2018  
 !

@@ -539,7 +539,42 @@
 ! end of remloops
 !  
       end subroutine remloops
-        
+!-------------------------------------------------------------------- 
+! subroutine orderbydistance
+! (c) Vladislav Matus
+! last edit: 12. 08. 2018  
+!
+! Purpose:
+!   
+!   
+! Input:
+!   
+!   
+! Output:
+!             
+!   
+! Allocations:  perm, invperm
+
+      subroutine orderbydistance(ia, ja, n)
+        implicit none
+!
+! parameters
+!
+        integer :: n
+        integer :: ia(n+1),ja(ia(n+1)-1)      
+!
+! internals
+!              
+   
+!
+! start of orderbydistance
+!	    
+     
+!
+! end of orderbydistance
+!  
+      end subroutine orderbydistance     
+      
 !-------------------------------------------------------------------- 
 ! subroutine ordervertices
 ! (c) Vladislav Matus
@@ -567,10 +602,9 @@
 ! parameters
 !
       integer :: ierr, n
-      integer :: ia(n+1),ja(ia(n+1)-1),part(n)
+      integer :: ia(n+1),ja(ia(n+1)-1)
       double precision :: aa(ia(n+1)-1)    	  
-      integer, allocatable, dimension(:) :: iaord, jaord, perm, invperm
-      double precision, allocatable, dimension(:) :: aaord
+      integer, allocatable, dimension(:) :: perm, invperm      
 !
 ! internals
 !              

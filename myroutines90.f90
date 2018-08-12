@@ -541,6 +541,42 @@
       end subroutine remloops
         
 !-------------------------------------------------------------------- 
+! subroutine minimumordering
+! (c) Vladislav Matus
+! last edit: 12. 08. 2018  
+!
+! Purpose:
+!   
+!   
+! Input:
+!   
+!   
+! Output:
+!             
+!   
+! Allocations:  perm, invperm
+
+      subroutine minimumordering(ia, ja, n)
+            implicit none
+    !
+    ! parameters
+    !
+            integer :: n
+            integer :: ia(n+1),ja(ia(n+1)-1)      
+    !
+    ! internals
+    !              
+       
+    !
+    ! start of minimumordering
+    !	    
+         
+    !
+    ! end of minimumordering
+    !  
+          end subroutine minimumordering    
+
+!-------------------------------------------------------------------- 
 ! subroutine ordervertices
 ! (c) Vladislav Matus
 ! last edit: 12. 08. 2018  

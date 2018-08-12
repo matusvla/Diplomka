@@ -89,7 +89,7 @@
 ! program start
 !
 ! -- various initializations
-! -- TODO loading command line arguments, at the moment hardcoded:
+! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
      matrixtype = 'P'     

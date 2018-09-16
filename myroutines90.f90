@@ -576,7 +576,7 @@
       end subroutine orderbydistance     
       
 !-------------------------------------------------------------------- 
-! subroutine minimumordering
+! subroutine minimumorderingg
 ! (c) Vladislav Matus
 ! last edit: 12. 08. 2018  
 !

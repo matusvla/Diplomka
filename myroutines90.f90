@@ -545,30 +545,38 @@
 ! last edit: 12. 08. 2018  
 !
 ! Purpose:
-!   
+!   create ordering of subgraphs according to distance from vertex separator
+!   Returns array with weights from [0,1], bigger weight = further from separator
 !   
 ! Input:
-!   
+!   ia, ja, aa ... graph in CSR format
+!   n ... size of the corresponding matrix
+!   parts ... number of parts in partition
+!   part ... vector describing the partition of the graph
 !   
 ! Output:
-!             
+!   distOrd ... dp vector of length n which contains weights corresponding to
+!     graph ordering. Vertex separator is weighed by 0
 !   
-! Allocations:  perm, invperm
+! Allocations:  distOrd
 
-      subroutine orderbydistance(ia, ja, n)
+      subroutine orderbydistance(ia, ja, n, part, parts, distOrd)
         implicit none
 !
 ! parameters
 !
-        integer :: n
-        integer :: ia(n+1),ja(ia(n+1)-1)      
+        integer, parameter :: n, parts
+        integer, parameter :: ia(n+1),ja(ia(n+1)-1)    
+        double precision, allocatable, dimension(:) :: distOrd
 !
 ! internals
-!              
+!             
    
 !
 ! start of orderbydistance
 !	    
+        
+
      
 !
 ! end of orderbydistance
@@ -591,7 +599,7 @@
 ! Output:
 !   iaord, jaord, aaord ... ordered graph in CSR format     
 !   perm ... permutation: original ordering -> new ordering
-!   perm ... permutation: new ordering -> original ordering 
+!   invperm ... permutation: new ordering -> original ordering 
 !   ierr ... error code (0 if succesful, 1 otherwise)             
 !   
 ! Allocations:  perm, invperm

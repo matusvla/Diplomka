@@ -574,6 +574,7 @@
     !
     ! start of minimumordering
     !	    
+            !TODO write the routine code
          
     !
     ! end of minimumordering

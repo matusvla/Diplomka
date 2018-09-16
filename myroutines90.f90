@@ -567,7 +567,6 @@
             integer :: n
             integer :: ia(n+1),ja(ia(n+1)-1)
             double precision, allocatable, dimension(:) :: minOrdering
-
     !
     ! internals
     !              

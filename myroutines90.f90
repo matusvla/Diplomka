@@ -538,42 +538,7 @@
 !
 ! end of remloops
 !  
-      end subroutine remloops
-!-------------------------------------------------------------------- 
-! subroutine orderbydistance
-! (c) Vladislav Matus
-! last edit: 12. 08. 2018  
-!
-! Purpose:
-!   
-!   
-! Input:
-!   
-!   
-! Output:
-!             
-!   
-! Allocations:  perm, invperm
-
-      subroutine orderbydistance(ia, ja, n)
-        implicit none
-!
-! parameters
-!
-        integer :: n
-        integer :: ia(n+1),ja(ia(n+1)-1)      
-!
-! internals
-!              
-   
-!
-! start of orderbydistance
-!	    
-     
-!
-! end of orderbydistance
-!  
-      end subroutine orderbydistance     
+      end subroutine remloops 
       
 !-------------------------------------------------------------------- 
 ! subroutine minimumordering
@@ -581,23 +546,28 @@
 ! last edit: 12. 08. 2018  
 !
 ! Purpose:
-!   
+!   Creates the minimmum degree ordering ot the graph      
+!   Outputs an array where will be weight in (0,1) for all the vertices
+!   The smaller the weight the smaller the new number of the vertex
 !   
 ! Input:
-!   
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices          
 !   
 ! Output:
-!             
+!   minOrdering ... double precision array with weights corresponding to graph numbering
 !   
-! Allocations:  perm, invperm
+! Allocations:  minOrdering
 
-      subroutine minimumordering(ia, ja, n)
+      subroutine minimumordering(ia, ja, n, minOrdering)
             implicit none
     !
     ! parameters
     !
             integer :: n
-            integer :: ia(n+1),ja(ia(n+1)-1)      
+            integer :: ia(n+1),ja(ia(n+1)-1)
+            double precision, allocatable, dimension(:) :: minOrdering
+
     !
     ! internals
     !              
@@ -605,6 +575,7 @@
     !
     ! start of minimumordering
     !	    
+            !TODO write the routine code
          
     !
     ! end of minimumordering

@@ -540,6 +540,33 @@
 !  
       end subroutine remloops
 !-------------------------------------------------------------------- 
+
+      recursive function orderNeighbours(vertexInd, ia, ja, n, isOrdered, depth) result(maxDepth)
+        implicit none
+
+        integer :: vertexInd, n, depth
+        integer :: ia(n+1), ja(ia(n+1)-1)
+        logical :: isOrdered(n)
+
+        integer :: neighbour, newDepth, maxDepth
+
+        maxDepth = depth
+        write(*,*) 'working', depth, vertexInd
+        isOrdered(vertexInd) = .true.
+        do neighbour = ia(vertexInd), ia(vertexInd + 1) - 1
+          if(.not. isOrdered(neighbour)) then
+            newDepth = orderNeighbours(neighbour, ia, ja, n, isOrdered, depth + 1)
+          end if
+          if (newDepth > maxDepth) then
+            maxDepth = newDepth
+          end if
+        end do
+
+      end function orderNeighbours
+
+
+
+
 ! subroutine orderbydistance
 ! (c) Vladislav Matus
 ! last edit: 12. 08. 2018  
@@ -565,18 +592,27 @@
 !
 ! parameters
 !
-        integer, parameter :: n, parts
-        integer, parameter :: ia(n+1),ja(ia(n+1)-1)    
-        double precision, allocatable, dimension(:) :: distOrd
+        integer :: n, parts, ierr
+        integer :: ia(n+1), ja(ia(n+1)-1), part(n) 
+        double precision :: distOrd(n)
 !
 ! internals
 !             
-   
+        integer :: i, j, maxDepth
+        logical :: isOrdered(n)
+        integer :: maxPathLength = 0
 !
 ! start of orderbydistance
-!	    
-        
-
+!	 
+        do i = 1, n
+          isOrdered(i) = .false.
+        end do
+        do i = 1, n
+          if (.NOT. isOrdered(i) .AND. part(i) == parts + 1) then ! repair isOrdered for separator vertices 
+            isOrdered(i) = .true.
+            maxDepth = orderNeighbours(i, ia, ja, n, isOrdered, 0)
+          end if
+        end do
      
 !
 ! end of orderbydistance
@@ -594,7 +630,9 @@
 !   
 ! Input:
 !   ia, ja, aa ... graph in CSR format
-!   n ... number of vertices      
+!   n ... number of vertices    
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs        
 !   
 ! Output:
 !   iaord, jaord, aaord ... ordered graph in CSR format     
@@ -604,13 +642,13 @@
 !   
 ! Allocations:  perm, invperm
 
-      subroutine ordervertices(ia, ja, aa, n, perm, invperm)
+      subroutine ordervertices(ia, ja, aa, n, part, parts, perm, invperm, ierr)
         implicit none
 !
 ! parameters
 !
-      integer :: ierr, n
-      integer :: ia(n+1),ja(ia(n+1)-1)
+      integer :: ierr, n, parts
+      integer :: ia(n+1), ja(ia(n+1)-1), part(n)
       double precision :: aa(ia(n+1)-1)    	  
       integer, allocatable, dimension(:) :: perm, invperm      
 !
@@ -618,14 +656,18 @@
 !              
       integer :: i      
       real :: ordvalue, order(n)
+      double precision :: distOrd(n)
 !
 ! start of ordervertices
 !	    
       !TODO real order, now just random
-      do i = 1, n
-        CALL RANDOM_NUMBER(ordvalue)
-        order(i) = ordvalue
-      end do      
+      !do i = 1, n
+      ! CALL RANDOM_NUMBER(ordvalue)
+      ! order(i) = ordvalue
+      !end do 
+      !
+      call orderbydistance(ia, ja, n, part, parts, distOrd) 
+      write(*,'(30I3)') distOrd    
 !
 ! -- fill in invperm and perm using sorted order values
 !                  

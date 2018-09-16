@@ -152,7 +152,7 @@
 ! -- Find best ordering of vertices
 !     TODO order vertices in all parts      
 !      
-      call ordervertices(ia, ja, aa, n, ordperm, invordperm)
+      call ordervertices(ia, ja, aa, n, part, parts, ordperm, invordperm, ierr)
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          

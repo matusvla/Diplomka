@@ -484,7 +484,10 @@
         logical :: isOrdered(n)        
 !
 ! start of countDistance
-!	         
+!	    
+! -- initialize currentLayer, currentLayerSize with separator
+!    and fill isOrdered and distFromSep accordingly        
+!          
         do i = 1, n          
           if (part(i) == parts + 1) then
             isOrdered(i) = .true.
@@ -495,7 +498,9 @@
             isOrdered(i) = .false.
           end if
         end do
-
+!
+! -- count distance from separator for all the vertices
+!                       
         maxDepth = -1        
 
         do while (currentLayerSize /= 0)
@@ -573,7 +578,7 @@
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n),invperm(n),stat=ierr)
-      call MRGRNK (distOrd, invperm);
+      call MRGRNK (distFromSep, invperm);
       do i = 1, n
         perm(invperm(i)) = i
       end do

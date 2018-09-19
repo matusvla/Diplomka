@@ -159,7 +159,7 @@
 !    TODO miscelaneous error handling          
 !      
       open(unit=graphvizunit, file=graphvizfilename)       
-      call graphvizcr(ia, ja, n, part, graphvizunit, ierr, .true.)
+      call graphvizcr(ia, ja, n, part, graphvizunit, ierr, .true.)      
       close(graphvizunit)  
       
       open(unit=15, file="GVgraph1.txt")   

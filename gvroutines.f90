@@ -10,14 +10,15 @@
 
 ! subroutine graphvizcr
 ! (c) Vladislav Matus
-! last edit: 15. 07. 2018
+! last edit: 19. 09. 2018
 ! TODO: check contents of ia, ja
 ! TODO: fill ierr      
 !
 ! Purpose:
-!   creating Graphviz friendly file to look at the graph corresponding
+!   The most advanced routine simplified by the routines following it
+!   Creates Graphviz friendly .txt file representing the graph corresponding
 !   to matrix desribed by ia, ja
-!   can be used e.g. https://dreampuf.github.io/GraphvizOnline/ (16. 3. 2018)
+!   can be visualised by e.g. https://dreampuf.github.io/GraphvizOnline/ (16. 3. 2018)
 ! Input:
 !   ia, ja ... matrix in CSR format
 !   n ... size of this matrix
@@ -28,7 +29,7 @@
 !   ierr ... error code (0 if succesful, 1 otherwise)
 ! Allocations: none     
 
-      subroutine graphvizcr(ia,ja,n,part,unitn,ierr,isvertsep)
+      subroutine graphvizcr(ia,ja,n,part,unitn,ierr,vertsep)
         implicit none
 !
 ! parameters
@@ -36,13 +37,12 @@
       integer :: n, unitn, ierr
       integer :: ia(n+1),ja(ia(n+1)-1)
       integer :: part(n)
-      logical, optional :: isvertsep
+      logical :: vertsep
 !
 ! internals
 !        
       integer :: i,j,vertsepindex
-      character(len=10) :: ich,jch 
-      logical :: vertsep
+      character(len=10) :: ich,jch       
 !
 ! constants
 !        
@@ -54,14 +54,7 @@
 
 !
 ! -- write out the file
-!   
-      
-      if (present(isvertsep)) then
-        vertsep = isvertsep
-      else
-        vertsep = .false.
-      end if
-      
+!         
       write(unitn,*) "strict graph G {"
       
       if(vertsep) then 
@@ -97,8 +90,26 @@
 !  
       end subroutine graphvizcr  
 
-!--------------------------------------------------------------------            
+!--------------------------------------------------------------------         
+! subroutine gvSimpleGraph
+! (c) Vladislav Matus
+! last edit: 19. 09. 2018
+! Interface for using graphvizcr for drawing a graph without any partition    
+!--------------------------------------------------------------------         
+    subroutine gvSimpleGraph (ia, ja, n, unitn, ierr)
+        implicit none
 
+        integer :: n, unitn, ierr
+        integer :: ia(n+1),ja(ia(n+1)-1)
+        
+        integer :: part(n)
+        logical :: vertsep = .false.
+
+        part = 0        
+        call graphvizcr(ia,ja,n,part,unitn,ierr,vertsep)
+
+    end subroutine gvSimpleGraph
+!--------------------------------------------------------------------             
 !
 ! end of module
 !      

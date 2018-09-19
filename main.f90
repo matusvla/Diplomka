@@ -93,7 +93,7 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'P'     
+     matrixtype = 'RSA'     
      matrixpath = "./matrices/bcsstk01.rsa"
 !
 ! -- matrix loading
@@ -122,7 +122,7 @@
           !end konzultace          
           
         case ('P')
-          nfull = 14
+          nfull = 6
           !allocate ia, ja, aa
           call poisson1(nfull, n, ia, ja, aa, info)
           mformat = 11  
@@ -159,7 +159,8 @@
 !    TODO miscelaneous error handling          
 !      
       open(unit=graphvizunit, file=graphvizfilename)       
-      call gvColorEdgeSep(ia, ja, n, part, graphvizunit, ierr)      
+      
+      call gvColorGraph(ia, ja, n, part, graphvizunit, ierr)  
       close(graphvizunit)  
       
       ! open(unit=15, file="GVgraph1.txt")   

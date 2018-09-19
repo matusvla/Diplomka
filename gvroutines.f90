@@ -49,7 +49,7 @@
 ! internals
 !        
       integer :: i,j,vertsepindex, colorStep
-      character(len=10) :: ich, jch, grayShadow
+      character(len=10) :: ich, jch, grayShadow, labelch
 !
 ! constants
 !        
@@ -73,11 +73,11 @@
         end if
         do i = 1, n            
           write(grayShadow,'(I10)') &
-            colorStep * part(i) - colorStep * part(i) / 100 * 100
+            colorStep * part(i) - colorStep * part(i) / 101 * 100
           write(ich,'(I10)') i
           write(unitn,*) "  "//TRIM(ADJUSTL(ich))// &
             "[fillcolor=gray"//TRIM(ADJUSTL(grayShadow))//&
-            "fontcolor=red, style=filled]"
+            " fontcolor=red, style=filled]"
         end do
       end if
       
@@ -88,6 +88,14 @@
             write(ich,'(I10)') i
             write(unitn,*) "  "//TRIM(ADJUSTL(ich))//separatorformat
           end if
+        end do
+      end if
+
+      if(hasLabels) then
+        do i = 1, n
+          write(ich,'(I10)') i
+          write(labelch,'(I10)') labels(i)
+          write(unitn,*) "  "//TRIM(ADJUSTL(ich))//"[xlabel="//TRIM(ADJUSTL(labelch))//"]"
         end do
       end if
 
@@ -218,10 +226,12 @@ subroutine gvSetLabels (ia, ja, n, labels, unitn, ierr)
   integer :: ia(n+1), ja(ia(n+1)-1), labels(n)
   
   integer :: part(n)
-  logical :: vertsepcolor = .true.
+  logical :: vertsepcolor = .false.
   logical :: edgesepcolor = .false.
   logical :: colorful = .false.
-  logical :: hasLabels = .true.
+  logical :: hasLabels = .true.  
+
+  part = 0
 
   call graphvizcr(ia, ja, n, part, unitn, ierr, vertsepcolor, &
     edgesepcolor, colorful, hasLabels, labels)

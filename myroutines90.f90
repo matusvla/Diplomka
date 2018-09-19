@@ -572,8 +572,7 @@
       ! order(i) = ordvalue
       ! end do 
       
-      call countDistance(ia, ja, n, part, parts, distFromSep) 
-      write(*,'(30I3)') distFromSep   
+      call countDistance(ia, ja, n, part, parts, distFromSep)       
 !
 ! -- fill in invperm and perm using sorted order values
 !                  
@@ -582,6 +581,7 @@
       do i = 1, n
         perm(invperm(i)) = i
       end do
+      part = distFromSep
 !
 ! end of ordervertices
 !  

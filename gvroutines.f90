@@ -76,7 +76,8 @@
             colorStep * part(i) - colorStep * part(i) / 100 * 100
           write(ich,'(I10)') i
           write(unitn,*) "  "//TRIM(ADJUSTL(ich))// &
-            "[fillcolor=gray"//TRIM(ADJUSTL(grayShadow))//", style=filled]"
+            "[fillcolor=gray"//TRIM(ADJUSTL(grayShadow))//&
+            "fontcolor=red, style=filled]"
         end do
       end if
       

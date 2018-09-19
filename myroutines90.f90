@@ -566,7 +566,7 @@
 !
 ! start of ordervertices
 !	    
-      !TODO real order, now just random
+      ! Random order:
       ! do i = 1, n
       ! CALL RANDOM_NUMBER(ordvalue)
       ! order(i) = ordvalue
@@ -574,6 +574,7 @@
       
       call countDistance(ia, ja, n, part, parts, distFromSep) 
       write(*,'(30I3)') distFromSep   
+      part = distFromSep !TODO DELETE!!!!!
 !
 ! -- fill in invperm and perm using sorted order values
 !                  

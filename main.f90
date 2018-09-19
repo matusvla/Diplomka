@@ -8,6 +8,7 @@
       use mydepend
       use mydepend90
       use myroutines90      
+      use gvroutines 
       use raggedmultiarray
       use metis_interface
       
@@ -92,7 +93,7 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'P'     
+     matrixtype = 'RSA'     
      matrixpath = "./matrices/bcsstk01.rsa"
 !
 ! -- matrix loading
@@ -121,7 +122,7 @@
           !end konzultace          
           
         case ('P')
-          nfull = 3
+          nfull = 6
           !allocate ia, ja, aa
           call poisson1(nfull, n, ia, ja, aa, info)
           mformat = 11  
@@ -152,18 +153,19 @@
 ! -- Find best ordering of vertices
 !     TODO order vertices in all parts      
 !      
-      call ordervertices(ia, ja, aa, n, ordperm, invordperm)
+      call ordervertices(ia, ja, aa, n, part, parts, ordperm, invordperm, ierr)
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          
 !      
       open(unit=graphvizunit, file=graphvizfilename)       
-      call graphvizcr(ia, ja, n, part, graphvizunit, ierr, .true.)
+      
+      call gvColorGraph(ia, ja, n, part, graphvizunit, ierr)  
       close(graphvizunit)  
       
-      open(unit=15, file="GVgraph1.txt")   
-      call graphvizcr(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), part, 15, ierr, .true.)
-      close(15)  
+      ! open(unit=15, file="GVgraph1.txt")   
+      ! call graphvizcr(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), part, 15, ierr, .true., .false., .false.,)
+      ! close(15)  
       
 !      
 ! -- write out matlab format for displaying this matrix

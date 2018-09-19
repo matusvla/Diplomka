@@ -24,12 +24,17 @@
 !   n ... size of this matrix
 !   part ... vector describing the partition of corresponding graph      
 !   unitn ... nuber of unit of the opened file         
-!   vertsepcolor ... boolean flag, if true, vertex separator is colored, else edge separator
+!   vertsepcolor ... boolean flag, if true, part with highest number
+!     (i. e. vertex separator) is colored to yellow
+!   egdesepcolor ... boolean flag, if true, all edges from one part
+!     to another are colored red
+!   colorful ... boolean flag, each part colored another shade of gray
 ! Output:
 !   ierr ... error code (0 if succesful, 1 otherwise)
 ! Allocations: none     
 
-      subroutine graphvizcr(ia, ja, n, part, unitn, ierr, vertsepcolor, colorful)
+      subroutine graphvizcr(ia, ja, n, part, unitn, ierr, &
+        vertsepcolor, edgesepcolor, colorful)
         implicit none
 !
 ! parameters
@@ -37,7 +42,7 @@
       integer :: n, unitn, ierr
       integer :: ia(n+1),ja(ia(n+1)-1)
       integer :: part(n)
-      logical :: vertsepcolor, colorful
+      logical :: vertsepcolor, edgesepcolor, colorful
 !
 ! internals
 !        
@@ -46,7 +51,7 @@
 !
 ! constants
 !        
-      character(len=*), parameter :: edgeformat = "[color=red]"
+      character(len=*), parameter :: edgeformat = " [color=red]"
       character(len=*), parameter :: separatorformat = "[fillcolor=yellow, style=filled]"
 
 !
@@ -94,7 +99,7 @@
             write(unitn,'(a)',advance='no') &
               "  "//TRIM(ADJUSTL(ich))//" -- "//TRIM(ADJUSTL(jch));
             !format the edge separator
-            if (part(i) /= part(ja(j)) .and. .not. vertsepcolor) then
+            if (part(i) /= part(ja(j)) .and. edgesepcolor) then
               write(unitn,'(a)',advance='no') edgeformat
             end if
             write(unitn,*) !new line
@@ -121,19 +126,20 @@
         
         integer :: part(n)
         logical :: vertsepcolor = .false.
+        logical :: edgesepcolor = .false.
         logical :: colorful = .false.
 
         part = 0        
-        call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,colorful)
+        call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,edgesepcolor,colorful)
 
     end subroutine gvSimpleGraph
 !--------------------------------------------------------------------       
-! subroutine gvColoredGraph
+! subroutine gvColorGraph
 ! (c) Vladislav Matus
 ! last edit: 19. 09. 2018
 ! Interface for using graphvizcr for drawing a graph with every part in different color    
 !--------------------------------------------------------------------         
-    subroutine gvColoredGraph (ia, ja, n, part, unitn, ierr)
+    subroutine gvColorGraph (ia, ja, n, part, unitn, ierr)
         implicit none
 
         integer :: n, unitn, ierr
@@ -141,11 +147,52 @@
         
         integer :: part(n)
         logical :: vertsepcolor = .false.
+        logical :: edgesepcolor = .false.
         logical :: colorful = .true.
 
-        call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,colorful)
+        call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,edgesepcolor,colorful)
 
-    end subroutine gvColoredGraph
+    end subroutine gvColorGraph
+!--------------------------------------------------------------------       
+! subroutine gvColorVertSep
+! (c) Vladislav Matus
+! last edit: 19. 09. 2018
+! Interface for using graphvizcr for drawing a graph with every part in different color    
+!--------------------------------------------------------------------         
+    subroutine gvColorVertSep (ia, ja, n, part, unitn, ierr)
+      implicit none
+
+      integer :: n, unitn, ierr
+      integer :: ia(n+1),ja(ia(n+1)-1)
+      
+      integer :: part(n)
+      logical :: vertsepcolor = .true.
+      logical :: edgesepcolor = .false.
+      logical :: colorful = .false.
+
+      call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,edgesepcolor,colorful)
+
+  end subroutine gvColorVertSep    
+!--------------------------------------------------------------------       
+! subroutine gvColorEdgeSep
+! (c) Vladislav Matus
+! last edit: 19. 09. 2018
+! Interface for using graphvizcr for drawing a graph with every part in different color    
+!--------------------------------------------------------------------         
+  subroutine gvColorEdgeSep (ia, ja, n, part, unitn, ierr)
+    implicit none
+
+    integer :: n, unitn, ierr
+    integer :: ia(n+1),ja(ia(n+1)-1)
+    
+    integer :: part(n)
+    logical :: vertsepcolor = .false.
+    logical :: edgesepcolor = .true.
+    logical :: colorful = .false.
+
+    call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,edgesepcolor,colorful)
+
+end subroutine gvColorEdgeSep      
 !--------------------------------------------------------------------             
 !
 ! end of module

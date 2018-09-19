@@ -1,6 +1,6 @@
 ! module myroutines90
 ! (c) Vladislav Matus
-! last edit: 12. 08. 2018      
+! last edit: 19. 09. 2018      
 
       module myroutines90
         use raggedmultiarray
@@ -449,64 +449,110 @@
 !  
       end subroutine remloops
 !-------------------------------------------------------------------- 
-! subroutine orderbydistance
+! subroutine countDistance
 ! (c) Vladislav Matus
-! last edit: 12. 08. 2018  
+! last edit: 19. 09. 2018  
 !
 ! Purpose:
-!   
+!   create ordering of subgraphs according to distance from vertex separator
+!   Returns array of distances from separator
 !   
 ! Input:
-!   
+!   ia, ja, aa ... graph in CSR format
+!   n ... size of the corresponding matrix
+!   parts ... number of parts in partition
+!   part ... vector describing the partition of the graph
 !   
 ! Output:
-!             
+!   distFromSep ... int vector of length n which contains distances of vertices from separator
 !   
-! Allocations:  perm, invperm
+! Allocations:  distFromSep
 
-      subroutine orderbydistance(ia, ja, n)
+      subroutine countDistance(ia, ja, n, part, parts, distFromSep)
         implicit none
 !
 ! parameters
 !
-        integer :: n
-        integer :: ia(n+1),ja(ia(n+1)-1)      
+        integer :: n, parts, ierr
+        integer :: ia(n+1), ja(ia(n+1)-1), part(n), distFromSep(n)        
 !
 ! internals
-!              
-   
+!             
+        integer :: i, j, maxDepth, vertexNo
+        integer :: currentLayer(n), currentLayerSize = 0
+        integer :: oldLayer(n), oldLayerSize = 0
+        logical :: isOrdered(n)        
 !
-! start of orderbydistance
+! start of countDistance
 !	    
-     
+! -- initialize currentLayer, currentLayerSize with separator
+!    and fill isOrdered and distFromSep accordingly        
+!          
+        do i = 1, n          
+          if (part(i) == parts + 1) then
+            isOrdered(i) = .true.
+            distFromSep(i) = 0
+            currentLayerSize = currentLayerSize + 1
+            currentLayer(currentLayerSize) = i            
+          else
+            isOrdered(i) = .false.
+          end if
+        end do
 !
-! end of orderbydistance
+! -- count distance from separator for all the vertices
+!                       
+        maxDepth = -1        
+
+        do while (currentLayerSize /= 0)
+          maxDepth = maxDepth + 1
+          oldLayer = currentLayer
+          oldLayerSize = currentLayerSize
+          currentLayerSize = 0
+          do i = 1, oldLayerSize
+            vertexNo = oldLayer(i)
+            do j = ia(vertexNo), ia(vertexNo + 1) - 1
+              if (.not. isOrdered(ja(j))) then                
+                isOrdered(ja(j)) = .true.
+                distFromSep(ja(j)) = maxDepth + 1
+                currentLayerSize = currentLayerSize + 1
+                currentLayer(currentLayerSize) = ja(j)                
+              end if
+            end do
+          end do         
+        end do    
+!
+! end of countDistance
 !  
-      end subroutine orderbydistance     
+      end subroutine countDistance     
       
 !-------------------------------------------------------------------- 
-! subroutine minimumordering
+! subroutine ordervertices
 ! (c) Vladislav Matus
 ! last edit: 12. 08. 2018  
 !
 ! Purpose:
-!   
+!   Creates the minimmum degree ordering ot the graph      
+!   Outputs an array where will be weight in (0,1) for all the vertices
+!   The smaller the weight the smaller the new number of the vertex
 !   
 ! Input:
-!   
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices          
 !   
 ! Output:
-!             
+!   minOrdering ... double precision array with weights corresponding to graph numbering
 !   
-! Allocations:  perm, invperm
+! Allocations:  minOrdering
 
-      subroutine minimumordering(ia, ja, n)
+      subroutine minimumordering(ia, ja, n, minOrdering)
             implicit none
     !
     ! parameters
     !
             integer :: n
-            integer :: ia(n+1),ja(ia(n+1)-1)      
+            integer :: ia(n+1),ja(ia(n+1)-1)
+            double precision, allocatable, dimension(:) :: minOrdering
+
     !
     ! internals
     !              
@@ -514,6 +560,7 @@
     !
     ! start of minimumordering
     !	    
+            !TODO write the routine code
          
     !
     ! end of minimumordering
@@ -523,7 +570,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine ordervertices
 ! (c) Vladislav Matus
-! last edit: 12. 08. 2018  
+! last edit: 19. 09. 2018  
 !
 ! Purpose:
 !   Computes the permutation of vertices in graph to be ordered
@@ -531,46 +578,52 @@
 !   
 ! Input:
 !   ia, ja, aa ... graph in CSR format
-!   n ... number of vertices      
+!   n ... number of vertices    
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs        
 !   
 ! Output:
 !   iaord, jaord, aaord ... ordered graph in CSR format     
 !   perm ... permutation: original ordering -> new ordering
-!   perm ... permutation: new ordering -> original ordering 
+!   invperm ... permutation: new ordering -> original ordering 
 !   ierr ... error code (0 if succesful, 1 otherwise)             
 !   
 ! Allocations:  perm, invperm
 
-      subroutine ordervertices(ia, ja, aa, n, perm, invperm)
+      subroutine ordervertices(ia, ja, aa, n, part, parts, perm, invperm, ierr)
         implicit none
 !
 ! parameters
 !
-      integer :: ierr, n
-      integer :: ia(n+1),ja(ia(n+1)-1)
+      integer :: ierr, n, parts
+      integer :: ia(n+1), ja(ia(n+1)-1), part(n)
       double precision :: aa(ia(n+1)-1)    	  
       integer, allocatable, dimension(:) :: perm, invperm      
 !
 ! internals
 !              
-      integer :: i      
+      integer :: i, distFromSep(n)
       real :: ordvalue, order(n)
+      double precision :: distOrd(n)
 !
 ! start of ordervertices
 !	    
-      !TODO real order, now just random
-      do i = 1, n
-        CALL RANDOM_NUMBER(ordvalue)
-        order(i) = ordvalue
-      end do      
+      ! Random order:
+      ! do i = 1, n
+      ! CALL RANDOM_NUMBER(ordvalue)
+      ! order(i) = ordvalue
+      ! end do 
+      
+      call countDistance(ia, ja, n, part, parts, distFromSep)       
 !
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n),invperm(n),stat=ierr)
-      call MRGRNK (order, invperm);
+      call MRGRNK (distFromSep, invperm);
       do i = 1, n
         perm(invperm(i)) = i
       end do
+      part = distFromSep
 !
 ! end of ordervertices
 !  

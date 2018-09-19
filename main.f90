@@ -121,7 +121,7 @@
           !end konzultace          
           
         case ('P')
-          nfull = 12
+          nfull = 14
           !allocate ia, ja, aa
           call poisson1(nfull, n, ia, ja, aa, info)
           mformat = 11  

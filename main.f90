@@ -159,7 +159,7 @@
 !    TODO miscelaneous error handling          
 !      
       open(unit=graphvizunit, file=graphvizfilename)       
-      call gvColorGraph(ia, ja, n, part, graphvizunit, ierr)      
+      call gvColorEdgeSep(ia, ja, n, part, graphvizunit, ierr)      
       close(graphvizunit)  
       
       ! open(unit=15, file="GVgraph1.txt")   

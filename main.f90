@@ -8,6 +8,7 @@
       use mydepend
       use mydepend90
       use myroutines90      
+      use gvroutines 
       use raggedmultiarray
       use metis_interface
       
@@ -158,11 +159,11 @@
 !    TODO miscelaneous error handling          
 !      
       open(unit=graphvizunit, file=graphvizfilename)       
-      call graphvizcr(ia, ja, n, part, graphvizunit, ierr, .true.)
+      call gvColorEdgeSep(ia, ja, n, part, graphvizunit, ierr)      
       close(graphvizunit)  
       
       open(unit=15, file="GVgraph1.txt")   
-      call graphvizcr(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), part, 15, ierr, .true.)
+      call graphvizcr(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), part, 15, ierr, .true., .false., .false.)
       close(15)  
       
 !      

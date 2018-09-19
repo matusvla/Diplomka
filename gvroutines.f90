@@ -29,20 +29,22 @@
 !   egdesepcolor ... boolean flag, if true, all edges from one part
 !     to another are colored red
 !   colorful ... boolean flag, each part colored another shade of gray
+!   hasLabels ... boolean flag, change labels of vertices
+!   labels ... if hasLabels, then labels are used             
 ! Output:
 !   ierr ... error code (0 if succesful, 1 otherwise)
 ! Allocations: none     
 
       subroutine graphvizcr(ia, ja, n, part, unitn, ierr, &
-        vertsepcolor, edgesepcolor, colorful)
+        vertsepcolor, edgesepcolor, colorful, hasLabels, labels)
         implicit none
 !
 ! parameters
 !
       integer :: n, unitn, ierr
-      integer :: ia(n+1),ja(ia(n+1)-1)
+      integer :: ia(n+1), ja(ia(n+1)-1), labels(n)
       integer :: part(n)
-      logical :: vertsepcolor, edgesepcolor, colorful
+      logical :: vertsepcolor, edgesepcolor, colorful, hasLabels
 !
 ! internals
 !        
@@ -123,15 +125,17 @@
         implicit none
 
         integer :: n, unitn, ierr
-        integer :: ia(n+1),ja(ia(n+1)-1)
+        integer :: ia(n+1), ja(ia(n+1)-1), labels(n)
         
         integer :: part(n)
         logical :: vertsepcolor = .false.
         logical :: edgesepcolor = .false.
         logical :: colorful = .false.
+        logical :: hasLabels = .false.
 
         part = 0        
-        call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,edgesepcolor,colorful)
+        call graphvizcr(ia, ja, n, part, unitn, ierr, vertsepcolor, &
+          edgesepcolor, colorful, hasLabels, labels)
 
     end subroutine gvSimpleGraph
 !--------------------------------------------------------------------       
@@ -144,14 +148,16 @@
         implicit none
 
         integer :: n, unitn, ierr
-        integer :: ia(n+1),ja(ia(n+1)-1)
+        integer :: ia(n+1), ja(ia(n+1)-1), labels(n)
         
         integer :: part(n)
         logical :: vertsepcolor = .false.
         logical :: edgesepcolor = .false.
         logical :: colorful = .true.
+        logical :: hasLabels = .false.
 
-        call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,edgesepcolor,colorful)
+        call graphvizcr(ia, ja, n, part, unitn, ierr, vertsepcolor, &
+          edgesepcolor, colorful, hasLabels, labels)
 
     end subroutine gvColorGraph
 !--------------------------------------------------------------------       
@@ -164,14 +170,17 @@
       implicit none
 
       integer :: n, unitn, ierr
-      integer :: ia(n+1),ja(ia(n+1)-1)
+      integer :: ia(n+1), ja(ia(n+1)-1), labels(n)
       
       integer :: part(n)
       logical :: vertsepcolor = .true.
       logical :: edgesepcolor = .false.
       logical :: colorful = .false.
+      logical :: hasLabels = .false.
 
-      call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,edgesepcolor,colorful)
+
+      call graphvizcr(ia, ja, n, part, unitn, ierr, vertsepcolor, &
+        edgesepcolor, colorful, hasLabels, labels)
 
   end subroutine gvColorVertSep    
 !--------------------------------------------------------------------       
@@ -184,16 +193,40 @@
     implicit none
 
     integer :: n, unitn, ierr
-    integer :: ia(n+1),ja(ia(n+1)-1)
+    integer :: ia(n+1), ja(ia(n+1)-1), labels(n)
     
     integer :: part(n)
     logical :: vertsepcolor = .false.
     logical :: edgesepcolor = .true.
     logical :: colorful = .false.
+    logical :: hasLabels = .true.
 
-    call graphvizcr(ia,ja,n,part,unitn,ierr,vertsepcolor,edgesepcolor,colorful)
+    call graphvizcr(ia, ja, n, part, unitn, ierr, vertsepcolor, &
+      edgesepcolor, colorful, hasLabels, labels)
 
 end subroutine gvColorEdgeSep      
+!--------------------------------------------------------------------       
+! subroutine gvColorEdgeSep
+! (c) Vladislav Matus
+! last edit: 19. 09. 2018
+! Interface for using graphvizcr for drawing a graph with every part in different color    
+!--------------------------------------------------------------------         
+subroutine gvSetLabels (ia, ja, n, labels, unitn, ierr)
+  implicit none
+
+  integer :: n, unitn, ierr
+  integer :: ia(n+1), ja(ia(n+1)-1), labels(n)
+  
+  integer :: part(n)
+  logical :: vertsepcolor = .true.
+  logical :: edgesepcolor = .false.
+  logical :: colorful = .false.
+  logical :: hasLabels = .true.
+
+  call graphvizcr(ia, ja, n, part, unitn, ierr, vertsepcolor, &
+    edgesepcolor, colorful, hasLabels, labels)
+
+end subroutine gvSetLabels   
 !--------------------------------------------------------------------             
 !
 ! end of module

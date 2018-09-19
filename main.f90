@@ -162,9 +162,9 @@
       call gvColorGraph(ia, ja, n, part, graphvizunit, ierr)      
       close(graphvizunit)  
       
-      open(unit=15, file="GVgraph1.txt")   
-      call graphvizcr(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), part, 15, ierr, .true., .false., .false.)
-      close(15)  
+      ! open(unit=15, file="GVgraph1.txt")   
+      ! call graphvizcr(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), part, 15, ierr, .true., .false., .false.,)
+      ! close(15)  
       
 !      
 ! -- write out matlab format for displaying this matrix

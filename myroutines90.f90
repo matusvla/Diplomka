@@ -1,6 +1,6 @@
 ! module myroutines90
 ! (c) Vladislav Matus
-! last edit: 12. 08. 2018      
+! last edit: 19. 09. 2018      
 
       module myroutines90
         use raggedmultiarray
@@ -540,40 +540,13 @@
 !  
       end subroutine remloops
 !-------------------------------------------------------------------- 
-
-      recursive function orderNeighbours(vertexInd, ia, ja, n, isOrdered, depth) result(maxDepth)
-        implicit none
-
-        integer :: vertexInd, n, depth
-        integer :: ia(n+1), ja(ia(n+1)-1)
-        logical :: isOrdered(n)
-
-        integer :: neighbour, newDepth, maxDepth
-
-        maxDepth = depth
-        write(*,*) 'working', depth, vertexInd
-        isOrdered(vertexInd) = .true.
-        do neighbour = ia(vertexInd), ia(vertexInd + 1) - 1
-          if(.not. isOrdered(neighbour)) then
-            newDepth = orderNeighbours(neighbour, ia, ja, n, isOrdered, depth + 1)
-          end if
-          if (newDepth > maxDepth) then
-            maxDepth = newDepth
-          end if
-        end do
-
-      end function orderNeighbours
-
-
-
-
-! subroutine orderbydistance
+! subroutine countDistance
 ! (c) Vladislav Matus
-! last edit: 12. 08. 2018  
+! last edit: 19. 09. 2018  
 !
 ! Purpose:
 !   create ordering of subgraphs according to distance from vertex separator
-!   Returns array with weights from [0,1], bigger weight = further from separator
+!   Returns array of distances from separator
 !   
 ! Input:
 !   ia, ja, aa ... graph in CSR format
@@ -582,47 +555,66 @@
 !   part ... vector describing the partition of the graph
 !   
 ! Output:
-!   distOrd ... dp vector of length n which contains weights corresponding to
-!     graph ordering. Vertex separator is weighed by 0
+!   distFromSep ... int vector of length n which contains distances of vertices from separator
 !   
-! Allocations:  distOrd
+! Allocations:  distFromSep
 
-      subroutine orderbydistance(ia, ja, n, part, parts, distOrd)
+      subroutine countDistance(ia, ja, n, part, parts, distFromSep)
         implicit none
 !
 ! parameters
 !
         integer :: n, parts, ierr
-        integer :: ia(n+1), ja(ia(n+1)-1), part(n) 
-        double precision :: distOrd(n)
+        integer :: ia(n+1), ja(ia(n+1)-1), part(n), distFromSep(n)        
 !
 ! internals
 !             
-        integer :: i, j, maxDepth
-        logical :: isOrdered(n)
-        integer :: maxPathLength = 0
+        integer :: i, j, maxDepth, vertexNo
+        integer :: currentLayer(n), currentLayerSize = 0
+        integer :: oldLayer(n), oldLayerSize = 0
+        logical :: isOrdered(n)        
 !
-! start of orderbydistance
-!	 
-        do i = 1, n
-          isOrdered(i) = .false.
-        end do
-        do i = 1, n
-          if (.NOT. isOrdered(i) .AND. part(i) == parts + 1) then ! repair isOrdered for separator vertices 
+! start of countDistance
+!	         
+        do i = 1, n          
+          if (part(i) == parts + 1) then
             isOrdered(i) = .true.
-            maxDepth = orderNeighbours(i, ia, ja, n, isOrdered, 0)
+            distFromSep(i) = 0
+            currentLayerSize = currentLayerSize + 1
+            currentLayer(currentLayerSize) = i            
+          else
+            isOrdered(i) = .false.
           end if
         end do
-     
+
+        maxDepth = -1        
+
+        do while (currentLayerSize /= 0)
+          maxDepth = maxDepth + 1
+          oldLayer = currentLayer
+          oldLayerSize = currentLayerSize
+          currentLayerSize = 0
+          do i = 1, oldLayerSize
+            vertexNo = oldLayer(i)
+            do j = ia(vertexNo), ia(vertexNo + 1) - 1
+              if (.not. isOrdered(ja(j))) then                
+                isOrdered(ja(j)) = .true.
+                distFromSep(ja(j)) = maxDepth + 1
+                currentLayerSize = currentLayerSize + 1
+                currentLayer(currentLayerSize) = ja(j)                
+              end if
+            end do
+          end do         
+        end do    
 !
-! end of orderbydistance
+! end of countDistance
 !  
-      end subroutine orderbydistance     
+      end subroutine countDistance     
       
 !-------------------------------------------------------------------- 
 ! subroutine ordervertices
 ! (c) Vladislav Matus
-! last edit: 12. 08. 2018  
+! last edit: 19. 09. 2018  
 !
 ! Purpose:
 !   Computes the permutation of vertices in graph to be ordered
@@ -654,25 +646,25 @@
 !
 ! internals
 !              
-      integer :: i      
+      integer :: i, distFromSep(n)
       real :: ordvalue, order(n)
       double precision :: distOrd(n)
 !
 ! start of ordervertices
 !	    
       !TODO real order, now just random
-      !do i = 1, n
+      ! do i = 1, n
       ! CALL RANDOM_NUMBER(ordvalue)
       ! order(i) = ordvalue
-      !end do 
-      !
-      call orderbydistance(ia, ja, n, part, parts, distOrd) 
-      write(*,'(30I3)') distOrd    
+      ! end do 
+      
+      call countDistance(ia, ja, n, part, parts, distFromSep) 
+      write(*,'(30I3)') distFromSep   
 !
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n),invperm(n),stat=ierr)
-      call MRGRNK (order, invperm);
+      call MRGRNK (distOrd, invperm);
       do i = 1, n
         perm(invperm(i)) = i
       end do

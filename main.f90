@@ -95,17 +95,17 @@
 ! -- simple graphs for testing purposes
 !
 !  -- 1.
-      ! n = 5
-      ! ia = [1, 4, 6, 8, 10, 13]
-      ! ja = [2, 3, 5, 1, 4, 1, 5, 2, 5, 1, 3, 4]
-      ! allocate(aa(ia(n+1)-1))
-      ! aa = 0
-!  -- 2.
       n = 5
-      ia = [1, 5, 9, 13, 17, 21]
-      ja = [3, 2, 5, 4, 1, 3, 4, 5, 1, 2, 4, 5, 1, 2, 3, 5, 1, 2, 3, 4]
+      ia = [1, 4, 6, 8, 10, 13]
+      ja = [2, 3, 5, 1, 4, 1, 5, 2, 5, 1, 3, 4]
       allocate(aa(ia(n+1)-1))
       aa = 0
+!  -- 2.
+      ! n = 5
+      ! ia = [1, 5, 9, 13, 17, 21]
+      ! ja = [3, 2, 5, 4, 1, 3, 4, 5, 1, 2, 4, 5, 1, 2, 3, 5, 1, 2, 3, 4]
+      ! allocate(aa(ia(n+1)-1))
+      ! aa = 0
 
             
 ! -- TODO load command line arguments, at the moment hardcoded:

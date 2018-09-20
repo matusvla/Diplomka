@@ -585,27 +585,39 @@
         integer, allocatable, dimension(:) :: iaNew, jaNew
 
         integer :: vertexDegree
-        integer :: i, jaNewSize, neighoursI
+        integer :: i, j, jaNewSize, neighboursI, iaDiff
         integer :: neighbours(ia(replaceIndex + 1) - ia(replaceIndex))
+        integer, allocatable, dimension(:) :: uniqueNeighbours
 
 ! -- allocations
         vertexDegree = ia(replaceIndex + 1) - ia(replaceIndex)
         nNew = n - 1
         jaNewSize = ia(n + 1) - 1 - vertexDegree + vertexDegree * vertexDegree + 1 / 2
         allocate(iaNew(nNew), jaNew(jaNewSize))
+
 ! -- 
         iaNew(1 : replaceIndex - 1) = ia(1 : replaceIndex - 1)
         iaNew(replaceIndex : nNew) = ia(replaceIndex + 1 : n)
         neighbours = ja(ia(replaceIndex) : ia(replaceIndex + 1) - 1)
-        call insertionSort(neighbours, vertexDegree)
+        call insertionSort(neighbours)
         write(*,*) "neighbours", neighbours
-        neighoursI = 1
+        neighboursI = 1
+        iaNew(1) = 1
         do i = 1, n          
-          if (i == neighboursI) then
-
+          if (i == neighboursI) then ! if one of the neighbours of replaceIndex            
+            call uniquify([ja(ia(i) : ia(i + 1) - 1), neighbours], uniqueNeighbours)
+            write(*,*) "a"
+            iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)
+            write(*,*) "a"
+            jaNew(iaNew(i) : iaNew(i + 1) - 1) = uniqueNeighbours
+            write(*,*) "a"
+            deallocate(uniqueNeighbours)
+            write(*,*) "a"
             neighboursI = neighboursI + 1
-          else
-            
+          else ! just copy the part of ja
+            iaDiff = ia(i + 1) - ia(i)
+            iaNew(i + 1) = iaNew(i) + iaDiff
+            jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(i) : ia(i + 1) - 1)
           end if  
         end do
 

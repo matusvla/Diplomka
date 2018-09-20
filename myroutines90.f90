@@ -585,13 +585,9 @@
         integer, allocatable, dimension(:) :: iaNew, jaNew
 
         integer :: vertexDegree
-        integer :: i, j, jaNewSize, neighboursI, iaDiff
+        integer :: i, j, jaNewSize, nI, iaDiff
         integer :: neighbours(ia(replaceIndex + 1) - ia(replaceIndex))
-        integer, allocatable, dimension(:) :: uniqueNeighbours
-
-
-        integer, allocatable, dimension(:) :: asdf
-        
+        integer, allocatable, dimension(:) :: uniqueNeighbours        
 
 ! -- allocations
         vertexDegree = ia(replaceIndex + 1) - ia(replaceIndex)
@@ -599,34 +595,42 @@
         jaNewSize = ia(n + 1) - 1 - vertexDegree + (vertexDegree * (vertexDegree + 1))/ 2
         write(*,*) "jaNewSize",jaNewSize
         allocate(iaNew(nNew), jaNew(jaNewSize))
+        jaNew = 0
+        iaNew = 0
 
 ! -- 
-
-        call uniquify([1,1,1,2,1],asdf,ierr,1)
-        write(*,*) "asdf", asdf
-        stop
-
-        iaNew(1 : replaceIndex - 1) = ia(1 : replaceIndex - 1)
-        iaNew(replaceIndex : nNew) = ia(replaceIndex + 1 : n)
         neighbours = ja(ia(replaceIndex) : ia(replaceIndex + 1) - 1)
-        call insertionSort(neighbours)
-        write(*,*) "neighbours", neighbours
-        neighboursI = 1
+        call insertionSort(neighbours)        
+        nI = 1
         iaNew(1) = 1
-        do i = 1, n          
-          if (i == neighboursI) then ! if one of the neighbours of replaceIndex            
-            call uniquify([ja(ia(i) : ia(i + 1) - 1), neighbours], uniqueNeighbours, i)            
-            iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)            
-            jaNew(iaNew(i) : iaNew(i + 1) - 1) = uniqueNeighbours                        
-            deallocate(uniqueNeighbours)            
-            neighboursI = neighboursI + 1
+        do i = 1, n 
+          if (i == replaceIndex) cycle                   
+          if (i == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
+            write(*,*) "Oh, look, a penny"
+            call uniquify([ja(ia(i) : ia(i + 1) - 1), neighbours], uniqueNeighbours, ierr, [i,replaceIndex])            
+            if(ierr == 0) then
+              iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)            
+              jaNew(iaNew(i) : iaNew(i + 1) - 1) = uniqueNeighbours                        
+              deallocate(uniqueNeighbours)            
+            else
+              iaNew(i + 1) = iaNew(i)
+            end if
+            nI = nI + 1
+            write(*,'(30I3)') iaNew      
+            write(*,'(30I3)') jaNew      
           else ! just copy the part of ja
             iaDiff = ia(i + 1) - ia(i)
             iaNew(i + 1) = iaNew(i) + iaDiff
+            write(*,*) iaNew(i+1)
             jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(i) : ia(i + 1) - 1)
-          end if  
-          write(*,'(30I3)') jaNew
+            write(*,*) "No penny :("
+            write(*,'(30I3)') iaNew   
+            write(*,'(30I3)') jaNew      
+          end if            
         end do
+
+        write(*,'(30I3)') iaNew
+        write(*,'(30I3)') jaNew        
 
         !TODO precislovat vrcholy
 

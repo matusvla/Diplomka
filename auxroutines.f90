@@ -4,8 +4,23 @@
 
       module auxroutines            
         implicit none  
+        private  
+        public :: insertionSort, uniquify
+
       contains
-!--------------------------------------------------------------------
+!-------------------------------------------------------------------- 
+! subroutine insertionSort
+! (c) Vladislav Matus
+! last edit: 20. 09. 2018  
+!      
+! Purpose:
+!   Sort array 
+! Input:
+!   arr ... array for sorting
+! Output:
+!   arr ... sorted array
+! Allocations: none
+!--------------------------------------------------------------------           
       subroutine insertionSort(arr)
         implicit none
         integer, dimension(:) :: arr
@@ -15,7 +30,7 @@
           j = i
           do while (j > 1 .and. arr(j) < arr(j-1))
             !swap elements
-            write(*,*) "swapping", arr(j), arr(j-1)
+            !write(*,*) "swapping", arr(j), arr(j-1)
             val = arr(j-1)
             arr(j-1) = arr(j)
             arr(j) = val
@@ -23,20 +38,34 @@
           end do
         end do
       end subroutine insertionSort
-!--------------------------------------------------------------------   
-      subroutine uniquify(arr, uniqueArr, ierr, omitElement)   
+!-------------------------------------------------------------------- 
+! subroutine uniquify
+! (c) Vladislav Matus
+! last edit: 20. 09. 2018  
+!      
+! Purpose:
+!   Return array with all duplicates removed
+! Input:
+!   arr ... array for removing
+!   [omitElements] ... which elements should be removed completely
+! Output:
+!   uniqueArr ... array with each value only once
+!   ierr ... 0 if uniqueArr is not empty, 1 otherwise      
+! Allocations: uniqueArr (only if not empty)
+!--------------------------------------------------------------------          
+      subroutine uniquify(arr, uniqueArr, ierr, omitElements)   
         implicit none       
 
         integer, dimension(:) :: arr
         integer, allocatable, dimension(:) :: uniqueArr
-        integer, optional :: omitElement
-        integer :: n, i, uI, uniqueL, ierr, firstIndex     
+        integer, dimension(:), optional :: omitElements
+        integer :: n, i, j, uI, uniqueL, ierr, firstIndex, omitNo    
         logical :: omit, firstFound        
 
-        if(present(omitElement))then
-          omit = .true.
+        if(present(omitElements))then
+          omitNo = SIZE(omitElements)
         else
-          omit = .false.
+          omitNo = 0
         endif
         ierr = 0        
 
@@ -45,14 +74,18 @@
         uniqueL = 0
         do i = 1, n
           if (arr(i) /= arr(i - 1)) then
-            if(.not. (omit .and. omitElement==arr(i))) then
+            omit = .false.
+            do j = 1, omitNo
+              omit = omit .or. (omitElements(j)==arr(i))
+            end do
+            if(.not. omit) then
               uniqueL = uniqueL + 1            
             end if          
           end if
-        end do                
+        end do                        
 
         if(uniqueL < 1) then
-          write(*,*) "[auxroutines.f90:56] Error in uniquify, nothing to return!"
+          write(*,*) "[auxroutines.f90:56] Warning: Nothing to return in uniquify!"
           ierr = 1
           return
         end if
@@ -61,7 +94,11 @@
 
         firstFound = .false.        
         do i = 1, n
-          if(.not. (omit .and. omitElement==arr(i))) then
+          omit = .false.
+          do j = 1, omitNo
+            omit = omit .or. (omitElements(j)==arr(i))
+          end do
+          if(.not. omit) then
             uniqueArr(1) = arr(i) 
             firstIndex = i                   
             firstFound = .true.
@@ -75,7 +112,11 @@
 
         do i = firstIndex + 1, n
           if (arr(i) /= arr(i - 1)) then
-            if(.not. (omit .and. omitElement==arr(i))) then
+          omit = .false.
+          do j = 1, omitNo
+            omit = omit .or. (omitElements(j)==arr(i))
+          end do
+            if(.not. omit) then
               uniqueArr(uI) = arr(i)
               uI = uI + 1              
             end if            

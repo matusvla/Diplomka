@@ -93,7 +93,7 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'RSA'     
+     matrixtype = 'P'     
      matrixpath = "./matrices/bcsstk01.rsa"
 !
 ! -- matrix loading

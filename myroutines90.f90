@@ -447,9 +447,6 @@
 !
 ! end of remloops
 !  
-<<<<<<< HEAD
-      end subroutine remloops 
-=======
       end subroutine remloops
 !-------------------------------------------------------------------- 
 ! subroutine countDistance
@@ -527,53 +524,7 @@
 ! end of countDistance
 !  
       end subroutine countDistance     
->>>>>>> graphOrdering
       
-!-------------------------------------------------------------------- 
-! subroutine ordervertices
-! (c) Vladislav Matus
-! last edit: 12. 08. 2018  
-!
-! Purpose:
-!   Creates the minimmum degree ordering ot the graph      
-!   Outputs an array where will be weight in (0,1) for all the vertices
-!   The smaller the weight the smaller the new number of the vertex
-!   
-! Input:
-!   ia, ja ... graph in CSR format
-!   n ... number of vertices          
-!   
-! Output:
-!   minOrdering ... double precision array with weights corresponding to graph numbering
-!   
-! Allocations:  minOrdering
-
-      subroutine minimumordering(ia, ja, n, minOrdering)
-            implicit none
-    !
-    ! parameters
-    !
-            integer :: n
-            integer :: ia(n+1),ja(ia(n+1)-1)
-            double precision, allocatable, dimension(:) :: minOrdering
-<<<<<<< HEAD
-=======
-
->>>>>>> graphOrdering
-    !
-    ! internals
-    !              
-       
-    !
-    ! start of minimumordering
-    !	    
-            !TODO write the routine code
-         
-    !
-    ! end of minimumordering
-    !  
-          end subroutine minimumordering    
-
 !-------------------------------------------------------------------- 
 ! subroutine ordervertices
 ! (c) Vladislav Matus
@@ -621,7 +572,9 @@
       ! order(i) = ordvalue
       ! end do 
       
-      call countDistance(ia, ja, n, part, parts, distFromSep)       
+      call countDistance(ia, ja, n, part, parts, distFromSep) 
+      write(*,'(30I3)') distFromSep   
+      part = distFromSep !TODO DELETE!!!!!
 !
 ! -- fill in invperm and perm using sorted order values
 !                  
@@ -630,7 +583,12 @@
       do i = 1, n
         perm(invperm(i)) = i
       end do
-      part = distFromSep
+
+! TODO integrate the two orderings togther, now minimum us only rewriting the result of ordering by distance
+      call minimumOrdering()
+
+
+
 !
 ! end of ordervertices
 !  

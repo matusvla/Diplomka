@@ -24,27 +24,61 @@
         end do
       end subroutine insertionSort
 !--------------------------------------------------------------------   
-      subroutine uniquify(arr, uniqueArr)   
+      subroutine uniquify(arr, uniqueArr, ierr, omitElement)   
         implicit none       
+
         integer, dimension(:) :: arr
         integer, allocatable, dimension(:) :: uniqueArr
-        integer :: n, i, uI, uniqueL
-        n = SIZE(arr)
-        write(*,*) "n",n 
-        call insertionSort(arr)        
+        integer, optional :: omitElement
+        integer :: n, i, uI, uniqueL, ierr, firstIndex     
+        logical :: omit, firstFound        
+
+        if(present(omitElement))then
+          omit = .true.
+        else
+          omit = .false.
+        endif
+        ierr = 0        
+
+        n = SIZE(arr)                
+        call insertionSort(arr)                  
         uniqueL = 0
         do i = 1, n
           if (arr(i) /= arr(i - 1)) then
-            uniqueL = uniqueL + 1
+            if(.not. (omit .and. omitElement==arr(i))) then
+              uniqueL = uniqueL + 1            
+            end if          
           end if
-        end do
+        end do                
+
+        if(uniqueL < 1) then
+          write(*,*) "[auxroutines.f90:56] Error in uniquify, nothing to return!"
+          ierr = 1
+          return
+        end if
+
         allocate(uniqueArr(uniqueL))
-        uniqueArr(1) = arr(1)
+
+        firstFound = .false.        
+        do i = 1, n
+          if(.not. (omit .and. omitElement==arr(i))) then
+            uniqueArr(1) = arr(i) 
+            firstIndex = i                   
+            firstFound = .true.
+          end if        
+          if(firstFound) then
+            exit
+          end if
+        end do          
+
         uI = 2        
-        do i = 2, n
+
+        do i = firstIndex + 1, n
           if (arr(i) /= arr(i - 1)) then
-            uniqueArr(uI) = arr(i)
-            uI = uI + 1
+            if(.not. (omit .and. omitElement==arr(i))) then
+              uniqueArr(uI) = arr(i)
+              uI = uI + 1              
+            end if            
           end if
         end do                  
       end subroutine uniquify

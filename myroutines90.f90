@@ -580,7 +580,7 @@
       subroutine vertexToClique(ia, ja, n, iaNew, jaNew, nNew, replaceIndex)
         implicit none
 
-        integer :: n, ia(n), ja(ia(n+1)-1), replaceIndex
+        integer :: n, ia(n), ja(ia(n+1)-1), replaceIndex, ierr
         integer :: nNew
         integer, allocatable, dimension(:) :: iaNew, jaNew
 
@@ -589,13 +589,23 @@
         integer :: neighbours(ia(replaceIndex + 1) - ia(replaceIndex))
         integer, allocatable, dimension(:) :: uniqueNeighbours
 
+
+        integer, allocatable, dimension(:) :: asdf
+        
+
 ! -- allocations
         vertexDegree = ia(replaceIndex + 1) - ia(replaceIndex)
         nNew = n - 1
-        jaNewSize = ia(n + 1) - 1 - vertexDegree + vertexDegree * vertexDegree + 1 / 2
+        jaNewSize = ia(n + 1) - 1 - vertexDegree + (vertexDegree * (vertexDegree + 1))/ 2
+        write(*,*) "jaNewSize",jaNewSize
         allocate(iaNew(nNew), jaNew(jaNewSize))
 
 ! -- 
+
+        call uniquify([1,1,1,2,1],asdf,ierr,1)
+        write(*,*) "asdf", asdf
+        stop
+
         iaNew(1 : replaceIndex - 1) = ia(1 : replaceIndex - 1)
         iaNew(replaceIndex : nNew) = ia(replaceIndex + 1 : n)
         neighbours = ja(ia(replaceIndex) : ia(replaceIndex + 1) - 1)
@@ -605,21 +615,20 @@
         iaNew(1) = 1
         do i = 1, n          
           if (i == neighboursI) then ! if one of the neighbours of replaceIndex            
-            call uniquify([ja(ia(i) : ia(i + 1) - 1), neighbours], uniqueNeighbours)
-            write(*,*) "a"
-            iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)
-            write(*,*) "a"
-            jaNew(iaNew(i) : iaNew(i + 1) - 1) = uniqueNeighbours
-            write(*,*) "a"
-            deallocate(uniqueNeighbours)
-            write(*,*) "a"
+            call uniquify([ja(ia(i) : ia(i + 1) - 1), neighbours], uniqueNeighbours, i)            
+            iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)            
+            jaNew(iaNew(i) : iaNew(i + 1) - 1) = uniqueNeighbours                        
+            deallocate(uniqueNeighbours)            
             neighboursI = neighboursI + 1
           else ! just copy the part of ja
             iaDiff = ia(i + 1) - ia(i)
             iaNew(i + 1) = iaNew(i) + iaDiff
             jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(i) : ia(i + 1) - 1)
           end if  
+          write(*,'(30I3)') jaNew
         end do
+
+        !TODO precislovat vrcholy
 
       end subroutine vertexToClique
 

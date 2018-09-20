@@ -3,8 +3,9 @@
 ! last edit: 19. 09. 2018      
 
       module myroutines90
+        use auxroutines
         use raggedmultiarray
-        use m_mrgrnk
+        use m_mrgrnk        
         implicit none        
         integer, parameter :: MAX_INT =  2147483647
         integer, parameter :: INT_SIZE =  4
@@ -555,26 +556,8 @@
         end do
 
       end function findMinimumDegreeIndex
+      
 !-------------------------------------------------------------------- 
-      subroutine insertionSort(arr, arrSize)
-        implicit none
-        integer :: arrSize, arr(arrSize)
-        integer :: i, j, val
-        do i = 1, arrSize
-          j = i
-          do while (j > 1 .and. arr(j) < arr(j-1))
-            !swap elements
-            write(*,*) "swapping", arr(j), arr(j-1)
-            val = arr(j-1)
-            arr(j-1) = arr(j)
-            arr(j) = val
-            j = j - 1
-          end do
-        end do
-
-      end subroutine insertionSort
-
-
 ! subroutine vertexToClique
 ! (c) Vladislav Matus
 ! last edit: 20. 09. 2018  
@@ -604,10 +587,6 @@
         integer :: vertexDegree
         integer :: i, jaNewSize, neighbours(ia(replaceIndex + 1) - ia(replaceIndex))
 
-      
-        integer, allocatable, dimension(:) :: asdfa
-
-
 ! -- allocations
         vertexDegree = ia(replaceIndex + 1) - ia(replaceIndex)
         nNew = n - 1
@@ -618,13 +597,7 @@
         iaNew(replaceIndex : nNew) = ia(replaceIndex + 1 : n)
         neighbours = ja(ia(replaceIndex) : ia(replaceIndex + 1) - 1)
         call insertionSort(neighbours, vertexDegree)
-
-        asdfa = [345,2345,435,45,63245,6543,324,346,65,21,4365,2,563,142,6435,215,437,1,623,534,6,1,2354,3456,154,365]
-        call insertionSort(asdfa, 26)
-        write(*,*) "asdfa", asdfa
-        
         write(*,*) "neighbours", neighbours
-         
 
         do i = 1, n
 

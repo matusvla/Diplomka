@@ -556,7 +556,7 @@
         end do
 
       end function findMinimumDegreeIndex
-      
+
 !-------------------------------------------------------------------- 
 ! subroutine vertexToClique
 ! (c) Vladislav Matus
@@ -585,7 +585,8 @@
         integer, allocatable, dimension(:) :: iaNew, jaNew
 
         integer :: vertexDegree
-        integer :: i, jaNewSize, neighbours(ia(replaceIndex + 1) - ia(replaceIndex))
+        integer :: i, jaNewSize, neighoursI
+        integer :: neighbours(ia(replaceIndex + 1) - ia(replaceIndex))
 
 ! -- allocations
         vertexDegree = ia(replaceIndex + 1) - ia(replaceIndex)
@@ -598,9 +599,14 @@
         neighbours = ja(ia(replaceIndex) : ia(replaceIndex + 1) - 1)
         call insertionSort(neighbours, vertexDegree)
         write(*,*) "neighbours", neighbours
+        neighoursI = 1
+        do i = 1, n          
+          if (i == neighboursI) then
 
-        do i = 1, n
-
+            neighboursI = neighboursI + 1
+          else
+            
+          end if  
         end do
 
       end subroutine vertexToClique

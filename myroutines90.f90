@@ -6,6 +6,8 @@
         use raggedmultiarray
         use m_mrgrnk
         implicit none        
+        integer, parameter :: MAX_INT =  2147483647
+        integer, parameter :: INT_SIZE =  4
       contains
 
 !--------------------------------------------------------------------           
@@ -526,6 +528,112 @@
       end subroutine countDistance   
       
 !-------------------------------------------------------------------- 
+! function findMinimumDegreeIndex
+! (c) Vladislav Matus
+! last edit: 20. 09. 2018  
+!
+! Purpose:
+!   Finds vertex in graph with minimimal degree
+! Input:
+!   n ... integer, size of graph
+!   ia ... pointer array of graph in CSR format
+! Returns:
+!   integer, index of vertex with minimal degree
+! Allocations: none
+
+      integer function findMinimumDegreeIndex(ia, n)
+        implicit none
+
+        integer :: n, ia(n), minimumDegree, i
+
+        minimumDegree = MAX_INT
+        do i = 1, n
+          if (minimumDegree > ia(i+1)-ia(i)) then
+            minimumDegree = ia(i+1)-ia(i)
+            findMinimumDegreeIndex = i
+          end if
+        end do
+
+      end function findMinimumDegreeIndex
+!-------------------------------------------------------------------- 
+      subroutine insertionSort(arr, arrSize)
+        implicit none
+        integer :: arrSize, arr(arrSize)
+        integer :: i, j, val
+        do i = 1, arrSize
+          j = i
+          do while (j > 1 .and. arr(j) < arr(j-1))
+            !swap elements
+            write(*,*) "swapping", arr(j), arr(j-1)
+            val = arr(j-1)
+            arr(j-1) = arr(j)
+            arr(j) = val
+            j = j - 1
+          end do
+        end do
+
+      end subroutine insertionSort
+
+
+! subroutine vertexToClique
+! (c) Vladislav Matus
+! last edit: 20. 09. 2018  
+!
+! Purpose:
+!   Transforms graph into a new graph where one of the original vertices
+!   is removed and all its neighbours are connected into a clique
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices   
+!   replaceIndex ... index of vertex which should be removed      
+!   
+! Output:
+!   iaNew, jaNew ... new graph in CSR format
+!   nNew ... number of vertices of the new graph
+!   
+! Allocations:  iaNew, jaNew
+!      
+      subroutine vertexToClique(ia, ja, n, iaNew, jaNew, nNew, replaceIndex)
+        implicit none
+
+        integer :: n, ia(n), ja(ia(n+1)-1), replaceIndex
+        integer :: nNew
+        integer, allocatable, dimension(:) :: iaNew, jaNew
+
+        integer :: vertexDegree
+        integer :: i, jaNewSize, neighbours(ia(replaceIndex + 1) - ia(replaceIndex))
+
+      
+        integer, allocatable, dimension(:) :: asdfa
+
+
+! -- allocations
+        vertexDegree = ia(replaceIndex + 1) - ia(replaceIndex)
+        nNew = n - 1
+        jaNewSize = ia(n + 1) - 1 - vertexDegree + vertexDegree * vertexDegree + 1 / 2
+        allocate(iaNew(nNew), jaNew(jaNewSize))
+! -- 
+        iaNew(1 : replaceIndex - 1) = ia(1 : replaceIndex - 1)
+        iaNew(replaceIndex : nNew) = ia(replaceIndex + 1 : n)
+        neighbours = ja(ia(replaceIndex) : ia(replaceIndex + 1) - 1)
+        call insertionSort(neighbours, vertexDegree)
+
+        asdfa = [345,2345,435,45,63245,6543,324,346,65,21,4365,2,563,142,6435,215,437,1,623,534,6,1,2354,3456,154,365]
+        call insertionSort(asdfa, 26)
+        write(*,*) "asdfa", asdfa
+        
+        write(*,*) "neighbours", neighbours
+         
+
+        do i = 1, n
+
+        end do
+
+      end subroutine vertexToClique
+
+!-------------------------------------------------------------------- 
+
 ! subroutine minimumordering
 ! (c) Vladislav Matus
 ! last edit: 20. 09. 2018  
@@ -534,27 +642,38 @@
 !   Comupute the minimum ordering of the graph
 !   
 ! Input:
-!   
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices   
 !   
 ! Output:
-!             
+!   ordering ... the final ordering of the graph             
 !   
 ! Allocations:  perm, invperm
 
-      subroutine minimumordering(ia, ja, n)
+      subroutine minimumordering(ia, ja, n, ordering)
         implicit none
 !
 ! parameters
 !
         integer :: n
-        integer :: ia(n+1),ja(ia(n+1)-1)      
+        integer :: ia(n+1), ja(ia(n+1)-1)      
 !
 ! internals
-!              
-   
+!  
+        integer :: minDegIndex, nNew
+        integer, allocatable, dimension(:) :: iaNew, jaNew
+        integer :: ordering(n)     
 !
 ! start of minimumordering
-!	    
+!	
+        
+        
+
+
+! FIRST NAIVE IMPLEMENTATION, one step
+        minDegIndex = findMinimumDegreeIndex(ia, n)
+        call vertexToClique(ia, ja, n, iaNew, jaNew, nNew, minDegIndex)
+! END OF FIRST NAIVE IMPLEMENTATION
      
 !
 ! end of minimumordering
@@ -597,7 +716,7 @@
 !
 ! internals
 !              
-      integer :: i, distFromSep(n)
+      integer :: i, distFromSep(n), minOrdering(n)
       real :: ordvalue, order(n)
       double precision :: distOrd(n)
 !
@@ -622,7 +741,7 @@
       end do
 
 ! TODO integrate the two orderings togther, now minimum us only rewriting the result of ordering by distance
-      call minimumOrdering()
+      call minimumOrdering(ia, ja, n, minOrdering)
 
 
 

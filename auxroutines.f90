@@ -5,7 +5,7 @@
       module auxroutines            
         implicit none  
         private  
-        public :: insertionSort, uniquify, trim
+        public :: insertionSort, uniquify, trimArr, shiftArr
 
       contains
 !-------------------------------------------------------------------- 
@@ -124,7 +124,7 @@
         end do                  
       end subroutine uniquify
 !-------------------------------------------------------------------- 
-! subroutine trim
+! subroutine trimArr
 ! (c) Vladislav Matus
 ! last edit: 21. 09. 2018  
 !      
@@ -137,12 +137,12 @@
 !   arr ... resulting subarray
 ! Allocations: none
 !--------------------------------------------------------------------          
-      subroutine trim(arr, endIndex)
+      subroutine trimArr(arr, endIndex)
         implicit none
         integer, allocatable, dimension(:) :: arr, newArr
         integer :: endIndex
         if(endIndex > SIZE(arr)) then
-          write(*,*) "[auxroutines.f90:trim] Warning: endIndex > SIZE(arr), not trimmed"
+          write(*,*) "[auxroutines.f90:trimArr] Warning: endIndex > SIZE(arr), not trimmed"
           return 
         end if
         allocate(newArr(endIndex))
@@ -150,7 +150,41 @@
         deallocate(arr)
         arr = newArr
         deallocate(newArr)
-      end subroutine trim
-!--------------------------------------------------------------------          
+      end subroutine trimArr
+!-------------------------------------------------------------------- 
+! subroutine shift
+! (c) Vladislav Matus
+! last edit: 21. 09. 2018  
+!      
+! Purpose:
+!   Shift values larger then threshold in array by coef
+! Input:
+!   arr ... array for shifting
+!   threshold ... only values >threshold are modified      
+!   [coef] ... shift coeficient, if not specified = -1
+! Output:
+!   arr ... result
+! Allocations: none
+!--------------------------------------------------------------------           
+      subroutine shiftArr(arr, threshold, coef)
+        implicit none
+        integer, allocatable, dimension(:) :: arr
+        integer :: threshold, coefValue, i
+        integer, optional ::coef
+
+        if(present(coef)) then
+          coefValue = coef
+        else
+          coefValue = -1
+        end if            
+        
+        do i = 1, SIZE(arr)
+          if (arr(i) > threshold) then
+            arr(i) = arr(i) + coefValue
+          end if          
+        end do
+        
+      end subroutine shiftArr         
+!--------------------------------------------------------------------                    
 
       end module auxroutines

@@ -97,15 +97,15 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 2
+     testGraphNumber = 1
 !
 ! -- matrix loading
 !    TODO improve matrix loading, now it's just generating matrix using poisson1
 !      
       info = 0
-	!loading of the matrix in RB format
+  !loading of the matrix in RB format      
       select case (TRIM(matrixtype))
         case ('RSA')
           open(unit=infileunit, file=matrixpath, action='read', iostat=statio)        
@@ -146,7 +146,7 @@
 !    TODO miscelaneous error handling    
 !     
     
-      call remloops(n, ia, ja, aa, iaNoLoops, jaNoLoops, aaNoLoops, ierr)
+      call remloops(n, ia, ja, iaNoLoops, jaNoLoops, ierr, aa, aaNoLoops)
       allocate(part(n), stat=ierr)      
       metis_call_status=METIS_SetDefaultOptions(metisoptions)
       call shiftnumbering(-1, n, iaNoLoops, jaNoLoops)  ! transform graph into C++ notation (starting from 0)    

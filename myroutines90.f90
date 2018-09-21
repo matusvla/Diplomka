@@ -6,6 +6,7 @@
         use auxroutines
         use raggedmultiarray
         use m_mrgrnk        
+        use gvroutines
         implicit none        
         integer, parameter :: MAX_INT =  2147483647
         integer, parameter :: INT_SIZE =  4
@@ -372,6 +373,7 @@
 ! Returns:
 !   integer, number of loops
 ! Allocations: none
+! TODO Test after change
 
       integer function countloops(n,ia,ja)
         implicit none
@@ -379,7 +381,7 @@
 ! parameters
 !
       integer :: n
-      integer, allocatable, dimension(:) :: ia, ja      
+      integer, dimension(:) :: ia, ja      
 !
 ! internals
 !              
@@ -404,7 +406,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine remloops
 ! (c) Vladislav Matus
-! last edit: 22. 07. 2018  
+! last edit: 21. 09. 2018  
 !
 ! Purpose:
 !   This routine removes all loops in the graph
@@ -415,15 +417,18 @@
 !   iaN,jaN,aaN .. graph without loops in CSR format
 ! Allocations: iaN, jaN, aaN
 ! TODO Error handling
+! TODO Test after change      
 
-      subroutine remloops(n,ia,ja,aa,iaN,jaN,aaN,ierr)
+      subroutine remloops(n, ia, ja, iaN, jaN, ierr, aa, aaN)
         implicit none
 !
 ! parameters
 !
       integer :: n, ierr
-      integer, allocatable, dimension(:) :: ia, ja, iaN, jaN
-      double precision, allocatable, dimension(:) :: aa, aaN
+      integer, dimension(:) :: ia, ja 
+      integer, allocatable, dimension(:) :: iaN, jaN
+      double precision, allocatable, dimension(:), optional :: aa, aaN
+      logical :: countingAa
 !
 ! internals
 !              
@@ -431,8 +436,15 @@
 !
 ! start of remloops
 !	      
+      if(present(aa) .and. present(aaN)) then
+        countingAa = .true.
+      else
+        countingAa = .false.
+      end if  
+
       loops = countloops(n,ia,ja)
-      allocate(iaN(n+1), jaN(ia(n+1)-loops-1), aaN(ia(n+1)-loops-1), stat=ierr)
+      allocate(iaN(n+1), jaN(ia(n+1)-loops-1), stat=ierr)
+      if (countingAa) allocate(aaN(ia(n+1)-loops-1), stat=ierr)
       seenloops = 0      
       do i = 1, n
         iaN(i) = ia(i) - seenloops
@@ -441,7 +453,7 @@
             seenloops = seenloops + 1            
           else
             jaN(j-seenloops) = ja(j)
-            aaN(j-seenloops) = aa(j)
+            if(countingAa) aaN(j-seenloops) = aa(j)
           end if          
         end do
       end do
@@ -548,14 +560,42 @@
         integer :: n, ia(n), minimumDegree, i
 
         minimumDegree = MAX_INT
-        do i = 1, n
+        do i = 1, n          
           if (minimumDegree > ia(i+1)-ia(i)) then
             minimumDegree = ia(i+1)-ia(i)
             findMinimumDegreeIndex = i
           end if
-        end do
+        end do        
 
       end function findMinimumDegreeIndex
+
+!--------------------------------------------------------------------           
+! subroutine normalizeOrdering
+! (c) Vladislav Matus
+! last edit: 21. 09. 2018  
+!      
+! Purpose:
+!   Takes an array of indices removed from resulting graph in each step
+!   of minimum degree algorithm and projects it onto an array with
+!   the indices corresponding to original ones            
+! Input:
+!   ord ... input indices array
+! Output:
+!   ord ... minimum ordering of the graph
+! Allocations: none  
+
+      subroutine normalizeOrdering(ord)
+        implicit none
+        integer, dimension(:) :: ord
+        integer :: n, i, j
+        
+        n = SIZE(ord)
+        do i = n - 1, 1, -1
+          do j = i + 1, n
+            if (ord(i) <= ord(j)) ord(j) = ord(j) + 1
+          end do
+        end do
+      end subroutine normalizeOrdering       
 
 !-------------------------------------------------------------------- 
 ! subroutine vertexToClique
@@ -593,24 +633,22 @@
         vertexDegree = ia(replaceIndex + 1) - ia(replaceIndex)
         nNew = n - 1
         jaNewSize = ia(n + 1) - 1 - vertexDegree + (vertexDegree * (vertexDegree + 1))/ 2
-        write(*,*) "jaNewSize",jaNewSize
-        allocate(iaNew(nNew), jaNew(jaNewSize))
+        allocate(iaNew(nNew + 1), jaNew(jaNewSize))
         jaNew = 0
         iaNew = 0
 
 ! -- 
-        neighbours = ja(ia(replaceIndex) : ia(replaceIndex + 1) - 1)
+        neighbours = ja(ia(replaceIndex) : ia(replaceIndex + 1) - 1)  
         call insertionSort(neighbours)        
         nI = 1
         iaNew(1) = 1
         i = 0 !indexing for avoiding replaceIndex
-        do j = 1, n           
+        do j = 1, n  
           if (j == replaceIndex) cycle                   
           i = i + 1 
           if (j == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
-            write(*,*) "Oh, look, a penny"
-            call uniquify([ja(ia(i) : ia(i + 1) - 1), neighbours], uniqueNeighbours, ierr, [j,replaceIndex])            
-            if(ierr == 0) then
+            call uniquify([ja(ia(j) : ia(j + 1) - 1), neighbours], uniqueNeighbours, ierr, [j,replaceIndex])                                    
+            if(ierr == 0) then              
               iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)            
               jaNew(iaNew(i) : iaNew(i + 1) - 1) = uniqueNeighbours                        
               deallocate(uniqueNeighbours)            
@@ -618,36 +656,23 @@
               iaNew(i + 1) = iaNew(i)
             end if
             nI = nI + 1
-            write(*,'(30I3)') ia  
-            write(*,'(30I3)') ja
-            write(*,'(30I3)') iaNew      
-            write(*,'(30I3)') jaNew      
           else ! just copy the part of ja
-            iaDiff = ia(i + 1) - ia(i)
+            iaDiff = ia(j + 1) - ia(j)
             iaNew(i + 1) = iaNew(i) + iaDiff
-            write(*,*) iaNew(i+1)
             jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(j) : ia(j + 1) - 1)
-            write(*,*) "No penny :("
-            write(*,'(30I3)') ia  
-            write(*,'(30I3)') ja  
-            write(*,'(30I3)') iaNew   
-            write(*,'(30I3)') jaNew      
           end if            
         end do          
-        call trim(jaNew, iaNew(nNew + 1) - 1)        
-
-        !TODO precislovat vrcholy
-
+        call trimArr(jaNew, iaNew(nNew + 1) - 1)    !TODO rewrite using PACK
+        call shiftArr(jaNew,replaceIndex)
       end subroutine vertexToClique
 
 !-------------------------------------------------------------------- 
-
 ! subroutine minimumordering
 ! (c) Vladislav Matus
 ! last edit: 21. 09. 2018  
 !
 ! Purpose:
-!   Comupute the minimum ordering of the graph
+!   Comupute the minimum ordering of the graph.
 !   
 ! Input:
 !   ia, ja ... graph in CSR format
@@ -656,33 +681,40 @@
 ! Output:
 !   ordering ... the final ordering of the graph             
 !   
-! Allocations:  perm, invperm
+! Allocations:  none
 
       subroutine minimumordering(ia, ja, n, ordering)
         implicit none
 !
 ! parameters
 !
-        integer :: n
+        integer :: n, i, ierr
         integer :: ia(n+1), ja(ia(n+1)-1)      
 !
 ! internals
 !  
-        integer :: minDegIndex, nNew
-        integer, allocatable, dimension(:) :: iaNew, jaNew
-        integer :: ordering(n)     
+        integer :: minDegIndex, nIn, nOut
+        integer, allocatable, dimension(:) :: iaIn, jaIn, iaOut, jaOut
+        integer :: ordering(n)           
 !
 ! start of minimumordering
-!	
-        
+!	        
+        call remloops(n, ia, ja, iaIn, jaIn, ierr)        
+        nIn = n
+        do i = 1, n - 2               
+          minDegIndex = findMinimumDegreeIndex(iaIn, nIn) !TODO rewrite using MIN          
+          ordering(i) = minDegIndex
+          call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, minDegIndex)
+          iaIn = iaOut
+          jaIn = jaOut
+          nIn = nOut          
+          deallocate(iaOut, jaOut)               
+        end do
+        ordering(n - 1) = 1 !two vertex graph is symetrical
+        ordering(n) = 1
+        call normalizeOrdering(ordering)  
         
 
-
-! FIRST NAIVE IMPLEMENTATION, one step
-        minDegIndex = findMinimumDegreeIndex(ia, n)
-        call vertexToClique(ia, ja, n, iaNew, jaNew, nNew, minDegIndex)
-! END OF FIRST NAIVE IMPLEMENTATION
-     
 !
 ! end of minimumordering
 !  
@@ -737,7 +769,7 @@
       ! end do 
       
       call countDistance(ia, ja, n, part, parts, distFromSep) 
-      write(*,'(30I3)') distFromSep   
+      !write(*,'(30I3)') distFromSep   
       part = distFromSep !TODO DELETE!!!!!
 !
 ! -- fill in invperm and perm using sorted order values
@@ -750,6 +782,7 @@
 
 ! TODO integrate the two orderings togther, now minimum us only rewriting the result of ordering by distance
       call minimumOrdering(ia, ja, n, minOrdering)
+
 
 
 

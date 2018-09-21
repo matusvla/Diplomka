@@ -780,7 +780,7 @@
         perm(invperm(i)) = i
       end do
 
-! TODO integrate the two orderings togther, now minimum us only rewriting the result of ordering by distance
+! TODO integrate the two orderings togther, now minimum is only rewriting the result of ordering by distance
       call minimumOrdering(ia, ja, n, minOrdering)
 
 

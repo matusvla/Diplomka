@@ -1,6 +1,6 @@
 ! module myroutines90
 ! (c) Vladislav Matus
-! last edit: 19. 09. 2018      
+! last edit: 21. 09. 2018      
 
       module myroutines90
         use auxroutines
@@ -560,7 +560,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine vertexToClique
 ! (c) Vladislav Matus
-! last edit: 20. 09. 2018  
+! last edit: 21. 09. 2018  
 !
 ! Purpose:
 !   Transforms graph into a new graph where one of the original vertices
@@ -633,10 +633,8 @@
             write(*,'(30I3)') iaNew   
             write(*,'(30I3)') jaNew      
           end if            
-        end do
-
-        write(*,'(30I3)') iaNew
-        write(*,'(30I3)') jaNew        
+        end do          
+        call trim(jaNew, iaNew(nNew + 1) - 1)        
 
         !TODO precislovat vrcholy
 
@@ -646,7 +644,7 @@
 
 ! subroutine minimumordering
 ! (c) Vladislav Matus
-! last edit: 20. 09. 2018  
+! last edit: 21. 09. 2018  
 !
 ! Purpose:
 !   Comupute the minimum ordering of the graph

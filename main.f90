@@ -9,6 +9,7 @@
       use mydepend90
       use myroutines90      
       use gvroutines 
+      use testing
       use raggedmultiarray
       use metis_interface
       
@@ -86,33 +87,19 @@
       !number of parts as string, use partsch(1:ndigits)
       character*(partsch_max_len) :: partsch       
       integer :: mformat ! matrix format for loading             
+      integer :: testGraphNumber ! which matrix should be loaded in test mode
 !--------------------------------------------------------------------
 !
 ! program start
 !
 ! -- various initializations
-!
-! -- simple graphs for testing purposes
-!
-!  -- 1.
-      n = 5
-      ia = [1, 4, 6, 8, 10, 13]
-      ja = [2, 3, 5, 1, 4, 1, 5, 2, 5, 1, 3, 4]
-      allocate(aa(ia(n+1)-1))
-      aa = 0
-!  -- 2.
-      ! n = 5
-      ! ia = [1, 5, 9, 13, 17, 21]
-      ! ja = [3, 2, 5, 4, 1, 3, 4, 5, 1, 2, 4, 5, 1, 2, 3, 5, 1, 2, 3, 4]
-      ! allocate(aa(ia(n+1)-1))
-      ! aa = 0
-
-            
+!            
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
      matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
+     testGraphNumber = 2
 !
 ! -- matrix loading
 !    TODO improve matrix loading, now it's just generating matrix using poisson1
@@ -147,6 +134,7 @@
 
         case ('T')
             write(*,*) "Running in test mode"
+            call loadTestGraph(ia, ja, aa, n, testGraphNumber)
 
         case default
           stop 'Unrecognised matrix format!'
@@ -196,6 +184,12 @@
 !      call chfill2(nfull, ia, ja, mformat, colcnt, chsize, info)
 
 
+!
+! -- final tests in test mode
+!            
+      ! if(TRIM(matrixtype) = 'T') then
+      !   !TODO tests
+      ! end if
 !
 ! -- deallocate all allocated fields
 !

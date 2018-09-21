@@ -5,7 +5,7 @@
       module auxroutines            
         implicit none  
         private  
-        public :: insertionSort, uniquify
+        public :: insertionSort, uniquify, trim
 
       contains
 !-------------------------------------------------------------------- 
@@ -85,7 +85,7 @@
         end do                        
 
         if(uniqueL < 1) then
-          write(*,*) "[auxroutines.f90:56] Warning: Nothing to return in uniquify!"
+          write(*,*) "[auxroutines.f90:uniquify] Warning: Nothing to return in uniquify!"
           ierr = 1
           return
         end if
@@ -123,5 +123,34 @@
           end if
         end do                  
       end subroutine uniquify
-!--------------------------------------------------------------------         
+!-------------------------------------------------------------------- 
+! subroutine trim
+! (c) Vladislav Matus
+! last edit: 21. 09. 2018  
+!      
+! Purpose:
+!   Remove 
+! Input:
+!   arr ... array for removing trailing zeros
+!   endIndex ... last element or new array, if > SIZE(arr), warning thrown
+! Output:
+!   arr ... resulting subarray
+! Allocations: none
+!--------------------------------------------------------------------          
+      subroutine trim(arr, endIndex)
+        implicit none
+        integer, allocatable, dimension(:) :: arr, newArr
+        integer :: endIndex
+        if(endIndex > SIZE(arr)) then
+          write(*,*) "[auxroutines.f90:trim] Warning: endIndex > SIZE(arr), not trimmed"
+          return 
+        end if
+        allocate(newArr(endIndex))
+        newArr = arr(1 : endIndex)
+        deallocate(arr)
+        arr = newArr
+        deallocate(newArr)
+      end subroutine trim
+!--------------------------------------------------------------------          
+
       end module auxroutines

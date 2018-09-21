@@ -603,11 +603,13 @@
         call insertionSort(neighbours)        
         nI = 1
         iaNew(1) = 1
-        do i = 1, n 
-          if (i == replaceIndex) cycle                   
-          if (i == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
+        i = 0 !indexing for avoiding replaceIndex
+        do j = 1, n           
+          if (j == replaceIndex) cycle                   
+          i = i + 1 
+          if (j == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
             write(*,*) "Oh, look, a penny"
-            call uniquify([ja(ia(i) : ia(i + 1) - 1), neighbours], uniqueNeighbours, ierr, [i,replaceIndex])            
+            call uniquify([ja(ia(i) : ia(i + 1) - 1), neighbours], uniqueNeighbours, ierr, [j,replaceIndex])            
             if(ierr == 0) then
               iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)            
               jaNew(iaNew(i) : iaNew(i + 1) - 1) = uniqueNeighbours                        
@@ -616,14 +618,18 @@
               iaNew(i + 1) = iaNew(i)
             end if
             nI = nI + 1
+            write(*,'(30I3)') ia  
+            write(*,'(30I3)') ja
             write(*,'(30I3)') iaNew      
             write(*,'(30I3)') jaNew      
           else ! just copy the part of ja
             iaDiff = ia(i + 1) - ia(i)
             iaNew(i + 1) = iaNew(i) + iaDiff
             write(*,*) iaNew(i+1)
-            jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(i) : ia(i + 1) - 1)
+            jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(j) : ia(j + 1) - 1)
             write(*,*) "No penny :("
+            write(*,'(30I3)') ia  
+            write(*,'(30I3)') ja  
             write(*,'(30I3)') iaNew   
             write(*,'(30I3)') jaNew      
           end if            

@@ -1,6 +1,6 @@
 ! program main
 ! (c) Vladislav Matus
-! last edit: 12. 08. 2018
+! last edit: 22. 09. 2018
 ! TODO: file manipulation error handling
 ! TODO: check all ierr  
       
@@ -57,11 +57,12 @@
       integer, allocatable, dimension(:) :: part     
 ! -- multidimensional ragged arrays corresponding to partitions 
 !    containing matrices in CSR format
-      type(intraggedarr) :: iap, jap
-      type(dpraggedarr) :: aap
+      type(intRaggedArr) :: iap, jap
+      type(dpRaggedArr) :: aap
+      type(logicalRaggedArr) :: nvs
       ! Corresponding permutations from original to partitioned and back
       integer, allocatable, dimension(:) :: np, perm
-      type(intraggedarr) :: invperm      
+      type(intRaggedArr) :: invperm      
 ! -- permutations from original to ordered matrix and back      
       integer, allocatable, dimension(:) :: ordperm, invordperm
 ! -- command line arguments
@@ -127,7 +128,7 @@
           !end konzultace          
           
         case ('P')
-          nfull = 6
+          nfull = 5
           !allocate ia, ja, aa
           call poisson1(nfull, n, ia, ja, aa, info)
           mformat = 11  
@@ -157,7 +158,10 @@
 !
 ! -- Create subgraphs
 !
-      call crsubgr(ia, ja, aa, n, part, parts, iap, jap, aap, np, perm, invperm, ierr)         
+      call createSubgraphs(ia, ja, aa, n, part, parts, iap, jap, aap, np, nvs, perm, invperm, ierr)
+      write(*,'(30I3)') part
+      write(*,'(30L3)') nvs%vectors(1)%elements
+      write(*,'(30L3)') nvs%vectors(2)%elements
 !
 ! -- Find best ordering of vertices
 !     TODO order vertices in all parts      
@@ -167,9 +171,8 @@
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          
 !      
-      open(unit=graphvizunit, file=graphvizfilename)       
-      
-      call gvColorGraph(ia, ja, n, part, graphvizunit, ierr)  
+      open(unit=graphvizunit, file=graphvizfilename)            
+      call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
       close(graphvizunit)  
       
       ! open(unit=15, file="GVgraph1.txt")   
@@ -197,7 +200,7 @@
       deallocate(ja, stat=ierr)
       deallocate(aa, stat=ierr)
       deallocate(part, stat=ierr)	  
-      call subgrcleanup(iap, jap, aap, np, perm, invperm, parts, ierr)
+      call subgraphCleanup(iap, jap, aap, np, nvs, perm, invperm, parts, ierr)
 !
 !--------------------------------------------------------------------          
 !

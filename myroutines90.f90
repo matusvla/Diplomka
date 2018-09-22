@@ -115,9 +115,9 @@
 
 !--------------------------------------------------------------------
 
-! subroutine crsubgr
+! subroutine createSubgraphs
 ! (c) Vladislav Matus
-! last edit: 15. 07. 2018  
+! last edit: 22. 09. 2018
 ! TODO error handling      
 ! TODO fill ierr  
 !
@@ -134,16 +134,19 @@
 !   parts ... number of subgraphs
 ! Output:
 !   iap, jap, aap ... multidimensional ragged arrays containing submatrices in CSR format
+!   nextToVertSep ... logical multidimensional ragged array containig for each vertex info
+!     if it is connected to the vertex separator      
 !   np ... vector of sizes of the submatrices
 !   ierr ... error code (0 if succesful, 1 otherwise)  
 !   perm ... array containing the new indices of vertices after partition
 !   invperm ... multidimensional array containing the original indices
-! Allocations: iap%vectors,iap%vectors%elements(1..parts),
-!   jap%vectors, jap%vectors%elements(1..parts),
-!   aap%vectors, aap%vectors%elements(1..parts),
-!   np, perm, invperm%vectors, invperm%vectors%elements(1..parts) 
+! Allocations: iap%vectors,iap%vectors%elements(1..parts+1),
+!   jap%vectors, jap%vectors%elements(1..parts+1),
+!   aap%vectors, aap%vectors%elements(1..parts+1),
+!   np, perm, invperm%vectors, invperm%vectors%elements(1..parts+1) 
 
-      subroutine crsubgr(ia,ja,aa,n,part,parts,iap,jap,aap,np,perm,invperm,ierr)
+      subroutine createSubgraphs(ia, ja, aa, n, part, parts, iap, jap, aap, np, &
+        nextToVertSep, perm, invperm, ierr)
         implicit none
 !
 ! parameters
@@ -151,18 +154,19 @@
       integer :: n, ierr, parts
       integer :: ia(n+1),ja(ia(n+1)-1),part(n)
       double precision :: aa(ia(n+1)-1)
-      type(intraggedarr) :: iap,jap
-      type(dpraggedarr) :: aap
-	type(intraggedarr) :: invperm	  	  
-	integer, allocatable, dimension(:) :: np,perm
+      type(intRaggedArr) :: iap,jap
+      type(dpRaggedArr) :: aap
+      type(logicalRaggedArr) :: nextToVertSep
+      type(intRaggedArr) :: invperm
+      integer, allocatable, dimension(:) :: np, perm
 !
 ! internals
 !              
-      integer :: i, j      
+      integer :: i, j, origInd 
       integer, allocatable, dimension(:) :: ip,jp !indices for cycling     
       integer, allocatable, dimension(:) :: nep ! (2 * edges + loops) in parts 
 !
-! start of crsubgr
+! start of createSubgraphs
 !	
 ! -- zero out np, npe and count np, npe again
 !           
@@ -215,27 +219,30 @@
       allocate(iap%vectors(parts+1),stat=ierr)
       allocate(jap%vectors(parts+1),stat=ierr)
       allocate(aap%vectors(parts+1),stat=ierr)      
+      allocate(nextToVertSep%vectors(parts + 1),stat=ierr)      
       ! allocate the second dimension of the multiarrays ia, ja, aa, invperm
-	do i = 1, parts + 1
+      do i = 1, parts + 1
         allocate(iap%vectors(i)%elements(np(i)+1), stat=ierr)        
         allocate(jap%vectors(i)%elements(nep(i)), stat=ierr)
-        allocate(aap%vectors(i)%elements(nep(i)), stat=ierr)        
-      end do
+        allocate(aap%vectors(i)%elements(nep(i)), stat=ierr)
+        allocate(nextToVertSep%vectors(i)%elements(np(i)), stat=ierr)                
+      end do      
 !
 ! -- fill in the iap, jap, aap
 !      
       !allocate jp
       allocate(jp(parts+1),stat=ierr)         
-      !set first elements of iap
+      !set first elements of iap and set everything in nextToVertSep to false
       do i = 1, parts + 1        
         iap%vectors(i)%elements(1) = 1
+        nextToVertSep%vectors(i)%elements = .false.
       end do
       ! fill ip with twosm jp with ones
       do i = 1, parts + 1
         ip(i) = 2
         jp(i) = 1
       end do      
-      !fill iap      
+      !fill iap          
       do i = 1, n
         !set appropriate element in iap to his predecessor
         iap%vectors(part(i))%elements(ip(part(i))) = iap%vectors(part(i))%elements(ip(part(i))-1)            
@@ -247,11 +254,19 @@
             jap%vectors(part(i))%elements(jp(part(i))) = perm(ja(j))            
             aap%vectors(part(i))%elements(jp(part(i))) = aa(j)            
             jp(part(i)) = jp(part(i)) + 1
-          end if
+          end if          
         end do
         ip(part(i)) = ip(part(i)) + 1       
-      end do      
- 
+      end do  
+      !mark vectors connected to vertex separator
+      do i = 1, np(parts + 1)
+        origInd = invperm%vectors(parts + 1)%elements(i)
+        do j = ia(origInd), ia(origInd + 1) - 1
+          nextToVertSep%vectors(part(ja(j)))%elements(perm(ja(j))) = .true.          
+          write(*,*) "jaj", ja(j)
+          write(*,*) nextToVertSep%vectors(1)%elements
+        end do
+      end do
 !
 ! -- clean up
 !
@@ -259,57 +274,59 @@
       deallocate(jp,stat=ierr)
       deallocate(nep,stat=ierr)  
 !
-! end of crsubgr
+! end of createSubgraphs
 !  
-      end subroutine crsubgr
+      end subroutine createSubgraphs
       
 !--------------------------------------------------------------------
 
-! subroutine subgrcleanup
+! subroutine subgraphCleanup
 ! (c) Vladislav Matus
-! last edit: 15. 07. 2018  
+! last edit: 22. 09. 2018  
 !
 ! Purpose:
-!   This routine deallocates all allocated fields after using routine crsubgr
+!   This routine deallocates all allocated fields after using routine createSubgraphs
 ! Input:
-!   iap,jap,aap,np,perm,invperm ... various fields which need deallocating
+!   iap, jap, aap, nvs, np, perm, invperm ... various fields which need deallocating
 !   parts ... number of parts in partition
 ! Output:
 !   ierr ... error code (0 if succesful, # of fails otherwise)  
 ! Allocations: none
 
-      subroutine subgrcleanup(iap,jap,aap,np,perm,invperm,parts,ierr)
+      subroutine subgraphCleanup(iap, jap, aap, np, nvs, perm, invperm, parts, ierr)
         implicit none
 !
 ! parameters
 !
       integer :: parts,ierr            
-      type(intraggedarr) :: iap,jap
-      type(dpraggedarr) :: aap
-	type(intraggedarr) :: invperm	  	  
-	integer, allocatable, dimension(:) :: np,perm
+      type(intRaggedArr) :: iap,jap
+      type(dpRaggedArr) :: aap
+      type(intRaggedArr) :: invperm
+      type(logicalRaggedArr) :: nvs
+      integer, allocatable, dimension(:) :: np,perm
 !
 ! internals
 !              
       integer :: i, iierr        
 !
-! start of subgrcleanup
+! start of subgraphCleanup
 !	
 ! -- deallocate all fields
 ! 
       ierr = 0
-	do i = 1, parts + 1
+      do i = 1, parts + 1
         deallocate(iap%vectors(i)%elements, jap%vectors(i)%elements, & 
-          aap%vectors(i)%elements, invperm%vectors(i)%elements, stat=iierr)
+          aap%vectors(i)%elements, invperm%vectors(i)%elements, &
+          nvs%vectors(i)%elements, stat=iierr)
         ierr = ierr + iierr
       end do
-      deallocate(iap%vectors, jap%vectors, aap%vectors, invperm%vectors, &
-        perm, np, stat=iierr)
+      deallocate(iap%vectors, jap%vectors, aap%vectors, nvs%vectors, &
+        invperm%vectors, perm, np, stat=iierr)
       ierr = ierr + iierr
 !
-! end of subgrcleanup
+! end of subgraphCleanup
 !  
-      end subroutine subgrcleanup
+      end subroutine subgraphCleanup
         
 !--------------------------------------------------------------------        
 
@@ -780,10 +797,6 @@
 
 ! TODO integrate the two orderings togther, now minimum is only rewriting the result of ordering by distance
       call minimumOrdering(ia, ja, n, minOrdering)
-
-
-
-
 !
 ! end of ordervertices
 !  

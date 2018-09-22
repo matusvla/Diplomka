@@ -245,7 +245,7 @@
       !fill iap          
       do i = 1, n
         !set appropriate element in iap to his predecessor
-        iap%vectors(part(i))%elements(ip(part(i))) = iap%vectors(part(i))%elements(ip(part(i))-1)            
+        iap%vectors(part(i))%elements(ip(part(i))) = iap%vectors(part(i))%elements(ip(part(i))-1)
         do j = ia(i), ia(i+1) - 1
           if(part(i) == part(ja(j))) then ! if in same partition 
             !raise iap element by one          
@@ -666,7 +666,7 @@
           if (j == replaceIndex) cycle                   
           i = i + 1 
           if (j == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
-            call uniquify([ja(ia(j) : ia(j + 1) - 1), neighbours], uniqueNeighbours, ierr, [j,replaceIndex])                                    
+            call uniquify([ja(ia(j) : ia(j + 1) - 1), neighbours], uniqueNeighbours, ierr, [j,replaceIndex])
             if(ierr == 0) then              
               iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)            
               jaNew(iaNew(i) : iaNew(i + 1) - 1) = uniqueNeighbours                        
@@ -721,7 +721,7 @@
         call remloops(n, ia, ja, iaIn, jaIn, ierr)        
         nIn = n
         do i = 1, n - 2               
-          minDegIndex = findMinimumDegreeIndex(iaIn, nIn) !TODO rewrite using MIN          
+          minDegIndex = findMinimumDegreeIndex(iaIn, nIn) !TODO rewrite using MIN
           ordering(i) = minDegIndex
           call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, minDegIndex)
           iaIn = iaOut
@@ -739,6 +739,60 @@
 !  
       end subroutine minimumordering    
 
+!-------------------------------------------------------------------- 
+! subroutine mixedOrdering
+! (c) Vladislav Matus
+! last edit: 21. 09. 2018  
+!
+! Purpose:
+!   Comupute the minimum ordering of the graph.
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices   
+!   
+! Output:
+!   ordering ... the final ordering of the graph             
+!   
+! Allocations:  none
+
+      subroutine mixedOrdering(ia, ja, n, ordering)
+        implicit none
+!
+! parameters
+!
+        integer :: n, i, ierr
+        integer :: ia(n+1), ja(ia(n+1)-1)      
+!
+! internals
+!  
+        integer :: minDegIndex, nIn, nOut
+        integer, allocatable, dimension(:) :: iaIn, jaIn, iaOut, jaOut
+        integer :: ordering(n)           
+!
+! start of mixedOrdering
+!	        
+        call remloops(n, ia, ja, iaIn, jaIn, ierr)        
+        nIn = n
+        do i = 1, n - 2               
+          minDegIndex = findMinimumDegreeIndices(iaIn, nIn) !TODO rewrite using MIN
+          ordering(i) = minDegIndex
+          call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, minDegIndex)
+          iaIn = iaOut
+          jaIn = jaOut
+          nIn = nOut          
+          deallocate(iaOut, jaOut)               
+        end do
+        ordering(n - 1) = 1 !two vertex graph is symetrical
+        ordering(n) = 1
+        call normalizeOrdering(ordering)  
+        
+
+!
+! end of mixedOrdering
+!  
+      end subroutine mixedOrdering        
+
       
 !-------------------------------------------------------------------- 
 ! subroutine orderByDistance
@@ -749,7 +803,7 @@
 !   Computes the permutation of vertices in graph to be ordered.
 !   The vertices furthest from the separator have the lowest numbers
 !   When using for one component of graph, set parts = 1 and part has to contain
-!   vector of 1s,2s where vertices adjacent to separator are denoted by 2                     
+!   vector of 1s,2s where vertices adjacent to separator are denoted by 2
 !   
 ! Input:
 !   ia, ja ... graph in CSR format
@@ -800,13 +854,11 @@
 ! last edit: 19. 09. 2018  
 !
 ! Purpose:
-!   Computes the permutation of vertices in graph to be ordered using MD algorithm                  
+!   Computes the permutation of vertices in graph to be ordered using MD algorithm
 !   
 ! Input:
 !   ia, ja ... graph in CSR format
 !   n ... number of vertices    
-!   part ... vector of length n containing the partitioning of the graph
-!   parts ... number of subgraphs        
 !   
 ! Output:
 !   perm ... permutation: original ordering -> new ordering
@@ -844,6 +896,60 @@
 ! end of orderByMD
 !  
       end subroutine orderByMD
+        
+!-------------------------------------------------------------------- 
+! subroutine orderMixed
+! (c) Vladislav Matus
+! last edit: 19. 09. 2018  
+!
+! Purpose:
+!   Computes the permutation of vertices in graph to be ordered
+!   Using enhanced MD algorithm, i. e. the vertex with minimal degree
+!   is chosen and if there ar more vertices with the same minimal degree,
+!   the one the furthest from the separator is chosen            
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices    
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs        
+!   
+! Output:
+!   perm ... permutation: original ordering -> new ordering
+!   invperm ... permutation: new ordering -> original ordering 
+!   ierr ... error code (0 if succesful, 1 otherwise)             
+!   
+! Allocations:  perm, invperm
+
+      subroutine orderMixed(ia, ja, n, part, parts, perm, invperm, ierr)
+        implicit none
+!
+! parameters
+!
+      integer :: ierr, n, parts
+      integer :: ia(n+1), ja(ia(n+1)-1), part(n) 
+      integer, allocatable, dimension(:) :: perm, invperm      
+!
+! internals
+!              
+      integer :: i, ordering(n)      
+!
+! start of orderMixed
+!	    
+      call minimumOrdering(ia, ja, n, ordering)
+      write(*,'(30I3)')   
+!      
+! -- fill in invperm and perm using sorted order values
+!                  
+      allocate(perm(n), invperm(n), stat=ierr)
+      call MRGRNK (ordering, invperm);
+      do i = 1, n
+        perm(invperm(i)) = i
+      end do      
+!
+! end of orderMixed
+!  
+      end subroutine orderMixed
         
 !--------------------------------------------------------------------   
 

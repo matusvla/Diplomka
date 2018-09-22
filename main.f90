@@ -99,9 +99,9 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'P' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 3
+     testGraphNumber = 1
      nfull = 5
 !
 ! -- matrix loading
@@ -164,12 +164,16 @@
 ! -- Find best ordering of vertices
 !     TODO order vertices in all parts      
 !            
-      call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)
-      write(*,'(30L3)') nvs%vectors(1)%elements      
-      write(*,'(30I3)') ordperm
+      ! call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !   logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)
 
-      
+      ! call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !   ordperm, invordperm, ierr)
+          
+      !write(*,'(30I3)') ordperm
+
+      !TODO mixed ordering
+
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          

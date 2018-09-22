@@ -784,7 +784,7 @@
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  
-      allocate(perm(n),invperm(n),stat=ierr)
+      allocate(perm(n), invperm(n), stat=ierr)
       call MRGRNK (distFromSep, invperm);
       do i = 1, n
         perm(invperm(i)) = i
@@ -830,18 +830,16 @@
 !
 ! start of orderByMD
 !	    
-      
+      call minimumOrdering(ia, ja, n, minOrdering)
+      write(*,'(30I3)')   
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  
-      allocate(perm(n),invperm(n),stat=ierr)
+      allocate(perm(n), invperm(n), stat=ierr)
       call MRGRNK (minOrdering, invperm);
       do i = 1, n
         perm(invperm(i)) = i
-      end do
-
-! TODO integrate the two orderings togther, now minimum is only rewriting the result of ordering by distance
-      call minimumOrdering(ia, ja, n, minOrdering)
+      end do      
 !
 ! end of orderByMD
 !  

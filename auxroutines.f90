@@ -5,7 +5,7 @@
       module auxroutines            
         implicit none  
         private  
-        public :: insertionSort, uniquify, trimArr, shiftArr
+        public :: insertionSort, uniquify, trimArr, shiftArr, logical2intArr
 
       contains
 !-------------------------------------------------------------------- 
@@ -185,6 +185,29 @@
         end do
         
       end subroutine shiftArr         
-!--------------------------------------------------------------------                    
+!-------------------------------------------------------------------- 
+! subroutine logical2intArr
+! (c) Vladislav Matus
+! last edit: 22. 09. 2018  
+!      
+! Purpose:
+!   Transforms boolean array into integer array: true = 1, false = 0
+!   (Note that you need to add +1 to use resulting array as part)    
+! Input:
+!   arr ... array for shifting
+!   threshold ... only values >threshold are modified      
+!   [coef] ... shift coeficient, if not specified = -1
+! Output:
+!   arr ... result
+! Allocations: none
+!--------------------------------------------------------------------           
+      function logical2intArr (logicalArr)
+        implicit none
+        logical, dimension(:) :: logicalArr
+        integer :: logical2intArr(SIZE(logicalArr))
+        logical2intArr = logicalArr                     
+      end function logical2intArr         
+!--------------------------------------------------------------------   
+
 
       end module auxroutines

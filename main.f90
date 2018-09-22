@@ -9,6 +9,7 @@
       use mydepend90
       use myroutines90      
       use gvroutines 
+      use auxroutines 
       use testing
       use raggedmultiarray
       use metis_interface
@@ -98,9 +99,10 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     matrixtype = 'P' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 1
+     testGraphNumber = 3
+     nfull = 5
 !
 ! -- matrix loading
 !    TODO improve matrix loading, now it's just generating matrix using poisson1
@@ -128,7 +130,6 @@
           !end konzultace          
           
         case ('P')
-          nfull = 5
           !allocate ia, ja, aa
           call poisson1(nfull, n, ia, ja, aa, info)
           mformat = 11  
@@ -159,14 +160,16 @@
 ! -- Create subgraphs
 !
       call createSubgraphs(ia, ja, aa, n, part, parts, iap, jap, aap, np, nvs, perm, invperm, ierr)
-      write(*,'(30I3)') part
-      write(*,'(30L3)') nvs%vectors(1)%elements
-      write(*,'(30L3)') nvs%vectors(2)%elements
 !
 ! -- Find best ordering of vertices
 !     TODO order vertices in all parts      
-!      
-      call ordervertices(ia, ja, aa, n, part, parts, ordperm, invordperm, ierr)
+!            
+      call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)
+      write(*,'(30L3)') nvs%vectors(1)%elements      
+      write(*,'(30I3)') ordperm
+
+      
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          

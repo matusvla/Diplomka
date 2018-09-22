@@ -263,8 +263,6 @@
         origInd = invperm%vectors(parts + 1)%elements(i)
         do j = ia(origInd), ia(origInd + 1) - 1
           nextToVertSep%vectors(part(ja(j)))%elements(perm(ja(j))) = .true.          
-          write(*,*) "jaj", ja(j)
-          write(*,*) nextToVertSep%vectors(1)%elements
         end do
       end do
 !
@@ -481,9 +479,9 @@
 !  
       end subroutine remloops
 !-------------------------------------------------------------------- 
-! subroutine countDistance
+! function countDistance
 ! (c) Vladislav Matus
-! last edit: 19. 09. 2018  
+! last edit: 22. 09. 2018  
 !
 ! Purpose:
 !   create ordering of subgraphs according to distance from vertex separator
@@ -499,8 +497,11 @@
 !   distFromSep ... int vector of length n which contains distances of vertices from separator
 !   
 ! Allocations:  distFromSep
+! 
+! Returns: length of the longest path      
 
-      subroutine countDistance(ia, ja, n, part, parts, distFromSep)
+
+      integer function countDistance(ia, ja, n, part, parts, distFromSep)
         implicit none
 !
 ! parameters
@@ -551,11 +552,12 @@
               end if
             end do
           end do         
-        end do    
+        end do  
+        countDistance = maxDepth  
 !
 ! end of countDistance
 !  
-      end subroutine countDistance   
+      end function countDistance   
       
 !-------------------------------------------------------------------- 
 ! function findMinimumDegreeIndex
@@ -739,54 +741,47 @@
 
       
 !-------------------------------------------------------------------- 
-! subroutine ordervertices
+! subroutine orderByDistance
 ! (c) Vladislav Matus
 ! last edit: 19. 09. 2018  
 !
 ! Purpose:
-!   Computes the permutation of vertices in graph to be ordered
-!   in an order specified by internal order vector.
+!   Computes the permutation of vertices in graph to be ordered.
+!   The vertices furthest from the separator have the lowest numbers
+!   When using for one component of graph, set parts = 1 and part has to contain
+!   vector of 1s,2s where vertices adjacent to separator are denoted by 2                     
 !   
 ! Input:
-!   ia, ja, aa ... graph in CSR format
+!   ia, ja ... graph in CSR format
 !   n ... number of vertices    
 !   part ... vector of length n containing the partitioning of the graph
 !   parts ... number of subgraphs        
 !   
 ! Output:
-!   iaord, jaord, aaord ... ordered graph in CSR format     
 !   perm ... permutation: original ordering -> new ordering
 !   invperm ... permutation: new ordering -> original ordering 
 !   ierr ... error code (0 if succesful, 1 otherwise)             
 !   
 ! Allocations:  perm, invperm
 
-      subroutine ordervertices(ia, ja, aa, n, part, parts, perm, invperm, ierr)
+      subroutine orderByDistance(ia, ja, n, part, parts, perm, invperm, ierr)
         implicit none
 !
 ! parameters
 !
-      integer :: ierr, n, parts
-      integer :: ia(n+1), ja(ia(n+1)-1), part(n)
-      double precision :: aa(ia(n+1)-1)    	  
+      integer :: ierr, n, parts, maxDepth
+      integer :: ia(n+1), ja(ia(n+1)-1), part(n)       
       integer, allocatable, dimension(:) :: perm, invperm      
 !
 ! internals
 !              
-      integer :: i, distFromSep(n), minOrdering(n)
-      real :: ordvalue, order(n)
-      double precision :: distOrd(n)
+      integer :: i, distFromSep(n)
 !
-! start of ordervertices
+! start of orderByDistance
 !	    
-      ! Random order:
-      ! do i = 1, n
-      ! CALL RANDOM_NUMBER(ordvalue)
-      ! order(i) = ordvalue
-      ! end do 
-      
-      call countDistance(ia, ja, n, part, parts, distFromSep) 
-      
+      maxDepth = countDistance(ia, ja, n, part, parts, distFromSep)
+      distFromSep = maxDepth - distFromSep
+!      
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n),invperm(n),stat=ierr)
@@ -794,15 +789,65 @@
       do i = 1, n
         perm(invperm(i)) = i
       end do
+!
+! end of orderByDistance
+!  
+      end subroutine orderByDistance
+        
+!-------------------------------------------------------------------- 
+! subroutine orderByMD
+! (c) Vladislav Matus
+! last edit: 19. 09. 2018  
+!
+! Purpose:
+!   Computes the permutation of vertices in graph to be ordered using MD algorithm                  
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices    
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs        
+!   
+! Output:
+!   perm ... permutation: original ordering -> new ordering
+!   invperm ... permutation: new ordering -> original ordering 
+!   ierr ... error code (0 if succesful, 1 otherwise)             
+!   
+! Allocations:  perm, invperm
+
+      subroutine orderByMD(ia, ja, n, perm, invperm, ierr)
+        implicit none
+!
+! parameters
+!
+      integer :: ierr, n
+      integer :: ia(n+1), ja(ia(n+1)-1)
+      integer, allocatable, dimension(:) :: perm, invperm      
+!
+! internals
+!              
+      integer :: i, minOrdering(n)      
+!
+! start of orderByMD
+!	    
+      
+!      
+! -- fill in invperm and perm using sorted order values
+!                  
+      allocate(perm(n),invperm(n),stat=ierr)
+      call MRGRNK (minOrdering, invperm);
+      do i = 1, n
+        perm(invperm(i)) = i
+      end do
 
 ! TODO integrate the two orderings togther, now minimum is only rewriting the result of ordering by distance
       call minimumOrdering(ia, ja, n, minOrdering)
 !
-! end of ordervertices
+! end of orderByMD
 !  
-      end subroutine ordervertices
+      end subroutine orderByMD
         
-!--------------------------------------------------------------------       
+!--------------------------------------------------------------------   
 
 !
 ! end of module

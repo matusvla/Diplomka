@@ -769,9 +769,7 @@
       ! end do 
       
       call countDistance(ia, ja, n, part, parts, distFromSep) 
-      !write(*,'(30I3)') distFromSep   
-      part = distFromSep !TODO DELETE!!!!!
-!
+      
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n),invperm(n),stat=ierr)

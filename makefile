@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -c -O2
 
 OBJ= \
-	mydepend.o auxroutines.o mydepend90.o myroutines90.o gvroutines.o raggedmultiarray.o \
+	raggedmultiarray.o auxroutines.o mydepend.o mydepend90.o myroutines90.o gvroutines.o \
 	testing.o mrgrnk.o svrev.o metis_interface.o metisinclude.o \
 	main.o
 OBJDIR = objects

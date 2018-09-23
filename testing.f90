@@ -19,6 +19,10 @@
             n = 4
             ia = [1, 2, 4, 6, 7]
             ja = [2, 1, 3, 2, 4, 3]
+          case (4)
+            n = 7
+            ia = [1, 4, 8, 11, 13, 17, 20, 23]
+            ja = [5,2,4,  3,1,6,7,  5,2,6,  1,7,  3,6,7,1,  3,5,2,  4,5,2]  
           case default !the same as case 1
             n = 5
             ia = [1, 4, 6, 8, 10, 13]
@@ -27,5 +31,17 @@
         allocate(aa(ia(n+1)-1))
         aa = 0
       end subroutine loadTestGraph
-!--------------------------------------------------------------------                      
+!--------------------------------------------------------------------        
+      subroutine loadTestPart(part, graphID)
+        implicit none
+        integer :: graphID
+        integer, allocatable, dimension(:) :: part        
+        select case (graphID)
+          case (4)
+            part = [1, 1, 1, 2, 1, 1, 1]
+          case default !the same as case 1
+            stop "[testing.f90:loadTestPart] ERROR: Unknown graphID"
+        end select
+      end subroutine loadTestPart
+!--------------------------------------------------------------------                         
       end module testing

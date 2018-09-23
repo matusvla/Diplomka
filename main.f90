@@ -99,9 +99,9 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'P' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 1
+     testGraphNumber = 4
      nfull = 5
 !
 ! -- matrix loading
@@ -170,17 +170,21 @@
       ! call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
       !    ordperm, invordperm, ierr)
 
-      call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-         logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
-          
+      ! call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !    logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
+
+      call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
+
       write(*,'(30I3)') ordperm
 
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          
 !      
-      open(unit=graphvizunit, file=graphvizfilename)            
-      call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
+      open(unit=graphvizunit, file=graphvizfilename)                  
+      ! call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
+      call  gvColorGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+        logical2intArr(nvs%vectors(1)%elements) + 1, graphvizunit, ierr)  
       close(graphvizunit)  
       
       ! open(unit=15, file="GVgraph1.txt")   

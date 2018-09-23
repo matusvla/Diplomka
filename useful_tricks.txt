@@ -5,6 +5,5 @@ git push --all origin
 git remote prune origin
 git branch --merged
 
-
 GraphViz
 taillabel = <<font color="red">tail</font>>

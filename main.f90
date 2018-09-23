@@ -99,7 +99,7 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
      testGraphNumber = 1
      nfull = 5
@@ -168,11 +168,12 @@
       !   logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)
 
       ! call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-      !   ordperm, invordperm, ierr)
-          
-      !write(*,'(30I3)') ordperm
+      !    ordperm, invordperm, ierr)
 
-      !TODO mixed ordering
+      call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+         logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
+          
+      write(*,'(30I3)') ordperm
 
 !
 ! -- Write out partitioned graph in Graphviz format

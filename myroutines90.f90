@@ -588,6 +588,43 @@
 
       end function findMinimumDegreeIndex
 
+!-------------------------------------------------------------------- 
+! function findMinimumDegreeIndices
+! (c) Vladislav Matus
+! last edit: 23. 09. 2018  
+!
+! Purpose:
+!   Finds all vertices in graph with minimimal degree
+! Input:
+!   n ... integer, size of graph
+!   ia ... pointer array of graph in CSR format
+! Returns:
+!   integer array, indices of vertex with minimal degree
+! Allocations: findMinimumDegreeIndices
+
+      function findMinimumDegreeIndices(ia, n)
+        implicit none
+
+        integer :: n, ia(n), minimumDegree, i, fmdiIndex
+        integer, allocatable, dimension(:) :: findMinimumDegreeIndices
+        minimumDegree = MAX_INT
+        allocate(findMinimumDegreeIndices(n))        
+        do i = 1, n          
+          if (minimumDegree > ia(i+1)-ia(i)) then            
+            minimumDegree = ia(i+1)-ia(i)
+            findMinimumDegreeIndices(1) = i
+            fmdiIndex = 2
+          else if (minimumDegree == ia(i+1)-ia(i)) then
+            findMinimumDegreeIndices(fmdiIndex) = i
+            fmdiIndex = fmdiIndex + 1
+          end if        
+        end do 
+                 
+        call trimArr(findMinimumDegreeIndices, fmdiIndex - 1)
+
+      end function findMinimumDegreeIndices
+
+
 !--------------------------------------------------------------------           
 ! subroutine normalizeOrdering
 ! (c) Vladislav Matus
@@ -721,7 +758,7 @@
         call remloops(n, ia, ja, iaIn, jaIn, ierr)        
         nIn = n
         do i = 1, n - 2               
-          minDegIndex = findMinimumDegreeIndex(iaIn, nIn) !TODO rewrite using MIN
+          minDegIndex = findMinimumDegreeIndex(iaIn, nIn)
           ordering(i) = minDegIndex
           call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, minDegIndex)
           iaIn = iaOut
@@ -742,32 +779,34 @@
 !-------------------------------------------------------------------- 
 ! subroutine mixedOrdering
 ! (c) Vladislav Matus
-! last edit: 21. 09. 2018  
+! last edit: 23. 09. 2018  
 !
 ! Purpose:
-!   Comupute the minimum ordering of the graph.
+!   Comupute the mixed ordering of the graph
 !   
 ! Input:
 !   ia, ja ... graph in CSR format
 !   n ... number of vertices   
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs        
 !   
 ! Output:
 !   ordering ... the final ordering of the graph             
 !   
 ! Allocations:  none
 
-      subroutine mixedOrdering(ia, ja, n, ordering)
+      subroutine mixedOrdering(ia, ja, n, part, parts, ordering)
         implicit none
 !
 ! parameters
 !
-        integer :: n, i, ierr
-        integer :: ia(n+1), ja(ia(n+1)-1)      
+        integer :: n, i, ierr, parts
+        integer :: ia(n+1), ja(ia(n+1)-1), part(n)
 !
 ! internals
 !  
-        integer :: minDegIndex, nIn, nOut
-        integer, allocatable, dimension(:) :: iaIn, jaIn, iaOut, jaOut
+        integer :: nIn, nOut, minDegIndex
+        integer, allocatable, dimension(:) :: iaIn, jaIn, iaOut, jaOut, minDegIndices
         integer :: ordering(n)           
 !
 ! start of mixedOrdering
@@ -775,7 +814,8 @@
         call remloops(n, ia, ja, iaIn, jaIn, ierr)        
         nIn = n
         do i = 1, n - 2               
-          minDegIndex = findMinimumDegreeIndices(iaIn, nIn) !TODO rewrite using MIN
+          minDegIndices = findMinimumDegreeIndices(iaIn, nIn) !TODO rewrite using MIN
+          minDegIndex = minDegIndices(1)
           ordering(i) = minDegIndex
           call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, minDegIndex)
           iaIn = iaOut
@@ -936,7 +976,7 @@
 !
 ! start of orderMixed
 !	    
-      call minimumOrdering(ia, ja, n, ordering)
+      call mixedOrdering(ia, ja, n, part, parts, ordering)
       write(*,'(30I3)')   
 !      
 ! -- fill in invperm and perm using sorted order values

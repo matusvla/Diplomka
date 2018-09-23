@@ -5,8 +5,8 @@ CC = gcc
 CFLAGS = -c -O2
 
 OBJ= \
-	mydepend.o mydepend90.o myroutines90.o gvroutines.o raggedmultiarray.o \
-	mrgrnk.o svrev.o metis_interface.o metisinclude.o \
+	raggedmultiarray.o auxroutines.o mydepend.o mydepend90.o myroutines90.o gvroutines.o \
+	testing.o mrgrnk.o svrev.o metis_interface.o metisinclude.o \
 	main.o
 OBJDIR = objects
 LIBMETIS = /usr/local/lib/libmetis.a

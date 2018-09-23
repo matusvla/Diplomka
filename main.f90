@@ -1,6 +1,6 @@
 ! program main
 ! (c) Vladislav Matus
-! last edit: 12. 08. 2018
+! last edit: 22. 09. 2018
 ! TODO: file manipulation error handling
 ! TODO: check all ierr  
       
@@ -9,6 +9,8 @@
       use mydepend90
       use myroutines90      
       use gvroutines 
+      use auxroutines 
+      use testing
       use raggedmultiarray
       use metis_interface
       
@@ -17,6 +19,7 @@
 !--------------------------------------------------------------------
 ! 
 ! constants
+      
 !     
 ! -- unit numbers for file handling            
       integer, parameter :: metunit = 1  
@@ -55,11 +58,12 @@
       integer, allocatable, dimension(:) :: part     
 ! -- multidimensional ragged arrays corresponding to partitions 
 !    containing matrices in CSR format
-      type(intraggedarr) :: iap, jap
-      type(dpraggedarr) :: aap
+      type(intRaggedArr) :: iap, jap
+      type(dpRaggedArr) :: aap
+      type(logicalRaggedArr) :: nvs
       ! Corresponding permutations from original to partitioned and back
       integer, allocatable, dimension(:) :: np, perm
-      type(intraggedarr) :: invperm      
+      type(intRaggedArr) :: invperm      
 ! -- permutations from original to ordered matrix and back      
       integer, allocatable, dimension(:) :: ordperm, invordperm
 ! -- command line arguments
@@ -85,22 +89,26 @@
       !number of parts as string, use partsch(1:ndigits)
       character*(partsch_max_len) :: partsch       
       integer :: mformat ! matrix format for loading             
+      integer :: testGraphNumber ! which matrix should be loaded in test mode
 !--------------------------------------------------------------------
 !
 ! program start
 !
 ! -- various initializations
+!            
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'RSA'     
+     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
+     testGraphNumber = 4
+     nfull = 5
 !
 ! -- matrix loading
 !    TODO improve matrix loading, now it's just generating matrix using poisson1
 !      
       info = 0
-	!loading of the matrix in RB format
+  !loading of the matrix in RB format      
       select case (TRIM(matrixtype))
         case ('RSA')
           open(unit=infileunit, file=matrixpath, action='read', iostat=statio)        
@@ -122,10 +130,13 @@
           !end konzultace          
           
         case ('P')
-          nfull = 6
           !allocate ia, ja, aa
           call poisson1(nfull, n, ia, ja, aa, info)
           mformat = 11  
+
+        case ('T')
+            write(*,*) "Running in test mode"
+            call loadTestGraph(ia, ja, aa, n, testGraphNumber)
 
         case default
           stop 'Unrecognised matrix format!'
@@ -137,7 +148,7 @@
 !    TODO miscelaneous error handling    
 !     
     
-      call remloops(n, ia, ja, aa, iaNoLoops, jaNoLoops, aaNoLoops, ierr)
+      call remloops(n, ia, ja, iaNoLoops, jaNoLoops, ierr, aa, aaNoLoops)
       allocate(part(n), stat=ierr)      
       metis_call_status=METIS_SetDefaultOptions(metisoptions)
       call shiftnumbering(-1, n, iaNoLoops, jaNoLoops)  ! transform graph into C++ notation (starting from 0)    
@@ -148,19 +159,32 @@
 !
 ! -- Create subgraphs
 !
-      call crsubgr(ia, ja, aa, n, part, parts, iap, jap, aap, np, perm, invperm, ierr)         
+      call createSubgraphs(ia, ja, aa, n, part, parts, iap, jap, aap, np, nvs, perm, invperm, ierr)
 !
 ! -- Find best ordering of vertices
 !     TODO order vertices in all parts      
-!      
-      call ordervertices(ia, ja, aa, n, part, parts, ordperm, invordperm, ierr)
+!            
+      ! call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !   logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)
+
+      ! call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !    ordperm, invordperm, ierr)
+
+      ! call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !    logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
+
+      call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
+
+      write(*,'(30I3)') ordperm
+
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          
 !      
-      open(unit=graphvizunit, file=graphvizfilename)       
-      
-      call gvColorGraph(ia, ja, n, part, graphvizunit, ierr)  
+      open(unit=graphvizunit, file=graphvizfilename)                  
+      ! call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
+      call  gvColorGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+        logical2intArr(nvs%vectors(1)%elements) + 1, graphvizunit, ierr)  
       close(graphvizunit)  
       
       ! open(unit=15, file="GVgraph1.txt")   
@@ -176,13 +200,19 @@
 
 
 !
+! -- final tests in test mode
+!            
+      ! if(TRIM(matrixtype) = 'T') then
+      !   !TODO tests
+      ! end if
+!
 ! -- deallocate all allocated fields
 !
       deallocate(ia, stat=ierr)
       deallocate(ja, stat=ierr)
       deallocate(aa, stat=ierr)
       deallocate(part, stat=ierr)	  
-      call subgrcleanup(iap, jap, aap, np, perm, invperm, parts, ierr)
+      call subgraphCleanup(iap, jap, aap, np, nvs, perm, invperm, parts, ierr)
 !
 !--------------------------------------------------------------------          
 !

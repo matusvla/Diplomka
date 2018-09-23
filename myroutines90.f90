@@ -1,11 +1,15 @@
 ! module myroutines90
 ! (c) Vladislav Matus
-! last edit: 19. 09. 2018      
+! last edit: 21. 09. 2018      
 
       module myroutines90
+        use auxroutines
         use raggedmultiarray
-        use m_mrgrnk
+        use m_mrgrnk        
+        use gvroutines
         implicit none        
+        integer, parameter :: MAX_INT =  2147483647
+        integer, parameter :: INT_SIZE =  4
       contains
 
 !--------------------------------------------------------------------           
@@ -111,9 +115,9 @@
 
 !--------------------------------------------------------------------
 
-! subroutine crsubgr
+! subroutine createSubgraphs
 ! (c) Vladislav Matus
-! last edit: 15. 07. 2018  
+! last edit: 22. 09. 2018
 ! TODO error handling      
 ! TODO fill ierr  
 !
@@ -130,16 +134,19 @@
 !   parts ... number of subgraphs
 ! Output:
 !   iap, jap, aap ... multidimensional ragged arrays containing submatrices in CSR format
+!   nextToVertSep ... logical multidimensional ragged array containig for each vertex info
+!     if it is connected to the vertex separator      
 !   np ... vector of sizes of the submatrices
 !   ierr ... error code (0 if succesful, 1 otherwise)  
 !   perm ... array containing the new indices of vertices after partition
 !   invperm ... multidimensional array containing the original indices
-! Allocations: iap%vectors,iap%vectors%elements(1..parts),
-!   jap%vectors, jap%vectors%elements(1..parts),
-!   aap%vectors, aap%vectors%elements(1..parts),
-!   np, perm, invperm%vectors, invperm%vectors%elements(1..parts) 
+! Allocations: iap%vectors,iap%vectors%elements(1..parts+1),
+!   jap%vectors, jap%vectors%elements(1..parts+1),
+!   aap%vectors, aap%vectors%elements(1..parts+1),
+!   np, perm, invperm%vectors, invperm%vectors%elements(1..parts+1) 
 
-      subroutine crsubgr(ia,ja,aa,n,part,parts,iap,jap,aap,np,perm,invperm,ierr)
+      subroutine createSubgraphs(ia, ja, aa, n, part, parts, iap, jap, aap, np, &
+        nextToVertSep, perm, invperm, ierr)
         implicit none
 !
 ! parameters
@@ -147,18 +154,19 @@
       integer :: n, ierr, parts
       integer :: ia(n+1),ja(ia(n+1)-1),part(n)
       double precision :: aa(ia(n+1)-1)
-      type(intraggedarr) :: iap,jap
-      type(dpraggedarr) :: aap
-	type(intraggedarr) :: invperm	  	  
-	integer, allocatable, dimension(:) :: np,perm
+      type(intRaggedArr) :: iap,jap
+      type(dpRaggedArr) :: aap
+      type(logicalRaggedArr) :: nextToVertSep
+      type(intRaggedArr) :: invperm
+      integer, allocatable, dimension(:) :: np, perm
 !
 ! internals
 !              
-      integer :: i, j      
+      integer :: i, j, origInd 
       integer, allocatable, dimension(:) :: ip,jp !indices for cycling     
       integer, allocatable, dimension(:) :: nep ! (2 * edges + loops) in parts 
 !
-! start of crsubgr
+! start of createSubgraphs
 !	
 ! -- zero out np, npe and count np, npe again
 !           
@@ -211,30 +219,33 @@
       allocate(iap%vectors(parts+1),stat=ierr)
       allocate(jap%vectors(parts+1),stat=ierr)
       allocate(aap%vectors(parts+1),stat=ierr)      
+      allocate(nextToVertSep%vectors(parts + 1),stat=ierr)      
       ! allocate the second dimension of the multiarrays ia, ja, aa, invperm
-	do i = 1, parts + 1
+      do i = 1, parts + 1
         allocate(iap%vectors(i)%elements(np(i)+1), stat=ierr)        
         allocate(jap%vectors(i)%elements(nep(i)), stat=ierr)
-        allocate(aap%vectors(i)%elements(nep(i)), stat=ierr)        
-      end do
+        allocate(aap%vectors(i)%elements(nep(i)), stat=ierr)
+        allocate(nextToVertSep%vectors(i)%elements(np(i)), stat=ierr)                
+      end do      
 !
 ! -- fill in the iap, jap, aap
 !      
       !allocate jp
       allocate(jp(parts+1),stat=ierr)         
-      !set first elements of iap
+      !set first elements of iap and set everything in nextToVertSep to false
       do i = 1, parts + 1        
         iap%vectors(i)%elements(1) = 1
+        nextToVertSep%vectors(i)%elements = .false.
       end do
       ! fill ip with twosm jp with ones
       do i = 1, parts + 1
         ip(i) = 2
         jp(i) = 1
       end do      
-      !fill iap      
+      !fill iap          
       do i = 1, n
         !set appropriate element in iap to his predecessor
-        iap%vectors(part(i))%elements(ip(part(i))) = iap%vectors(part(i))%elements(ip(part(i))-1)            
+        iap%vectors(part(i))%elements(ip(part(i))) = iap%vectors(part(i))%elements(ip(part(i))-1)
         do j = ia(i), ia(i+1) - 1
           if(part(i) == part(ja(j))) then ! if in same partition 
             !raise iap element by one          
@@ -243,11 +254,17 @@
             jap%vectors(part(i))%elements(jp(part(i))) = perm(ja(j))            
             aap%vectors(part(i))%elements(jp(part(i))) = aa(j)            
             jp(part(i)) = jp(part(i)) + 1
-          end if
+          end if          
         end do
         ip(part(i)) = ip(part(i)) + 1       
-      end do      
- 
+      end do  
+      !mark vectors connected to vertex separator
+      do i = 1, np(parts + 1)
+        origInd = invperm%vectors(parts + 1)%elements(i)
+        do j = ia(origInd), ia(origInd + 1) - 1
+          nextToVertSep%vectors(part(ja(j)))%elements(perm(ja(j))) = .true.          
+        end do
+      end do
 !
 ! -- clean up
 !
@@ -255,57 +272,59 @@
       deallocate(jp,stat=ierr)
       deallocate(nep,stat=ierr)  
 !
-! end of crsubgr
+! end of createSubgraphs
 !  
-      end subroutine crsubgr
+      end subroutine createSubgraphs
       
 !--------------------------------------------------------------------
 
-! subroutine subgrcleanup
+! subroutine subgraphCleanup
 ! (c) Vladislav Matus
-! last edit: 15. 07. 2018  
+! last edit: 22. 09. 2018  
 !
 ! Purpose:
-!   This routine deallocates all allocated fields after using routine crsubgr
+!   This routine deallocates all allocated fields after using routine createSubgraphs
 ! Input:
-!   iap,jap,aap,np,perm,invperm ... various fields which need deallocating
+!   iap, jap, aap, nvs, np, perm, invperm ... various fields which need deallocating
 !   parts ... number of parts in partition
 ! Output:
 !   ierr ... error code (0 if succesful, # of fails otherwise)  
 ! Allocations: none
 
-      subroutine subgrcleanup(iap,jap,aap,np,perm,invperm,parts,ierr)
+      subroutine subgraphCleanup(iap, jap, aap, np, nvs, perm, invperm, parts, ierr)
         implicit none
 !
 ! parameters
 !
       integer :: parts,ierr            
-      type(intraggedarr) :: iap,jap
-      type(dpraggedarr) :: aap
-	type(intraggedarr) :: invperm	  	  
-	integer, allocatable, dimension(:) :: np,perm
+      type(intRaggedArr) :: iap,jap
+      type(dpRaggedArr) :: aap
+      type(intRaggedArr) :: invperm
+      type(logicalRaggedArr) :: nvs
+      integer, allocatable, dimension(:) :: np,perm
 !
 ! internals
 !              
       integer :: i, iierr        
 !
-! start of subgrcleanup
+! start of subgraphCleanup
 !	
 ! -- deallocate all fields
 ! 
       ierr = 0
-	do i = 1, parts + 1
+      do i = 1, parts + 1
         deallocate(iap%vectors(i)%elements, jap%vectors(i)%elements, & 
-          aap%vectors(i)%elements, invperm%vectors(i)%elements, stat=iierr)
+          aap%vectors(i)%elements, invperm%vectors(i)%elements, &
+          nvs%vectors(i)%elements, stat=iierr)
         ierr = ierr + iierr
       end do
-      deallocate(iap%vectors, jap%vectors, aap%vectors, invperm%vectors, &
-        perm, np, stat=iierr)
+      deallocate(iap%vectors, jap%vectors, aap%vectors, nvs%vectors, &
+        invperm%vectors, perm, np, stat=iierr)
       ierr = ierr + iierr
 !
-! end of subgrcleanup
+! end of subgraphCleanup
 !  
-      end subroutine subgrcleanup
+      end subroutine subgraphCleanup
         
 !--------------------------------------------------------------------        
 
@@ -369,6 +388,7 @@
 ! Returns:
 !   integer, number of loops
 ! Allocations: none
+! TODO Test after change
 
       integer function countloops(n,ia,ja)
         implicit none
@@ -376,7 +396,7 @@
 ! parameters
 !
       integer :: n
-      integer, allocatable, dimension(:) :: ia, ja      
+      integer, dimension(:) :: ia, ja      
 !
 ! internals
 !              
@@ -401,7 +421,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine remloops
 ! (c) Vladislav Matus
-! last edit: 22. 07. 2018  
+! last edit: 21. 09. 2018  
 !
 ! Purpose:
 !   This routine removes all loops in the graph
@@ -412,15 +432,18 @@
 !   iaN,jaN,aaN .. graph without loops in CSR format
 ! Allocations: iaN, jaN, aaN
 ! TODO Error handling
+! TODO Test after change      
 
-      subroutine remloops(n,ia,ja,aa,iaN,jaN,aaN,ierr)
+      subroutine remloops(n, ia, ja, iaN, jaN, ierr, aa, aaN)
         implicit none
 !
 ! parameters
 !
       integer :: n, ierr
-      integer, allocatable, dimension(:) :: ia, ja, iaN, jaN
-      double precision, allocatable, dimension(:) :: aa, aaN
+      integer, dimension(:) :: ia, ja 
+      integer, allocatable, dimension(:) :: iaN, jaN
+      double precision, allocatable, dimension(:), optional :: aa, aaN
+      logical :: countingAa
 !
 ! internals
 !              
@@ -428,8 +451,15 @@
 !
 ! start of remloops
 !	      
+      if(present(aa) .and. present(aaN)) then
+        countingAa = .true.
+      else
+        countingAa = .false.
+      end if  
+
       loops = countloops(n,ia,ja)
-      allocate(iaN(n+1), jaN(ia(n+1)-loops-1), aaN(ia(n+1)-loops-1), stat=ierr)
+      allocate(iaN(n+1), jaN(ia(n+1)-loops-1), stat=ierr)
+      if (countingAa) allocate(aaN(ia(n+1)-loops-1), stat=ierr)
       seenloops = 0      
       do i = 1, n
         iaN(i) = ia(i) - seenloops
@@ -438,7 +468,7 @@
             seenloops = seenloops + 1            
           else
             jaN(j-seenloops) = ja(j)
-            aaN(j-seenloops) = aa(j)
+            if(countingAa) aaN(j-seenloops) = aa(j)
           end if          
         end do
       end do
@@ -449,9 +479,9 @@
 !  
       end subroutine remloops
 !-------------------------------------------------------------------- 
-! subroutine countDistance
+! function countDistance
 ! (c) Vladislav Matus
-! last edit: 19. 09. 2018  
+! last edit: 22. 09. 2018  
 !
 ! Purpose:
 !   create ordering of subgraphs according to distance from vertex separator
@@ -467,8 +497,11 @@
 !   distFromSep ... int vector of length n which contains distances of vertices from separator
 !   
 ! Allocations:  distFromSep
+! 
+! Returns: length of the longest path      
 
-      subroutine countDistance(ia, ja, n, part, parts, distFromSep)
+
+      integer function countDistance(ia, ja, n, part, parts, distFromSep)
         implicit none
 !
 ! parameters
@@ -519,117 +552,449 @@
               end if
             end do
           end do         
-        end do    
+        end do  
+        countDistance = maxDepth  
 !
 ! end of countDistance
 !  
-      end subroutine countDistance     
+      end function countDistance   
       
 !-------------------------------------------------------------------- 
-! subroutine ordervertices
+! function findMinimumDegreeIndex
 ! (c) Vladislav Matus
-! last edit: 12. 08. 2018  
+! last edit: 20. 09. 2018  
 !
 ! Purpose:
-!   Creates the minimmum degree ordering ot the graph      
-!   Outputs an array where will be weight in (0,1) for all the vertices
-!   The smaller the weight the smaller the new number of the vertex
+!   Finds vertex in graph with minimimal degree
+! Input:
+!   n ... integer, size of graph
+!   ia ... pointer array of graph in CSR format
+! Returns:
+!   integer, index of vertex with minimal degree
+! Allocations: none
+
+      integer function findMinimumDegreeIndex(ia, n)
+        implicit none
+
+        integer :: n, ia(n), minimumDegree, i
+
+        minimumDegree = MAX_INT
+        do i = 1, n          
+          if (minimumDegree > ia(i+1)-ia(i)) then
+            minimumDegree = ia(i+1)-ia(i)
+            findMinimumDegreeIndex = i
+          end if
+        end do        
+
+      end function findMinimumDegreeIndex
+
+!-------------------------------------------------------------------- 
+! subroutine findMinimumDegreeMask
+! (c) Vladislav Matus
+! last edit: 23. 09. 2018  
+!
+! Purpose:
+!   Returns logical mask where all vertices with minimal value are .true.
+! Input:
+!   n ... integer, size of graph
+!   ia ... pointer array of graph in CSR format
+! Returns:
+!   logical array, mask with vertices with minimal ldegree marked as .true.      
+! Allocations: none
+
+      subroutine findMinimumDegreeMask(ia, n, resultingMask)
+        implicit none
+
+        integer :: n, ia(n), minimumDegree, i
+        logical :: resultingMask(n)
+        minimumDegree = MAX_INT
+        resultingMask = .false.
+        
+        do i = 1, n          
+          if (minimumDegree > ia(i+1)-ia(i)) then            
+            minimumDegree = ia(i+1)-ia(i)
+            resultingMask = .false.
+            resultingMask(i) = .true.       
+          else if (minimumDegree == ia(i+1)-ia(i)) then
+            resultingMask(i) = .true.    
+
+          end if        
+        end do 
+      end subroutine findMinimumDegreeMask
+
+!--------------------------------------------------------------------           
+! subroutine normalizeOrdering
+! (c) Vladislav Matus
+! last edit: 21. 09. 2018  
+!      
+! Purpose:
+!   Takes an array of indices removed from resulting graph in each step
+!   of minimum degree algorithm and projects it onto an array with
+!   the indices corresponding to original ones            
+! Input:
+!   ord ... input indices array
+! Output:
+!   ord ... minimum ordering of the graph
+! Allocations: none  
+
+      subroutine normalizeOrdering(ord)
+        implicit none
+        integer, dimension(:) :: ord
+        integer :: n, i, j
+        
+        n = SIZE(ord)
+        do i = n - 1, 1, -1
+          do j = i + 1, n
+            if (ord(i) <= ord(j)) ord(j) = ord(j) + 1
+          end do
+        end do
+      end subroutine normalizeOrdering       
+
+!-------------------------------------------------------------------- 
+! subroutine vertexToClique
+! (c) Vladislav Matus
+! last edit: 21. 09. 2018  
+!
+! Purpose:
+!   Transforms graph into a new graph where one of the original vertices
+!   is removed and all its neighbours are connected into a clique
 !   
 ! Input:
 !   ia, ja ... graph in CSR format
-!   n ... number of vertices          
+!   n ... number of vertices   
+!   replaceIndex ... index of vertex which should be removed      
 !   
 ! Output:
-!   minOrdering ... double precision array with weights corresponding to graph numbering
+!   iaNew, jaNew ... new graph in CSR format
+!   nNew ... number of vertices of the new graph
 !   
-! Allocations:  minOrdering
+! Allocations:  iaNew, jaNew
+!      
+      subroutine vertexToClique(ia, ja, n, iaNew, jaNew, nNew, replaceIndex)
+        implicit none
 
-      subroutine minimumordering(ia, ja, n, minOrdering)
-            implicit none
-    !
-    ! parameters
-    !
-            integer :: n
-            integer :: ia(n+1),ja(ia(n+1)-1)
-            double precision, allocatable, dimension(:) :: minOrdering
+        integer :: n, ia(n), ja(ia(n+1)-1), replaceIndex, ierr
+        integer :: nNew
+        integer, allocatable, dimension(:) :: iaNew, jaNew
 
-    !
-    ! internals
-    !              
-       
-    !
-    ! start of minimumordering
-    !	    
-            !TODO write the routine code
-         
-    !
-    ! end of minimumordering
-    !  
-          end subroutine minimumordering    
+        integer :: vertexDegree
+        integer :: i, j, jaNewSize, nI, iaDiff
+        integer :: neighbours(ia(replaceIndex + 1) - ia(replaceIndex))
+        integer, allocatable, dimension(:) :: uniqueNeighbours        
+
+! -- allocations
+        vertexDegree = ia(replaceIndex + 1) - ia(replaceIndex)
+        nNew = n - 1
+        jaNewSize = ia(n + 1) - 1 - vertexDegree + (vertexDegree * (vertexDegree + 1))/ 2
+        allocate(iaNew(nNew + 1), jaNew(jaNewSize))
+        jaNew = 0
+        iaNew = 0
+
+! -- 
+        neighbours = ja(ia(replaceIndex) : ia(replaceIndex + 1) - 1)  
+        call insertionSort(neighbours)        
+        nI = 1
+        iaNew(1) = 1
+        i = 0 !indexing for avoiding replaceIndex
+        do j = 1, n  
+          if (j == replaceIndex) cycle                   
+          i = i + 1 
+          if (j == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
+            call uniquify([ja(ia(j) : ia(j + 1) - 1), neighbours], uniqueNeighbours, ierr, [j,replaceIndex])
+            if(ierr == 0) then              
+              iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)            
+              jaNew(iaNew(i) : iaNew(i + 1) - 1) = uniqueNeighbours                        
+              deallocate(uniqueNeighbours)            
+            else
+              iaNew(i + 1) = iaNew(i)
+            end if
+            nI = nI + 1
+          else ! just copy the part of ja
+            iaDiff = ia(j + 1) - ia(j)
+            iaNew(i + 1) = iaNew(i) + iaDiff
+            jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(j) : ia(j + 1) - 1)
+          end if            
+        end do          
+        call trimArr(jaNew, iaNew(nNew + 1) - 1)    !TODO rewrite using PACK
+        call shiftArr(jaNew,replaceIndex)
+      end subroutine vertexToClique
 
 !-------------------------------------------------------------------- 
-! subroutine ordervertices
+! subroutine minimumordering
+! (c) Vladislav Matus
+! last edit: 21. 09. 2018  
+!
+! Purpose:
+!   Comupute the minimum ordering of the graph.
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices   
+!   
+! Output:
+!   ordering ... the final ordering of the graph             
+!   
+! Allocations:  none
+
+      subroutine minimumordering(ia, ja, n, ordering)
+        implicit none
+!
+! parameters
+!
+        integer :: n, i, ierr
+        integer :: ia(n+1), ja(ia(n+1)-1)      
+!
+! internals
+!  
+        integer :: minDegIndex, nIn, nOut
+        integer, allocatable, dimension(:) :: iaIn, jaIn, iaOut, jaOut
+        integer :: ordering(n)           
+!
+! start of minimumordering
+!	        
+        call remloops(n, ia, ja, iaIn, jaIn, ierr)        
+        nIn = n
+        do i = 1, n - 2               
+          minDegIndex = findMinimumDegreeIndex(iaIn, nIn)
+          ordering(i) = minDegIndex
+          call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, minDegIndex)
+          iaIn = iaOut
+          jaIn = jaOut
+          nIn = nOut          
+          deallocate(iaOut, jaOut)               
+        end do
+        ordering(n - 1) = 1 !two vertex graph is symetrical
+        ordering(n) = 1
+        call normalizeOrdering(ordering)  
+        
+
+!
+! end of minimumordering
+!  
+      end subroutine minimumordering    
+
+!-------------------------------------------------------------------- 
+! subroutine mixedOrdering
+! (c) Vladislav Matus
+! last edit: 23. 09. 2018  
+!
+! Purpose:
+!   Comupute the mixed ordering of the graph
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices   
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs        
+!   
+! Output:
+!   ordering ... the final ordering of the graph             
+!   
+! Allocations:  none
+
+      subroutine mixedOrdering(ia, ja, n, part, parts, ordering)
+        implicit none
+!
+! parameters
+!
+        integer :: n, i, ierr, parts
+        integer :: ia(n+1), ja(ia(n+1)-1), part(n)
+!
+! internals
+!  
+        integer :: nIn, nOut, aux, distFromSep(n)
+        integer, allocatable, dimension(:) :: iaIn, jaIn, iaOut, jaOut, dfs
+        integer :: ordering(n)
+        logical, allocatable, dimension(:) :: mask
+!
+! start of mixedOrdering
+!	        
+        call remloops(n, ia, ja, iaIn, jaIn, ierr)
+        aux = countDistance(ia, ja, n, part, parts, distFromSep)
+        dfs = distFromSep
+        nIn = n
+        do i = 1, n - 1     
+          allocate(mask(n - i + 1))                   
+          call findMinimumDegreeMask(iaIn, nIn, mask)
+          write(*,'(30L3)') mask
+          write(*,'(30I3)') dfs
+          write(*,*) "-----------------"
+          ordering(i) = MAXLOC(dfs, 1, mask)
+          dfs = [dfs(1 : ordering(i) - 1), dfs(ordering(i) + 1 : n - i + 1)] 
+          call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, ordering(i))
+          iaIn = iaOut
+          jaIn = jaOut
+          nIn = nOut          
+          deallocate(iaOut, jaOut, mask)
+        end do        
+        ordering(n) = 1
+        call normalizeOrdering(ordering)  
+        
+
+!
+! end of mixedOrdering
+!  
+      end subroutine mixedOrdering        
+
+      
+!-------------------------------------------------------------------- 
+! subroutine orderByDistance
 ! (c) Vladislav Matus
 ! last edit: 19. 09. 2018  
 !
 ! Purpose:
-!   Computes the permutation of vertices in graph to be ordered
-!   in an order specified by internal order vector.
+!   Computes the permutation of vertices in graph to be ordered.
+!   The vertices furthest from the separator have the lowest numbers
+!   When using for one component of graph, set parts = 1 and part has to contain
+!   vector of 1s,2s where vertices adjacent to separator are denoted by 2
 !   
 ! Input:
-!   ia, ja, aa ... graph in CSR format
+!   ia, ja ... graph in CSR format
 !   n ... number of vertices    
 !   part ... vector of length n containing the partitioning of the graph
 !   parts ... number of subgraphs        
 !   
 ! Output:
-!   iaord, jaord, aaord ... ordered graph in CSR format     
 !   perm ... permutation: original ordering -> new ordering
 !   invperm ... permutation: new ordering -> original ordering 
 !   ierr ... error code (0 if succesful, 1 otherwise)             
 !   
 ! Allocations:  perm, invperm
 
-      subroutine ordervertices(ia, ja, aa, n, part, parts, perm, invperm, ierr)
+      subroutine orderByDistance(ia, ja, n, part, parts, perm, invperm, ierr)
         implicit none
 !
 ! parameters
 !
-      integer :: ierr, n, parts
-      integer :: ia(n+1), ja(ia(n+1)-1), part(n)
-      double precision :: aa(ia(n+1)-1)    	  
+      integer :: ierr, n, parts, maxDepth
+      integer :: ia(n+1), ja(ia(n+1)-1), part(n)       
       integer, allocatable, dimension(:) :: perm, invperm      
 !
 ! internals
 !              
       integer :: i, distFromSep(n)
-      real :: ordvalue, order(n)
-      double precision :: distOrd(n)
 !
-! start of ordervertices
+! start of orderByDistance
 !	    
-      ! Random order:
-      ! do i = 1, n
-      ! CALL RANDOM_NUMBER(ordvalue)
-      ! order(i) = ordvalue
-      ! end do 
-      
-      call countDistance(ia, ja, n, part, parts, distFromSep)       
-!
+      maxDepth = countDistance(ia, ja, n, part, parts, distFromSep)
+      distFromSep = maxDepth - distFromSep
+!      
 ! -- fill in invperm and perm using sorted order values
 !                  
-      allocate(perm(n),invperm(n),stat=ierr)
+      allocate(perm(n), invperm(n), stat=ierr)
       call MRGRNK (distFromSep, invperm);
       do i = 1, n
         perm(invperm(i)) = i
       end do
-      part = distFromSep
 !
-! end of ordervertices
+! end of orderByDistance
 !  
-      end subroutine ordervertices
+      end subroutine orderByDistance
         
-!--------------------------------------------------------------------       
+!-------------------------------------------------------------------- 
+! subroutine orderByMD
+! (c) Vladislav Matus
+! last edit: 19. 09. 2018  
+!
+! Purpose:
+!   Computes the permutation of vertices in graph to be ordered using MD algorithm
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices    
+!   
+! Output:
+!   perm ... permutation: original ordering -> new ordering
+!   invperm ... permutation: new ordering -> original ordering 
+!   ierr ... error code (0 if succesful, 1 otherwise)             
+!   
+! Allocations:  perm, invperm
+
+      subroutine orderByMD(ia, ja, n, perm, invperm, ierr)
+        implicit none
+!
+! parameters
+!
+      integer :: ierr, n
+      integer :: ia(n+1), ja(ia(n+1)-1)
+      integer, allocatable, dimension(:) :: perm, invperm      
+!
+! internals
+!              
+      integer :: i, minOrdering(n)      
+!
+! start of orderByMD
+!	    
+      call minimumOrdering(ia, ja, n, minOrdering)
+      write(*,'(30I3)')   
+!      
+! -- fill in invperm and perm using sorted order values
+!                  
+      allocate(perm(n), invperm(n), stat=ierr)
+      call MRGRNK (minOrdering, invperm);
+      do i = 1, n
+        perm(invperm(i)) = i
+      end do      
+!
+! end of orderByMD
+!  
+      end subroutine orderByMD
+        
+!-------------------------------------------------------------------- 
+! subroutine orderMixed
+! (c) Vladislav Matus
+! last edit: 19. 09. 2018  
+!
+! Purpose:
+!   Computes the permutation of vertices in graph to be ordered
+!   Using enhanced MD algorithm, i. e. the vertex with minimal degree
+!   is chosen and if there ar more vertices with the same minimal degree,
+!   the one the furthest from the separator is chosen            
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices    
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs        
+!   
+! Output:
+!   perm ... permutation: original ordering -> new ordering
+!   invperm ... permutation: new ordering -> original ordering 
+!   ierr ... error code (0 if succesful, 1 otherwise)             
+!   
+! Allocations:  perm, invperm
+
+      subroutine orderMixed(ia, ja, n, part, parts, perm, invperm, ierr)
+        implicit none
+!
+! parameters
+!
+      integer :: ierr, n, parts
+      integer :: ia(n+1), ja(ia(n+1)-1), part(n) 
+      integer, allocatable, dimension(:) :: perm, invperm      
+!
+! internals
+!              
+      integer :: i, ordering(n)      
+!
+! start of orderMixed
+!	    
+      call mixedOrdering(ia, ja, n, part, parts, ordering)
+      write(*,'(30I3)')   
+!      
+! -- fill in invperm and perm using sorted order values
+!                  
+      allocate(perm(n), invperm(n), stat=ierr)
+      call MRGRNK (ordering, invperm);
+      do i = 1, n
+        perm(invperm(i)) = i
+      end do      
+!
+! end of orderMixed
+!  
+      end subroutine orderMixed
+        
+!--------------------------------------------------------------------   
 
 !
 ! end of module

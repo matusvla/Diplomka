@@ -589,41 +589,38 @@
       end function findMinimumDegreeIndex
 
 !-------------------------------------------------------------------- 
-! function findMinimumDegreeIndices
+! subroutine findMinimumDegreeMask
 ! (c) Vladislav Matus
 ! last edit: 23. 09. 2018  
 !
 ! Purpose:
-!   Finds all vertices in graph with minimimal degree
+!   Returns logical mask where all vertices with minimal value are .true.
 ! Input:
 !   n ... integer, size of graph
 !   ia ... pointer array of graph in CSR format
 ! Returns:
-!   integer array, indices of vertex with minimal degree
-! Allocations: findMinimumDegreeIndices
+!   logical array, mask with vertices with minimal ldegree marked as .true.      
+! Allocations: none
 
-      function findMinimumDegreeIndices(ia, n)
+      subroutine findMinimumDegreeMask(ia, n, resultingMask)
         implicit none
 
-        integer :: n, ia(n), minimumDegree, i, fmdiIndex
-        integer, allocatable, dimension(:) :: findMinimumDegreeIndices
+        integer :: n, ia(n), minimumDegree, i
+        logical :: resultingMask(n)
         minimumDegree = MAX_INT
-        allocate(findMinimumDegreeIndices(n))        
+        resultingMask = .false.
+        
         do i = 1, n          
           if (minimumDegree > ia(i+1)-ia(i)) then            
             minimumDegree = ia(i+1)-ia(i)
-            findMinimumDegreeIndices(1) = i
-            fmdiIndex = 2
+            resultingMask = .false.
+            resultingMask(i) = .true.       
           else if (minimumDegree == ia(i+1)-ia(i)) then
-            findMinimumDegreeIndices(fmdiIndex) = i
-            fmdiIndex = fmdiIndex + 1
+            resultingMask(i) = .true.    
+
           end if        
         end do 
-                 
-        call trimArr(findMinimumDegreeIndices, fmdiIndex - 1)
-
-      end function findMinimumDegreeIndices
-
+      end subroutine findMinimumDegreeMask
 
 !--------------------------------------------------------------------           
 ! subroutine normalizeOrdering
@@ -805,25 +802,31 @@
 !
 ! internals
 !  
-        integer :: nIn, nOut, minDegIndex
-        integer, allocatable, dimension(:) :: iaIn, jaIn, iaOut, jaOut, minDegIndices
-        integer :: ordering(n)           
+        integer :: nIn, nOut, aux, distFromSep(n)
+        integer, allocatable, dimension(:) :: iaIn, jaIn, iaOut, jaOut, dfs
+        integer :: ordering(n)
+        logical, allocatable, dimension(:) :: mask
 !
 ! start of mixedOrdering
 !	        
-        call remloops(n, ia, ja, iaIn, jaIn, ierr)        
+        call remloops(n, ia, ja, iaIn, jaIn, ierr)
+        aux = countDistance(ia, ja, n, part, parts, distFromSep)
+        dfs = distFromSep
         nIn = n
-        do i = 1, n - 2               
-          minDegIndices = findMinimumDegreeIndices(iaIn, nIn) !TODO rewrite using MIN
-          minDegIndex = minDegIndices(1)
-          ordering(i) = minDegIndex
-          call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, minDegIndex)
+        do i = 1, n - 1     
+          allocate(mask(n - i + 1))                   
+          call findMinimumDegreeMask(iaIn, nIn, mask)
+          write(*,'(30L3)') mask
+          write(*,'(30I3)') dfs
+          write(*,*) "-----------------"
+          ordering(i) = MAXLOC(dfs, 1, mask)
+          dfs = [dfs(1 : ordering(i) - 1), dfs(ordering(i) + 1 : n - i + 1)] 
+          call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, ordering(i))
           iaIn = iaOut
           jaIn = jaOut
           nIn = nOut          
-          deallocate(iaOut, jaOut)               
-        end do
-        ordering(n - 1) = 1 !two vertex graph is symetrical
+          deallocate(iaOut, jaOut, mask)
+        end do        
         ordering(n) = 1
         call normalizeOrdering(ordering)  
         

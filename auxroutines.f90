@@ -207,7 +207,7 @@
         integer :: logical2intArr(SIZE(logicalArr))
         logical2intArr = logicalArr                     
       end function logical2intArr         
-!--------------------------------------------------------------------   
 
+!-------------------------------------------------------------------- 
 
       end module auxroutines

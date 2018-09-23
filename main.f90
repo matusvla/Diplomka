@@ -99,7 +99,7 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     matrixtype = 'P' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
      testGraphNumber = 1
      nfull = 5

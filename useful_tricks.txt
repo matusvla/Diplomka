@@ -2,6 +2,8 @@ GIT
 git push -u origin my_branch
 git push -u origin HEAD
 git push --all origin
+git remote prune origin
+git branch --merged
 
 
 GraphViz

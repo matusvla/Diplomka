@@ -1,0 +1,166 @@
+\documentclass[11pt,american,czech,oneside]{book}
+    \usepackage[a4paper]{geometry}
+
+    \usepackage[T1]{fontenc}
+    \usepackage[utf8]{inputenc}
+    \usepackage{babel}
+    \usepackage{amsmath,amssymb,amsfonts,amsthm}
+    \usepackage{indentfirst}
+
+\theoremstyle{plain}
+    \newtheorem{theorem}{Věta}
+    \newtheorem{lemma}{Lemma}
+    \newtheorem{proposition}{Tvrzení}
+    \newtheorem*{corollary}{Důsledek}
+\theoremstyle{definition}
+    \newtheorem{definition}{Definice}
+    \newtheorem{remark}{Poznámka}
+    \newtheorem{example}{Příklad}
+    \newtheorem{observation}{Pozorování}
+\renewcommand*{\proofname}{Důkaz}
+
+
+\begin{document}
+%---- Z VU --------------------------------------------------------------------------------
+\chapter{Graf a strom}
+V této kapitole definujeme graf, popíšeme základní pojmy týkající se grafů a nastíníme
+vztah mezi grafem a maticí.
+\section{Základní grafová terminologie}
+graf
+
+souvislý
+
+neorientovaný
+
+cesta (bez cyklů!), cyklus, vzdálenost dvou vrcholů, vzdálenost od množiny
+
+podgraf
+
+\section{Strom}
+Nyní zaveďme základní pojmy týkající speciální třídy grafů nazývané stromy \ref{koubek}[???]
+\begin{definition}
+  Stromem $T$ nazveme konečný souvislý neorientovaný graf bez cyklů s vyznačeným bodem, který budeme nazývat kořenem stromu.
+\end{definition}
+Z definice stromu je patrné, že každý vrchol $v$ stromu $T$ spojuje s kořenem tohoto stromu právě jedna cesta.
+\begin{definition}
+  Vrcholy ležící na cestě spojující vrchol $v$ s kořenem nazveme předchůdci vrcholu $v$. Vrcholy ležící na této cestě, které jeou různé od $v$ nazýváme vlastními předchůdci vrcholu $v$. (Pokud $v$ není kořen, nazýváme předchůdce vrcholu $v$, který je s vrcholem $v$ spojen hranou, otcem vrcholu $v$, značíme $\emph{otec}(v)$.) Vrcholy, jejichž předchůdcem je vrchol $v$, nazýváme následníky vrcholu $v$. (Speciálně pokud $v$ je otcem $u$, říkáme, že $u$ je synem $v$.) Vrcholy bez následníků nazýváme listy stromu $T$, vrcholy alespoň s jedním následníkem nazýváme vnitřní vrcholy stromu.
+\end{definition}
+\begin{definition}
+  Podstromem určeným vrcholem $v$ nazveme úplný podgraf stromu tvořený vrcholem $v$ a a všemi jeho následníky.
+\end{definition}
+
+\chapter{Různé}
+\section{Číslování}
+\subsection{Číslování vrcholů grafu v závislosti na vzdálenosti od separátoru}
+\label{sepDistNumbering}
+    
+    V této podkapitole popíšeme nejjednodušší metodu číslování vrcholů podgrafu, který vznikl rozdělením původního grafu na $n$ částí.
+    Tuto metodu lze používat samostatně, ale vzhledem k její povaze ji lze využít i pro vylepšení ostatních metod očíslování grafu,
+    například ji lze kombinovat s metodou minimálního stupně.
+    
+    Mějme graf $G = (V,E)$ a jeho vrcholový separátor [TODO znaceni], jehož odebráním se graf rozpadne na $n$ podgrafů $G_1, \ldots, G_n$.
+    Popišme číslování vrcholů podgrafu $G_i$:
+    
+    \begin{enumerate}      
+      \item Položme $\texttt{j := 1}$.
+      \item \label{sepDistAlg2} Nalezneme neočíslovaný vrchol $v$ grafu $G_i$ takový, že jeho vzdálenost od vrcholového separátoru v grafu $G$ je maximální.
+      \item Tomuto vrcholu dáme číslo $\texttt{j}$, položíme $\texttt{j := j + 1}$.
+      \item Pokud jsou všechny vrcholy očíslovány, skončíme, jinak se vrátíme na krok \ref{sepDistAlg2}      
+    \end{enumerate}
+    
+    Z algoritmu je vidět, že výsledné očíslování vrcholů grafu nemusí být jednoznačné, protože pokud nalezneme dva nebo více vrcholů, jejichž vzdálenost
+    od separátoru je shodná, můžeme je očíslovat v libovolném pořadí.
+
+\subsection{Číslování vrcholů pomocí metody minimálního stupně}
+Metoda minimálního stupně je jednoduchým algoritmem pro nalezení očíslování grafu. 
+Algoritmus pro hledání očíslování grafu pomocí této metody je následující:
+
+\begin{enumerate}
+  \item Mějme graf $G=(V,E)$ a položme $j:=1$.
+  \item \label{mindegloop}
+      Nalezneme neočíslovaný vrchol $v$ grafu $G$ s nejmenším stupněm a přiřadíme mu číslo $j$.
+  \item Přidáme hrany mezi vrcholy z $\mathrm{adj}_G(v)$ tak, aby $\mathrm{adj}_G(v)$ byla klika v grafu $G$.
+  \item Pokud nejsou všechny vrcholy očíslované, zvětšíme $j$ o $1$ a vrátíme se na krok \ref{mindegloop}.
+\end{enumerate}
+
+Očíslování vrcholů grafu G pomocí tohoto algoritmu není jednoznačné, protože vrcholů s minimálním stupněm může být více.
+
+Pokud máme rozdělení $G_1, \ldots, G_n$ grafu $G$ s vrcholovým separátorem [TODO znaceni], můžeme pro očíslování části $G_i$ použít
+číslování vrcholů pomocí metody minimálního stupně, kde při výběru vrcholu ve \ref{mindegloop}. kroku přidáme kritérium vzdálenosti od separátoru
+popsané v \ref{sepDistNumbering}. Nejprve tedy nalezneme množinu všech vrcholů grafu $G$, které mají minimální stupeň 
+a poté mezi nimi zvolíme ten, který má nejmenší stupeň.
+
+\subsection{Topologické číslování vrcholů stromu}
+\begin{definition}
+    Mějme graf $G = (V,E)$, který je stromem. Očíslování jeho vrcholů nazveme topologickým právě tehdy,
+    když pro každý vrchol $v \in V$ platí, že libovolný následník vrcholu $v$ ve stromu $G$ má nižší číslo než vrchol $v$.
+\end{definition}
+
+
+\chapter{Eliminační stromy}
+V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic.
+Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění
+v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty.
+Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.
+
+V této kapitole bez újmy na obecnosti předpokládáme, že matice, jejíž Choleského rozklad chceme napočítávat, je ireducibilní,
+a tedy přidružený graf této matice je souvislý.
+
+\section{Definice eliminačního stromu matice}
+
+Nejprve se omezme na ireducibilní, pozitivně definitní, symetrickou matici $A_T$ o rozměrech $n \times n$,
+jejíž přidružený graf $G(A_T)$ je strom. V tomto případě je $A_T$ tzv. perfektní eliminační matice, tj. existuje permutační matice $P$ taková,
+že Choleského rozklad matice $PA_TP^T$ nebude obsahovat žádné zaplnění \cite{rose:72}
+(Matici $PA_TP^T$ můžeme vnímat pouze jako přečíslování řádků a sloupců matice $A_T$).
+Aby při choleského rozkladu matice $A_T$ nedošlo k žádnému zaplnění, stačí když pomocí topologického číslování očíslujeme vrcholy jí přidruženého grafu (z předpokladu se jedná o strom)
+a řádky a sloupce matice $A_T$ seřadíme odpovídajícím způsobem. Pak zjevně platí, že matice $A_T$ má, s výjimkou posledního řádku,
+pod diagonálou vždy právě jeden nenulový prvek.
+Díky tomu můžeme definovat pro matici $A_T$ funkci $\texttt{PARENT}: \{1,\ldots,n\} \rightarrow {1,\ldots,n}$ následovně:
+\begin{align*}
+  \forall j \in \{1,\ldots,n-1\} \quad \texttt{PARENT}[j] & := p \quad \Leftrightarrow \quad a_{p,j} \neq 0 \wedge p > j \\
+  \text{a speciálně:} \quad \texttt{PARENT}[n] & := 0.
+\end{align*}
+Zřejmě ve stromu přidruženém k matici $A_T$ platí, že předchůdcem vrcholu $x_j$ je vrchol $x_{\texttt{PARENT}[j]}$.
+
+Většinou však nepracujeme s maticemi, jejichž přidružený graf by byl stromem. Zavedeme tedy konstrukci pro libovolnou
+řídkou, ireducibilní, pozitivně definitní, symetrickou matici $A$ o rozměrech $n \times n$.
+Předpokládejme, že známe Choleského rozklad této matice, tj. $A = LL^T$. Maticí se zaplněním nazveme matici $F$ definovanou jako $F = L + L^T$.
+Dále zavedeme matice $L_t$ a $F_t$ následovně. $L_t$ je matice vzniklá z $L$ tím, že v každém sloupci vynulujeme všechny prvky pod diagonálou
+kromě prvku s nejnižším řádkovým indexem a $F_t = L_t L_t^T$.
+
+Z definice $F_t$ vidíme, že se jedná o matici, jejíž přidružený graf $G(F_t)$ je strom.
+
+\begin{definition}
+    Eliminačním stromem matice $A$ nazveme graf $G(F_t)$ popsaný výše, značíme $T(A)$.
+    Podstrom $T(A)$ s kořenem $x_j$ značíme $T[x_j]$. Množinu vrcholů tohoto stromu značíme také $T[x_j]$.
+\end{definition}
+
+Díky této definici můžeme definici funkce $\texttt{PARENT}$ přirozeně rozšířit na matici $A$ následovně:
+\[
+    \texttt{PARENT}[j] := \min \{i > j | l_{i,j} \neq 0\},
+\]
+kde $l_{i,j}$ označuje $i,j$-tý prvek matice $L$.
+
+\begin{observation}
+Přímo z definice plyne, že $T(A)$ a $T(F)$ jsou identické.
+\end{observation}
+
+\begin{observation}
+Pokud $x_i$ je vlastním předchůdcem $x_j$ v eliminačním stromu, pak $i > j$.
+\end{observation}
+
+\begin{proposition}
+  Pro $i>j$ závisí numerické hodnoty sloupce $L_{\bullet i}$ na sloupci $L_{\bullet j}$ právě tehdy,
+  když $l_{i,j} \neq 0$.
+\end{proposition}
+\begin{proof}
+  Tvrzení plyne přímo ze sloupcového algoritmu [???]
+\end{proof}
+
+
+
+\newpage
+\bibliographystyle{plain}
+\bibliography{diplomka}
+
+\end{document} 

@@ -1,9 +1,12 @@
 # Ignore everything
 *
-
 # Except for these files...
+!text
+!code
+
+!zadani.pdf
 !.gitignore
-!code/.gitignore
+
 !code/SVREV.F
 !code/auxroutines.f90
 !code/gvroutines.f90

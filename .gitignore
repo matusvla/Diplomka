@@ -1,0 +1,23 @@
+# Ignore all the code
+code/*
+
+# Except for these files...
+!.gitignore
+!code/.gitignore
+!code/SVREV.F
+!code/auxroutines.f90
+!code/gvroutines.f90
+!code/im_mtx.f90
+!code/main.f90
+!code/makefile
+!code/metis_interface.f95
+!code/metisinclude.c
+!code/mrgrnk.f90
+!code/mydepend.f
+!code/mydepend90.f90
+!code/myroutines90.f90
+!code/raggedmultiarray.f90
+!code/svrev.f90
+!code/testing.f90
+!code/useful_tricks.txt
+!code/volani.f

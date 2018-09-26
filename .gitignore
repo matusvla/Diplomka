@@ -1,5 +1,5 @@
-# Ignore all the code
-code/*
+# Ignore everything
+*
 
 # Except for these files...
 !.gitignore
@@ -21,3 +21,6 @@ code/*
 !code/testing.f90
 !code/useful_tricks.txt
 !code/volani.f
+
+!text/diplomka.tex
+!text/diplomka.pdf

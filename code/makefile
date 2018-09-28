@@ -1,36 +1,45 @@
+# Makefile
+# (c) Vladislav Matus
+# last edit: 28. 09. 2018
+# Variable initializations
 FC = gfortran
 FFLAGS = -c -O2 -J./modules -I./modules
-
 CC = gcc
 CFLAGS = -c -O2
 
-OBJ= \
-	raggedmultiarray.o auxroutines.o mydepend.o mydepend90.o myroutines90.o gvroutines.o \
-	testing.o mrgrnk.o svrev.o metis_interface.o metisinclude.o \
-	main.o
-OBJDIR = objects
+OBJECTS= \
+	raggedmultiarray.o mrgrnk.o gvroutines.o auxroutines.o \
+	mydepend.o mydepend90.o myroutines90.o \
+	testing.o svrev.o \
+	metis_interface.o metisinclude.o \
+	  main.o
 LIBMETIS = /usr/local/lib/libmetis.a
 
+OBJDIR = objects
+MODDIR = modules
 
-%.o: %.c
-	$(CC) $(CFLAGS) -o $@ $<
-
-%.o: %.f
-	$(FC) $(FFLAGS) -o $@ $<
-
-%.o: %.F
-	$(FC) $(FFLAGS) -o $@ $<
-
-%.o: %.f90
-	$(FC) $(FFLAGS) -o $@ $<   
-
-%.o: %.f95
-	$(FC) $(FFLAGS) -o $@ $<
-
-      
-main: ${OBJ}
-	$(FC) -o prog ${OBJ} $(LIBMETIS) 
+# Prefixing OBJECTS with OBJDIR to create folder structure
+OBJ = $(addprefix $(OBJDIR)/,$(OBJECTS))
      
-#
+# Building the project		 
+main: ${OBJ}
+	$(FC) -o prog $(OBJ) $(LIBMETIS) 
+
+$(OBJDIR)/%.o: %.c
+	$(CC) $(CFLAGS) -o $@ $^
+
+$(OBJDIR)/%.o: %.f
+	$(FC) $(FFLAGS) -o $@ $^
+
+$(OBJDIR)/%.o: %.F
+	$(FC) $(FFLAGS) -o $@ $^
+
+$(OBJDIR)/%.o: %.f90
+	$(FC) $(FFLAGS) -o $@ $^   
+
+$(OBJDIR)/%.o: %.f95
+	$(FC) $(FFLAGS) -o $@ $^
+     
+# Clean target
 clean :
-	rm -f  *.o ./objects/*.mod prog.exe
+	rm -f  *.o ./${MODDIR}/*.mod ./${OBJDIR}/*.o prog.exe

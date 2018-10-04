@@ -6,6 +6,14 @@
     \usepackage{babel}
     \usepackage{amsmath,amssymb,amsfonts,amsthm}
     \usepackage{indentfirst}
+    \usepackage{graphicx}
+
+    \usepackage{tikz}
+    \usepackage{caption,lipsum}
+    \usepackage{listings}
+    \usepackage{mathtools}
+    \usepackage{multirow}
+    \usetikzlibrary{calc}
 
 \theoremstyle{plain}
     \newtheorem{theorem}{Věta}
@@ -22,64 +30,113 @@
 
 \begin{document}
 %---- Z VU --------------------------------------------------------------------------------
-\chapter{Grafy, stromy}
-V této kapitole definujeme graf jakožto matematickou strukturu, popíšeme základní pojmy týkající se grafů a nastíníme možné vztahy mezi grafem a maticí. Dále definujeme strom, jakožto speciální případ grafu.
+\chapter{Grafy, stromy} [TODO nejaky hezky obrazky?] 
+V této kapitole definujeme graf jakožto matematickou strukturu, popíšeme základní pojmy týkající se grafů a nastíníme možné vztahy mezi grafem a maticí. Dále definujeme strom, jakožto speciální případ grafu. Terminologie je převzata z \cite{koub:11}
 
 \section{Základní grafová terminologie}
 
 \begin{definition}
-Mějme množinu $V$ a množinu $E = \left\{ \left\{ u,v \right\} | u,v \in V \right\}$.
-Uspořádanou dvojici $G=(V,E)$, nazveme neorientovaný graf. Množinu $V$ nazýváme množinou vrcholů grafu $G$, jejím prvkům říkáme vrcholy, množinu $E$ nazýváme množinou hran grafu $G$, jejím prvkům říkáme hrany. Prvky hrany $e$ označujeme jako vrcholy incidentní hraně $e$ nebo koncové body hrany $e$. Říkáme, že hrana $e = \{v,w\}$ spojuje vrcholy $v$ a $w$.
+  Mějme množinu $V$ a množinu $E = \left\{ \left\{ u,v \right\} | u,v \in V \right\}$. Uspořádanou dvojici $G := (V,E)$, nazveme neorientovaný graf. Množinu $V$ nazýváme množinou vrcholů grafu $G$, jejím prvkům říkáme vrcholy, množinu $E$ nazýváme množinou hran grafu $G$, jejím prvkům říkáme hrany. Prvky hrany $e$ označujeme jako vrcholy incidentní hraně $e$ nebo koncové body hrany $e$. Říkáme, že hrana $e = \{v,w\}$ spojuje vrcholy $v$ a $w$.
 \end{definition}
+
+Pokud neuvažujeme hrany jako nejvýše dvouprvkové množiny vrcholů, ale  jako uspořádané dvojice $(u,v)$, nazýváme odpovídající graf \textbf{orientovaný}. Obvykle uvažujeme orientované a neorientované grafy zvlášť, ale je možné uvažovat i jejich kombinaci. Graf, v němž se vyskytují jak orientované tak neorientované hrany, nazýváme \textbf{smíšený}. Řekneme, že neorientovaný graf $G$ je \textbf{úplný}, pokud $\forall u, v \in V$ $\left(\{u,v\} \in E\right)$.
+
+Povšimněme si, že v definici grafu není vyloučen případ, kdy jsou oba koncové body hrany shodné. Hrana je pak jednoprvkovou množinou a nazýváme ji \textbf{smyčkou} v grafu.
 
 \begin{remark}
-Pokud uvažujeme hrany jako uspořádané dvojice, nazýváme odpovídající graf orientovaný.
-
-V neorientovaném grafu $G=(V,E)$ platí, že jeho množina hran $E$ je podmnožinou $V \choose 2$, kde $V \choose 2$ značí množinu všech dvouprvkových podmnožin množiny $V$. V orientovaném grafu $H=(W,F)$ je $F$ podmnožinou množiny $W \times W$, tj. všech uspořádaných dvojic vrcholů z $W$.
-
-Obvykle uvažujeme orientované a neorientované grafy zvlášť, ale je možné uvažovat i jejich kombinaci. Graf, v němž se vyskytují jak orientované tak neorientované hrany, nazýváme smíšený.
-
-Povšimněme si, že v definici grafu není vyloučen případ, kdy jsou oba koncové body hrany shodné. Takové hrany nazýváme smyčkami v grafu.
+  V neorientovaném grafu $G=(V,E)$ platí, že jeho množina hran $E$ je podmnožinou ${V \choose 2} \cup V$, kde $V \choose 2$ značí množinu všech dvouprvkových podmnožin množiny $V$. V orientovaném grafu $H=(W,F)$ je $F$ podmnožinou množiny $W \times W$, tj. všech uspořádaných dvojic vrcholů z $W$.
 \end{remark}
 
+\textbf{Stupněm vrcholu} $v \in V$ rozumíme počet vrcholů spojených s vrcholem $v$, značíme $d(v)$. Množinu všech vrcholů, které jsou v grafu $G$ spojeny s vrcholem $v$ značíme $\mathrm{adj}_G(v)$.
+
 \begin{definition}
-  Stupněm vrcholu $v \in V$ rozumíme počet vrcholů spojených s vrcholem $v$, značíme $d(v)$. Množinu všech vrcholů, které jsou v grafu $G$ spojeny s vrcholem $v$ značíme $\mathrm{adj}_G(v)$.
+  \textbf{Podgrafem} grafu $G$ nazveme libovolný graf $H=(W,F)$ který splňuje: $W\subseteq V$, $F\subseteq E$ a všechny vrcholy incidentní hranám z $F$ náleží do $W$. Úplný podgraf grafu $G$ nazýváme \textbf{klikou} v grafu $G$. Podgrafem grafu $G$ \textbf{indukovaným} množinou vrcholů $W$ nazveme takový podgraf $G$, který obsahuje všechny hrany grafu $G$, jejichž oba koncové body náleží do $W$, značíme $G(W)$.
+\end{definition}
+
+
+[TODO Potrebuju ohodnoceny, vazeny?]
+\begin{definition}
+  Mějme graf $G=(V,E)$ a zobrazení $\omega:V \rightarrow \mathbb{R}$, resp. $c: E \rightarrow \mathbb{R}$. Přidáním zobrazení $\omega$, resp. $c$ ke~grafu $G$ dostaneme graf, který nazýváme \textbf{ohodnocený}, resp. \textbf{vážený} reálným ohodnocením.
 \end{definition}
 
 \begin{definition}
-    Řekneme, že graf $G$ je úplný, pokud $\forall u, v \in V$ $\left(\{u,v\} \in E\right)$.
+  [TODO doplnit definici cesty bez cyklu!, cyklu, delka cesty]
 \end{definition}
 
-\begin{definition}
-Podgrafem grafu $G$ nazveme libovolný graf $H=(W,F)$ který splňuje: $W\subseteq V$, $F\subseteq E$ a všechny vrcholy incidentní hranám z $F$ náleží do $W$. Úplný podgraf grafu $G$ nazýváme klikou v grafu $G$. Podgrafem $G$ indukovaným množinou vrcholů $W$ nazveme takový podgraf $G$, který obsahuje všechny hrany $G$, jejichž oba koncové body náleží do $W$, značíme $G(W)$.
-\end{definition}
-
-\begin{definition}
-Mějme graf $G=(V,E)$ a zobrazení $\omega:V \rightarrow \mathbb{R}$, resp. $c: E \rightarrow \mathbb{R}$. Přidáním zobrazení $\omega$, resp. $c$ ke~grafu $G$ dostaneme graf, který nazýváme ohodnocený, resp. vážený reálným ohodnocením.
-\end{definition}
+Existuje-li mezi libovolnými dvěma vrcholy grafu cesta, řekneme, že graf je \textbf{souvislý}.
+\textbf{Vzdáleností} dvou vrcholů v souvislém grafu $G=(V,E)$ nazveme minimální délku cesty mezi těmito dvěma vrcholy. Vzdáleností vrcholu $v \in V$ od množiny vrcholů $W \subset V$ nazveme minimální vzdálenost mezi vrcholem $v$ a libovolným vrcholem náležícím do $W$. 
 
 [TODO potrebuju bipartitni?]
 [TODO potrebuju ctvercovou sit?]
 
-souvislý
-
-cesta (bez cyklů!), cyklus, vzdálenost dvou vrcholů, vzdálenost od množiny
-
-podgraf
-
 \section{Strom}
-Nyní zaveďme základní pojmy týkající speciální třídy grafů nazývané stromy \ref{koubek}[???]
+
+Nyní zaveďme základní pojmy týkající speciální třídy grafů nazývané stromy \cite{koub:11}
+
 \begin{definition}
-  Stromem $T$ nazveme konečný souvislý neorientovaný graf bez cyklů s vyznačeným bodem, který budeme nazývat kořenem stromu.
-  [TODO Co s tim korenem? V originalni definici stromu neni, mam zavadet specialne korenovy strom?]
+  \textbf{Stromem} $T=(V,E)$ nazveme konečný souvislý neorientovaný graf bez cyklů. Pokud navíc v grafu $T$ vyznačíme bod $r \in V$, nazýváme uspořádanou dvojici $(T,r)$ \textbf{kořenovým stromem} a bod $r$ nazveme kořenem tohoto stromu.
 \end{definition}
-Z definice stromu je patrné, že každý vrchol $v$ stromu $T$ spojuje s kořenem tohoto stromu právě jedna cesta.
+
+Z definice stromu je patrné, že každý vrchol $v$ kořenového stromu $(T,r)$ spojuje s kořenem tohoto stromu právě jedna cesta.
+Vrcholy ležící na této cestě nazveme \textbf{předchůdci} vrcholu $v$. Předchůdce vrcholu $v$ různé od $v$ nazýváme \textbf{vlastními předchůdci} vrcholu $v$. Vrcholy, jejichž předchůdcem je vrchol $v$, nazýváme \textbf{následníky} vrcholu $v$. Vrcholy bez následníků nazýváme \textbf{listy stromu} $T$, vrcholy alespoň s jedním následníkem nazýváme \textbf{vnitřní vrcholy} stromu.
+
 \begin{definition}
-  Vrcholy ležící na cestě spojující vrchol $v$ s kořenem nazveme předchůdci vrcholu $v$. Vrcholy ležící na této cestě, které jeou různé od $v$ nazýváme vlastními předchůdci vrcholu $v$. (Pokud $v$ není kořen, nazýváme předchůdce vrcholu $v$, který je s vrcholem $v$ spojen hranou, otcem vrcholu $v$, značíme $\emph{otec}(v)$.) Vrcholy, jejichž předchůdcem je vrchol $v$, nazýváme následníky vrcholu $v$. (Speciálně pokud $v$ je otcem $u$, říkáme, že $u$ je synem $v$.) Vrcholy bez následníků nazýváme listy stromu $T$, vrcholy alespoň s jedním následníkem nazýváme vnitřní vrcholy stromu.
+  \textbf{Podstromem} stromu $T$ určeným vrcholem $v$ nazveme indukovaný podgraf stromu $T$ tvořený vrcholem $v$ a a všemi jeho následníky.
 \end{definition}
-\begin{definition}
-  Podstromem určeným vrcholem $v$ nazveme úplný podgraf stromu tvořený vrcholem $v$ a a všemi jeho následníky.
-\end{definition}
+
+\section{Vztah grafu a matice}
+
+Grafy a matice spolu úzce souvisí, což nám umožňuje převádět problémy na maticích na problémy na grafech a naopak. Nezanedbatelným praktickým důsledkem jejich vzájemného vztahu je i možnost používat grafové algoritmy při řešení některých maticových úloh, především může být tento přístup výhodný pro řídké matice. Dělení grafů může posloužit například při snaze o paralelizaci rozkladu matice.
+
+Neorientovaný graf $G=(V,E)$ s vrcholy $V = {v_1, \ldots, v_m}$ a hranami $E = {e_1, \ldots, e_n}$ Tento graf lze reprezentovat pomocí matice dvěma základními způsoby. \textbf{Maticí sousednosti}, neboli adjacenční matici, nazveme matici $A_G$ o rozměrech $m \times m$, jejíž prvek na pozici $(i,j)$ je definován jako:
+\[
+  {(A_G)}_{i,j} :=
+  \left\{
+    \begin{array}{@{\,}ll}
+      1  & \mbox{existuje-li hrana spojující vrcholy $v_i, v_j$} \\
+      0  & \mbox{jinak}
+    \end{array}
+  \right.
+\]
+
+Maticí incidence grafu $G$ nazveme matici o rozměrech $m \times n$  definovanou následovně:
+\[
+  {(\bar{A}_G)}_{i,j} :=
+  \left\{
+	  \begin{array}{@{\,}ll}
+		  1  & \mbox{je-li $v_i$ koncovým vrcholem hrany $e_j$} \\
+		  0  & \mbox{jinak}
+	  \end{array}
+  \right.
+\]
+
+V kapitole ref{spektral} [TODO bude ref spektral?] budeme potřebovat Laplaceovu matici $Q$ grafu $G$, která je definována následovně:
+\[
+Q_{ij} :=
+\left\{
+	\begin{array}{@{\,}ll}
+		-1  & \mbox{pro } i \neq j, (v_i,v_j) \in E \\
+		0 & \mbox{pro } i \neq j, (v_i,v_j) \notin E\\
+        d(i) & \mbox{pro } i = j
+	\end{array}
+\right.
+\]
+Laplaceovu matici $Q$ lze tedy vyjádřit jako $Q = D - A_G$, kde $D$  značí diagonální matici se stupni jednotlivých vrcholů na diagonále.
+
+Pokud chceme reprezentovat matici pomocí grafu, většinou nám stačí zachytit její strukturu. V takovém případě můžeme pro popis obecně nesymetrické matice $A$ o rozměrech $n \times n$ použít orientovaný graf s množinou vrcholů $V = {v_1,\ldots,v_n}$ a množinou hran $E =\{(v_i,v_j)|a_{ij}\neq 0\}$. V případě, že je matice $A$ symetrická, můžeme ji analogickým způsobem reprezentovat pomocí neorientovaného grafu.
+Pokud bychom chtěli do grafu zanést i numerické hodnoty jednotlivých prvků matice, museli bychom použít ohodnocený graf.
+
+[TODO rozhodnout, jestli tam tohle davat]
+Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můžeme také použít bipartitní graf $G=(R,B,E)$ pro nějž platí $|R|=m$, $|B|=n$ a $E = \{(i,j') \ | \ i \in R, j' \in B, a_{ij} \neq 0 \}$.
+[end TODO]
+
+\bigskip
+{
+  \centering
+  \includegraphics[width=0.7\textwidth]{pictures/matgr.pdf}
+  \captionof{figure}{Příklad grafu a jemu odpovídající struktury matice\label{prGrMat}}
+}
+
 
 \chapter{Různé}
 \section{Číslování}

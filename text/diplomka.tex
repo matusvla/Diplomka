@@ -68,6 +68,7 @@ Existuje-li mezi libovolnými dvěma vrcholy grafu cesta, řekneme, že graf je 
 
 [TODO potrebuju bipartitni?]
 [TODO potrebuju ctvercovou sit?]
+[TODO potrebuju faktorgraf?]
 
 \section{Strom}
 
@@ -137,6 +138,84 @@ Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můž
   \captionof{figure}{Příklad grafu a jemu odpovídající struktury matice\label{prGrMat}}
 }
 
+% ZATÍM ZKOPÍROVÁNO Z VU
+
+chapter{Dělení grafů}
+
+V této kapitole z formálního hlediska popíšeme problém dělení grafu a definujeme pojmy s dělením spojené. Dále se budeme věnovat některým technikám používaným pro dělení grafů, konkrétně vylepšovacímu algoritmu podle Kernighana a Lina a algoritmu spektrálního dělení. Na závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jakožto konkrétní příklad víceúrovňového algoritmu pro dělení grafů a popíšeme i schéma víceúrovňového dělení grafu obecně.
+
+Dělení grafů na dva nebo více podgrafů je praktický problém s bohatým teoretickým zázemím a mnoha aplikacemi. Může nám pomoci při řešení parciálních diferenciálních rovnic na moderních počítačových architekturách \cite{posl:90} a nezanedbatelnou roli hraje také při výrobě mikroprocesorů metodou VLSI nebo při řešení velkých systémů lineárních rovnic \cite{keli:70, pis:84}.
+
+Jako dělení grafu na $k$ částí označujeme hledání rozkladu jeho množiny vrcholů na $k$ podmnožin. Kritéria, která mají tyto podmnožiny splňovat, abychom toto rozdělení mohli označit jako optimální se mohou lišit. V této kapitole se zaměříme na klasickou definici dělení grafů, v dalších kapitolách poté bude popsán problém dělení grafů s jinými kritérii (například vzhledem k maticovým operacím) a s ohledem na více kritérií.
+
+\section{Formální definice dělení grafu}
+Standardní konvencí je omezit se při dělení grafu na jeho dělení na dva podgrafy, rozdělení na více částí lze poté dosáhnout rekurzivně. V nejklasičtějším případě je problém dělení grafů na dva podgrafy definován následovně.
+
+Mějme graf $G=(V,E)$ s počtem vrcholů $n$. Hledání optimálního rozdělení grafu na $k$ podgrafů je ve~své podstatě hledání rozkladu $V_1,V_2,\ldots,V_k$ množiny vrcholů $V$ splňujícího:
+\begin{enumerate}
+  \item $|V_i|=n/k$
+  \item Počet hran spojujících vrcholy ležící v různých podmnožinách je minimální možný.
+\end{enumerate}
+Rozdělení grafu běžně zapisujeme jako vektor $P$ o délce $n$ takový, že pro každý vrchol $v \in V$ je podgraf, v němž se vrchol v nachází, určen jeho $v$-tou složkou.
+
+Ukazuje se, že rozhodovací problém pro optimální rozdělení grafu je NP-úplný \cite{gajo:79}. Existují však algoritmy, které rozdělí graf v rozumném čase, přičemž kvalita jimi nalezeného rozdělení bude poměrně dobrá \cite{lita:79}. To ale neřeší problém samotného nalezení optimálního hranového nebo vrcholového separátoru \cite{liu:89}
+
+\section{Pojmy k dělení grafu}
+
+Mějme graf $G=(V,E)$ a jeho rozdělení na dva podgrafy s množinami vrcholů $A$, $B$. Množinu hran, jejichž jeden koncový bod náleží do $A$ a druhý do $B$ nazveme hranovým separátorem, značíme $\delta(A,B)$. Vrcholovým separátorem grafu $G$ nazveme podmnožinu množiny vrcholů $V$ takovou, že odstraněním všech vrcholů náležících do této množiny z grafu $G$ dojde k jeho rozdělení na dva podgrafy, které nejsou spojeny ani jednou hranou. Řešení problému optimální transformace mezi hranovým a vrcholovým separátorem, známe-li jeden z nich, můžeme naleznout v \cite{pofa:90}.
+
+Pokud má graf $G$ sudý počet vrcholů a množiny $A$ a $B$ mají stejný počet prvků, nazveme toto rozdělení bisekcí a velikost jeho hranového separátoru nazýváme šířkou bisekce.
+
+\section{Algoritmy pro dělení grafů}
+Algoritmy pro dělení grafů můžeme na základě jejich funkce rozdělit do dvou tříd.
+
+První třídou dělicích algoritmů jsou algoritmy, které implementují přímo samotný proces rozdělení grafu na dva nebo více podgrafů. Do této třídy můžeme zařadit například algoritmy, které pro svou funkci potřebují souřadnice vrcholů grafu v rovině či prostoru (např Inerciální dělení) \cite{poth:97}. Pro nás však bude zajímavé především spektrální dělení.
+
+Druhou třídou jsou tzv. vylepšovací algoritmy, které neřeší přímo problém samotného rozdělení grafu. Jejich úkolem je vylepšit již existující rozdělení grafu tak, aby výsledné rozdělení bylo blíže optimálnímu. Základním vylepšovacím algoritmem je algoritmus podle Kernighana a Lina.
+
+Algoritmy z těchto dvou tříd lze kombinovat. Nejprve necháme algoritmus z první třídy najít rozdělení grafu a poté vylepšovacím algoritmem zkusíme toto rozdělení optimalizovat.
+
+Při dělení velkých grafů je často využíváno víceúrovňové schéma, skládající se ze tří fází. V první fázi je zredukována velikost grafu, ve druhé fázi je provedeno samotné dělení grafu pomocí některého z výše zmíněných algoritmů a ve třetí fázi dochází k promítnutí nalezeného rozdělení na původní graf.
+
+\subsection{Algoritmus podle Kernighana a Lina}
+
+Algoritmus podle Kernighana a Lina (KL algoritmus) vznikl v roce 1970 s cílem dělit elektrické obvody na kartách.
+Jak již bylo zmíněno, jedná se o vylepšovací algoritmus, pro jeho funkci je tedy nutné poskytnout mu vstupní rozdělení grafu. Toto rozdělení lze zvolit libovolně, ale v praxi je výhodné, aby představovalo  rozumnou aproximaci optimálního rozdělení. Klasicky je KL algoritmus nebo jeho modifikace, používán pro vylepšení rozdělení nalezeného jiným grafovým algoritmem. Nezanedbatelnou úlohu hraje také při víceúrovňovém dělení grafů, viz. \ref{multilevel}.
+V této práci je algoritmus podle Kernighana a Lina zmíněn proto, že jeho modifikace mohou být využity pro vylepšování rozdělení nejen s ohledem na váhu jednotlivých hran, ale i s ohledem na jiné aspekty, které budou specifikovány níže.
+
+Mějme graf $G=(V,E)$ a rozklad jeho množiny vrcholů na podmnožiny $A$ a$B$. Základem KL algoritmu je cyklus, v jehož každé iteraci dojde k výměně určitého počtu vrcholů z množiny $A$ za stejný počet vrcholů z množiny $B$ tak, aby byla snížena velikost hranového separátoru.
+
+Vrcholy vhodné pro výměnu vybíráme na základě zisku spojeného s přesunem vrcholu $v$ z množiny $A$ do množiny $B$. Tento zisk definujeme jako rozdíl počtu hran (případně vah hran) spojujících vrchol $v$ s vrcholy v množině $B$ a počtu hran spojujících vrchol $V$ s vrcholy v množině $A$:
+\[
+D(v) := \sum\limits_{\substack{(u,v) \in E \\ P[u] \neq P[v]}}w(u,v) - \sum\limits_{\substack{(u,v) \in E \\ P[u] = P[v]}}w(u,v).
+\]
+Pokud přesuneme vrchol s kladným ziskem, dojde ke zmenšení hranového separátoru.
+Abychom mohli popsat reálný zisk při výměně vrcholů, je vhodné zavést si ještě pro $u,v \in V$ hodnotu $C_{uv}$.
+\[
+C_{uv}=
+    \left\{
+    \begin{array}{@{\,}ll}
+		1  & \mbox{} {u,v} \in E\\
+		0 & \mbox{jinak}
+	\end{array}
+\right.
+\]
+Pak reálný zisk při výměně vrcholů $u$ a $v$ ležících ve vzájemně různých částech rozdělení grafu je zřejmě
+\[
+g_{uv}=D(u)+D(v)-2C_{uv}.
+\]
+Základní varianta KL algoritmu se skládá ze dvou do sebe vnořených cyklů, z nichž vnější běží do té doby, dokud se rozdělení grafu zlepšuje a obsahuje tyto kroky
+\begin{enumerate}
+  \item Vypočítáme zisk jednotlivých vrcholů.
+  \item Postupně spárujeme všechny vrcholy z $a_i \in A$ s vrcholy s $b_i \in B$ tak, aby reálný zisk $g_i$ při výměně právě spárované dvojice vrcholů za předpokladu, že by všechny dvojice vrcholů nalezené před ní byly vyměněné, byl maximální.
+  \item Nalezneme takové $k \in {1,\ldots,\min{|A|,|B|}}$, aby $\sum_{j=1}^{k}g_i$ byla maximální.
+  \item Vyměníme vrcholy $a_1,...,a_k$ s vrcholy $b_1,...,b_k$.
+\end{enumerate}
+
+Hlavní nevýhodou KL algoritmu je, že pro svou funkci potřebuje počáteční rozdělení grafu. Jeho výsledky pro různá počáteční rozdělení se mohou lišit. Kvůli tomu se algoritmus podle Kernighana a Lina obvykle používá v kombinaci s jiným algoritmem pro dělení grafů, případně jako součást většího celku (např. víceúrovňových algoritmů, viz \ref{multilevel}).
+
+
+%----------------------------------------------------------------------------
 
 \chapter{Různé}
 \section{Číslování}

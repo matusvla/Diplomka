@@ -137,7 +137,7 @@ Pokud bychom chtěli do grafu zanést i numerické hodnoty jednotlivých prvků 
 
 \TODO{rozhodnout, jestli tam tohle dávat}
 Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můžeme také použít bipartitní graf $G=(R,B,E)$ pro nějž platí $|R|=m$, $|B|=n$ a $E = \{(i,j') \ | \ i \in R, j' \in B, a_{ij} \neq 0 \}$.
-[end TODO]
+\TODO{end}
 
 \bigskip
 {
@@ -335,9 +335,11 @@ Pokud budeme uvažovat pouze pole \texttt{ia}, \texttt{ja}, je podle teorie pops
 
 \section{Knihovna METIS pro dělení grafu}
 
-Pro samotné dělení grafu jsme využili knihovnu pro dělení grafů METIS \cite{kary:13} verze 5.1.0.
+Pro samotné dělení grafu na $k$ částí jsme využili knihovnu pro dělení grafů METIS \cite{kary:13} verze 5.1.0. Vzhledem k tomu, že jsme dělení grafů používali jako nástroj pro vyvažování počtu operací při Choleského rozkladu na jednotlivých oblastech, potřebovali jsme nalézt rozdělení grafu pomocí vrcholového separátoru. Takové rozdělení nám poskytne rutina \texttt{METIS\_ComputeVertexSeparator}, kterou jsme ve Fortranu implementovali pomocí rozhraní \texttt{metis\_interface.f95} a \texttt{metisinclude.c}.
 
-Vzhledem k tomu, že jsme dělení grafů používali jako nástroj pro vyvažování počtu operací při Choleského rozkladu na jednotlivých oblastech, potřebovali jsme nalézt rozdělení grafu pomocí vrcholového separátoru. Takové rozdělení nám poskytne rutina \texttt{METIS\_ComputeVertexSeparator}, kterou jsme ve Fortranu implementovali pomocí rozhraní \texttt{metis\_interface.f95} a \texttt{metisinclude.c}. 
+Zmíněná rutina není zmíněna v oficiální dokumentaci knihovny METIS a není tedy ve své základní verzi kompatibilní s jazykem Fortran. Proto bylo nutné učinit několik změn ve formátu CSR tak, aby bylo možné rutinu použít. Nejprve bylo třeba odebrat z grafu smyčky a poté jej přečíslovat tak, aby bylo vrcholy indexovány od 0, jak je požadováno v jazycích C a C++.
+
+Výstupem rutiny \texttt{METIS\_ComputeVertexSeparator} je pole $part$ o délce rovné počtu vrcholů grafu. Na $i$-té pozici tohoto pole je číslo od $1$ do $k+1$ (po převedení do Fortranového zápisu), které určuje, ve které části rozdělení se daný vrchol nachází. $k+1$ značí, že daný vrchol je ve vrcholovém separátoru.
 
 \section{Softwarové požadavky pro běh}
 Pro úspěšné slinkování a zkompilování

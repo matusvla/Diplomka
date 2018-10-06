@@ -28,9 +28,10 @@
     \newtheorem{observation}{Pozorování}
 \renewcommand*{\proofname}{Důkaz}
 
-
 \begin{document}
-%---- Z VU --------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------
+
 \chapter{Grafy, stromy} [TODO nejaky hezky obrazky?] 
 V této kapitole definujeme graf jakožto matematickou strukturu, popíšeme základní pojmy týkající se grafů a nastíníme možné vztahy mezi grafem a maticí. Dále definujeme strom, jakožto speciální případ grafu. Terminologie je převzata z \cite{koub:11}
 
@@ -87,7 +88,7 @@ Vrcholy ležící na této cestě nazveme \textbf{předchůdci} vrcholu $v$. Př
 \end{definition}
 
 \section{Vztah grafu a matice}
-
+\label{GrMatRel}
 Grafy a matice spolu úzce souvisí, což nám umožňuje převádět problémy na maticích na problémy na grafech a naopak. Nezanedbatelným praktickým důsledkem jejich vzájemného vztahu je i možnost používat grafové algoritmy při řešení některých maticových úloh, především může být tento přístup výhodný pro řídké matice. Dělení grafů může posloužit například při snaze o paralelizaci rozkladu matice.
 
 Neorientovaný graf $G=(V,E)$ s vrcholy $V = {v_1, \ldots, v_m}$ a hranami $E = {e_1, \ldots, e_n}$ Tento graf lze reprezentovat pomocí matice dvěma základními způsoby. \textbf{Maticí sousednosti}, neboli adjacenční matici, nazveme matici $A_G$ o rozměrech $m \times m$, jejíž prvek na pozici $(i,j)$ je definován jako:
@@ -101,7 +102,7 @@ Neorientovaný graf $G=(V,E)$ s vrcholy $V = {v_1, \ldots, v_m}$ a hranami $E = 
   \right.
 \]
 
-Maticí incidence grafu $G$ nazveme matici o rozměrech $m \times n$  definovanou následovně:
+ \textbf{Maticí incidence} grafu $G$ nazveme matici o rozměrech $m \times n$  definovanou následovně:
 \[
   {(\bar{A}_G)}_{i,j} :=
   \left\{
@@ -112,7 +113,7 @@ Maticí incidence grafu $G$ nazveme matici o rozměrech $m \times n$  definovano
   \right.
 \]
 
-V kapitole ref{spektral} [TODO bude ref spektral?] budeme potřebovat Laplaceovu matici $Q$ grafu $G$, která je definována následovně:
+V kapitole ref{spektral} [TODO bude ref spektral?] budeme potřebovat \textbf{Laplaceovu matici} $Q$ grafu $G$, která je definována následovně:
 \[
 Q_{ij} :=
 \left\{
@@ -128,27 +129,38 @@ Laplaceovu matici $Q$ lze tedy vyjádřit jako $Q = D - A_G$, kde $D$  značí d
 Pokud chceme reprezentovat matici pomocí grafu, většinou nám stačí zachytit její strukturu. V takovém případě můžeme pro popis obecně nesymetrické matice $A$ o rozměrech $n \times n$ použít orientovaný graf s množinou vrcholů $V = {v_1,\ldots,v_n}$ a množinou hran $E =\{(v_i,v_j)|a_{ij}\neq 0\}$. V případě, že je matice $A$ symetrická, můžeme ji analogickým způsobem reprezentovat pomocí neorientovaného grafu.
 Pokud bychom chtěli do grafu zanést i numerické hodnoty jednotlivých prvků matice, museli bychom použít ohodnocený graf.
 
-[TODO rozhodnout, jestli tam tohle davat]
+\begin{remark}
+  Pro jednoduchost zaveďme následující terminologii. Říkáme, že graf $G$ \textbf{odpovídá} matici $A$ právě tehdy, když matice $A$ je maticí sousednosti grafu $G$.
+\end{remark}
+
+[TODO rozhodnout, jestli tam tohle dávat]
 Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můžeme také použít bipartitní graf $G=(R,B,E)$ pro nějž platí $|R|=m$, $|B|=n$ a $E = \{(i,j') \ | \ i \in R, j' \in B, a_{ij} \neq 0 \}$.
 [end TODO]
 
 \bigskip
 {
+  \label{MatGrPicture}
   \centering
   \includegraphics[width=0.7\textwidth]{pictures/matgr.pdf}
   \captionof{figure}{Příklad grafu a jemu odpovídající struktury matice\label{prGrMat}}
 }
 
-% ZATÍM ZKOPÍROVÁNO Z VU
+%----------------------------------------------------------------------
 
 \chapter{Dělení grafů}
 [TODO doplnit]
+
+%----------------------------------------------------------------------
+
 \chapter{Rozklady matic}
 [TODO doplnit]
+
+%----------------------------------------------------------------------
+
 \chapter{Další parametry pro dělení grafu}
 [TODO doplnit]
 
-%----------------------------------------------------------------------------
+%----------------------------------------------------------------------
 
 \chapter{Různé}
 [TODO rozdistribuovat]
@@ -201,6 +213,8 @@ a poté mezi nimi zvolíme ten, který má nejmenší stupeň.
 \section{Další témata}
 [TODO Řídké matice vs. husté matice]
 
+
+%----------------------------------------------------------------------
 
 \chapter{Eliminační stromy}
 V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic.
@@ -262,6 +276,8 @@ Pokud $x_i$ je vlastním předchůdcem $x_j$ v eliminačním stromu, pak $i > j$
   Tvrzení plyne přímo ze sloupcového algoritmu [???]
 \end{proof}
 
+%----------------------------------------------------------------------
+
 \chapter{Algoritmizace a implementace}
 
 Cílem programu, který jsme implementovali, je ukázat, že rozdělení grafu získané za pomoci profesionální numerické knihovny pro dělení grafů METIS, nemusí být vyvážené vzhledem k výpočtu Choleského rozkladu na vzniklých oblastech. Dále jsme se pokusili navrhnout a otestovat metodu přerozdělení grafu založenou na přečíslování vrcholů grafu. Cílem navržené metody je zlepšit rozdělení grafu tak, aby počet operací potřebných pro Choleského faktorizaci na jednotlivých oblastem byl pokud možno stejný a nebyl vyšší než maximum z počtu operací při rozdělení počátečním.
@@ -269,7 +285,7 @@ Cílem programu, který jsme implementovali, je ukázat, že rozdělení grafu z
 Naši implementaci můžeme rozdělit na několik logických celků. [TODO doplnit]
 
 \section{Formát a uložení vstupní matice}
-V této podkapitole bude popsán vstupní formát matice a způsob, kterým tuto matici ukládáme v našem programu. 
+V této podkapitole bude popsán vstupní formát matice a způsob její reprezentace v našem programu.
 [TODO Zajímá nás jen struktura]
 
 \subsection{Vstupní formát matice}
@@ -280,10 +296,47 @@ Jako základní matice pro testování výsledků našeho programu nám poslouž
 
 Pro testování jsme dále používali matice vygenerované při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice (podprogram \texttt(poisson)) a několik jednoduchých testovacích matic, které jsme si ručně zapsali do souboru \texttt{testing.f90}
 
-Matice je v našem programu uložena v CSR formátu (compressed sparse row format) \cite{pis:84,saad:94}.
+\subsection{Reprezentace matice v programu}
+
+Matice je v našem programu uložena v \textbf{CSR formátu} (compressed sparse row format) \cite{pis:84,saad:94}, který je běžně využívaným formátem sloužícím pro reprezentaci řídkých matic a grafů. 
+
+Mějme řídkou matici $A$ o rozměrech $n \times n$, která obsahuje $n_e$ nenulových prvků. Tuto matici v programu reprezentujeme pomocí tří polí: pole \texttt{ia} o délce $n+1$ a polí \texttt{ja},\texttt{aa} o délce $n_e$. V poli \texttt{ja} na pozicích \texttt{ia($i$)},\ldots,\texttt{ia($i+1$)-1} jsou uloženy sloupcové indexy nenulových prvků na $i$-tém řádku matice $A$, na odpovídajících pozicích v poli \texttt{aa} jsou uloženy numerické hodnoty těchto prvků.
+
+\begin{example}
+  \label{CSRexample}
+  Mějme následující symetrickou matici
+  \[
+    \begin{pmatrix}
+      0 & 5 & 0 & 3 & 0 \\
+      5 & 0 & 9 & 4 & 2 \\
+      0 & 9 & 0 & 0 & 0 \\
+      3 & 4 & 0 & 0 & 4 \\
+      0 & 2 & 0 & 4 & 0
+    \end{pmatrix}
+  \]
+  Pak její reprezentace ve formátu CSR vypadá následovně:
+  \begin{verbatim}
+    ia = [ 1, 3, 7, 8, 11, 13 ]
+    ja = [ 2, 4, 1, 3, 4, 5, 2, 1, 2, 5, 2, 4 ]
+    aa = [ 5, 3, 5, 9, 4, 2, 9, 3, 4, 4, 2, 4 ]
+  \end{verbatim}
+\end{example}
+
+Pokud budeme uvažovat pouze pole \texttt{ia}, \texttt{ja}, je podle teorie popsané v oddíle \ref{GrMatRel} výsledná reprezentace matice $A$ zároveň reprezentací neorientovaného grafu, kterému matice $A$ odpovídá.
+
+\begin{example}
+  Pokud vezmeme matici z příkladu \ref{CSRexample}, pak graf, který je reprezentován pomocí polí \texttt{ia}, \texttt{ja} je zobrazen na obrázku \ref{MatGrPicture}
+\end{example}
 
 
 
+
+
+
+%----------------------------------------------------------------------
+
+\chapter*{Závěr}
+[TODO doplnit]
 
 
 \newpage

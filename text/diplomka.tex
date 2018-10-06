@@ -58,21 +58,21 @@ Povšimněme si, že v definici grafu není vyloučen případ, kdy jsou oba kon
 \end{definition}
 
 
-[TODO Potrebuju ohodnoceny, vazeny?]
+\TODO{Potrebuju ohodnoceny, vazeny?}
 \begin{definition}
   Mějme graf $G=(V,E)$ a zobrazení $\omega:V \rightarrow \mathbb{R}$, resp. $c: E \rightarrow \mathbb{R}$. Přidáním zobrazení $\omega$, resp. $c$ ke~grafu $G$ dostaneme graf, který nazýváme \textbf{ohodnocený}, resp. \textbf{vážený} reálným ohodnocením.
 \end{definition}
 
 \begin{definition}
-  [TODO doplnit definici cesty bez cyklu!, cyklu, delka cesty]
+  \TODO{doplnit definici cesty bez cyklu!, cyklu, delka cesty}
 \end{definition}
 
 Existuje-li mezi libovolnými dvěma vrcholy grafu cesta, řekneme, že graf je \textbf{souvislý}.
 \textbf{Vzdáleností} dvou vrcholů v souvislém grafu $G=(V,E)$ nazveme minimální délku cesty mezi těmito dvěma vrcholy. Vzdáleností vrcholu $v \in V$ od množiny vrcholů $W \subset V$ nazveme minimální vzdálenost mezi vrcholem $v$ a libovolným vrcholem náležícím do $W$. 
 
-[TODO potrebuju bipartitni?]
-[TODO potrebuju ctvercovou sit?]
-[TODO potrebuju faktorgraf?]
+\TODO{potrebuju bipartitni?}
+\TODO{potrebuju ctvercovou sit?}
+\TODO{potrebuju faktorgraf?}
 
 \section{Strom}
 
@@ -115,7 +115,7 @@ Neorientovaný graf $G=(V,E)$ s vrcholy $V = {v_1, \ldots, v_m}$ a hranami $E = 
   \right.
 \]
 
-V kapitole ref{spektral} [TODO bude ref spektral?] budeme potřebovat \textbf{Laplaceovu matici} $Q$ grafu $G$, která je definována následovně:
+V kapitole ref{spektral} \TODO{bude ref spektral?} budeme potřebovat \textbf{Laplaceovu matici} $Q$ grafu $G$, která je definována následovně:
 \[
 Q_{ij} :=
 \left\{
@@ -135,7 +135,7 @@ Pokud bychom chtěli do grafu zanést i numerické hodnoty jednotlivých prvků 
   Pro jednoduchost zaveďme následující terminologii. Říkáme, že graf $G$ \textbf{odpovídá} matici $A$ právě tehdy, když matice $A$ je maticí sousednosti grafu $G$.
 \end{remark}
 
-[TODO rozhodnout, jestli tam tohle dávat]
+\TODO{rozhodnout, jestli tam tohle dávat}
 Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můžeme také použít bipartitní graf $G=(R,B,E)$ pro nějž platí $|R|=m$, $|B|=n$ a $E = \{(i,j') \ | \ i \in R, j' \in B, a_{ij} \neq 0 \}$.
 [end TODO]
 
@@ -150,22 +150,22 @@ Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můž
 %----------------------------------------------------------------------
 
 \chapter{Dělení grafů}
-[TODO doplnit]
+\TODO{doplnit}
 
 %----------------------------------------------------------------------
 
 \chapter{Rozklady matic}
-[TODO doplnit]
+\TODO{doplnit}
 
 %----------------------------------------------------------------------
 
 \chapter{Další parametry pro dělení grafu}
-[TODO doplnit]
+\TODO{doplnit}
 
 %----------------------------------------------------------------------
 
 \chapter{Různé}
-[TODO rozdistribuovat]
+\TODO{rozdistribuovat}
 \section{Číslování}
 \subsection{Číslování vrcholů grafu v závislosti na vzdálenosti od separátoru}
 \label{sepDistNumbering}
@@ -174,7 +174,7 @@ Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můž
     Tuto metodu lze používat samostatně, ale vzhledem k její povaze ji lze využít i pro vylepšení ostatních metod očíslování grafu,
     například ji lze kombinovat s metodou minimálního stupně.
 
-    Mějme graf $G = (V,E)$ a jeho vrcholový separátor [TODO znaceni], jehož odebráním se graf rozpadne na $n$ podgrafů $G_1, \ldots, G_n$.
+    Mějme graf $G = (V,E)$ a jeho vrcholový separátor \TODO{znaceni}, jehož odebráním se graf rozpadne na $n$ podgrafů $G_1, \ldots, G_n$.
     Popišme číslování vrcholů podgrafu $G_i$:
 
     \begin{enumerate}
@@ -201,7 +201,7 @@ Algoritmus pro hledání očíslování grafu pomocí této metody je následuj�
 
 Očíslování vrcholů grafu G pomocí tohoto algoritmu není jednoznačné, protože vrcholů s minimálním stupněm může být více.
 
-Pokud máme rozdělení $G_1, \ldots, G_n$ grafu $G$ s vrcholovým separátorem [TODO znaceni], můžeme pro očíslování části $G_i$ použít
+Pokud máme rozdělení $G_1, \ldots, G_n$ grafu $G$ s vrcholovým separátorem \TODO{znaceni}, můžeme pro očíslování části $G_i$ použít
 číslování vrcholů pomocí metody minimálního stupně, kde při výběru vrcholu ve \ref{mindegloop}. kroku přidáme kritérium vzdálenosti od separátoru
 popsané v \ref{sepDistNumbering}. Nejprve tedy nalezneme množinu všech vrcholů grafu $G$, které mají minimální stupeň
 a poté mezi nimi zvolíme ten, který má nejmenší stupeň.
@@ -213,7 +213,7 @@ a poté mezi nimi zvolíme ten, který má nejmenší stupeň.
 \end{definition}
 
 \section{Další témata}
-[TODO Řídké matice vs. husté matice]
+\TODO{Řídké matice vs. husté matice}
 
 
 %----------------------------------------------------------------------
@@ -284,20 +284,20 @@ Pokud $x_i$ je vlastním předchůdcem $x_j$ v eliminačním stromu, pak $i > j$
 
 Cílem programu, který jsme implementovali, je ukázat, že rozdělení grafu získané za pomoci profesionální numerické knihovny pro dělení grafů METIS, nemusí být vyvážené vzhledem k výpočtu Choleského rozkladu na vzniklých oblastech. Dále jsme se pokusili navrhnout a otestovat metodu přerozdělení grafu založenou na přečíslování vrcholů grafu. Cílem navržené metody je zlepšit rozdělení grafu tak, aby počet operací potřebných pro Choleského faktorizaci na jednotlivých oblastem byl pokud možno stejný a nebyl vyšší než maximum z počtu operací při rozdělení počátečním.
 
-[TODO Fortran, Fortran90, c++]
-[TODO dělení na kolik částí?]
+\TODO{Fortran, Fortran90, c++}
+\TODO{dělení na kolik částí?}
 
-Naši implementaci můžeme rozdělit na několik logických celků. [TODO doplnit]
+Naši implementaci můžeme rozdělit na několik logických celků. \TODO{doplnit}
 
 \section{Formát a uložení vstupní matice}
 V této podkapitole bude popsán vstupní formát matice a způsob její reprezentace v našem programu.
-[TODO Zajímá nás jen struktura]
+\TODO{Zajímá nás jen struktura}
 
 \subsection{Vstupní formát matice}
 
 Jako základní matice pro testování výsledků našeho programu nám posloužily matice uložené ve formátu RSA v souborech s příponou \texttt{.rsa} nebo \texttt{.rb}. Jako zdroj pro tyto matice jsme použili kolekci \cite{hbcol}.
 
-[TODO popis HB formátu]
+\TODO{popis HB formátu}
 
 Pro testování jsme dále používali matice vygenerované při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice (podprogram \texttt(poisson)) a několik jednoduchých testovacích matic, které jsme si ručně zapsali do souboru \texttt{testing.f90}
 
@@ -341,7 +341,7 @@ Vzhledem k tomu, že jsme dělení grafů používali jako nástroj pro vyvažov
 
 \section{Softwarové požadavky pro běh}
 Pro úspěšné slinkování a zkompilování
-[TODO nainstalovaný METIS]
+\TODO{nainstalovaný METIS}
 
 
 
@@ -351,7 +351,7 @@ Pro úspěšné slinkování a zkompilování
 %----------------------------------------------------------------------
 
 \chapter*{Závěr}
-[TODO doplnit]
+\TODO{doplnit}
 
 
 \newpage

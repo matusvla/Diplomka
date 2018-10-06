@@ -28,11 +28,13 @@
     \newtheorem{observation}{Pozorování}
 \renewcommand*{\proofname}{Důkaz}
 
+\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}\PackageWarning{TODO:}{#1!}}
+
 \begin{document}
 
 %----------------------------------------------------------------------
 
-\chapter{Grafy, stromy} [TODO nejaky hezky obrazky?] 
+\chapter{Grafy, stromy} \TODO{nejaky hezky obrazky?} 
 V této kapitole definujeme graf jakožto matematickou strukturu, popíšeme základní pojmy týkající se grafů a nastíníme možné vztahy mezi grafem a maticí. Dále definujeme strom, jakožto speciální případ grafu. Terminologie je převzata z \cite{koub:11}
 
 \section{Základní grafová terminologie}
@@ -282,6 +284,9 @@ Pokud $x_i$ je vlastním předchůdcem $x_j$ v eliminačním stromu, pak $i > j$
 
 Cílem programu, který jsme implementovali, je ukázat, že rozdělení grafu získané za pomoci profesionální numerické knihovny pro dělení grafů METIS, nemusí být vyvážené vzhledem k výpočtu Choleského rozkladu na vzniklých oblastech. Dále jsme se pokusili navrhnout a otestovat metodu přerozdělení grafu založenou na přečíslování vrcholů grafu. Cílem navržené metody je zlepšit rozdělení grafu tak, aby počet operací potřebných pro Choleského faktorizaci na jednotlivých oblastem byl pokud možno stejný a nebyl vyšší než maximum z počtu operací při rozdělení počátečním.
 
+[TODO Fortran, Fortran90, c++]
+[TODO dělení na kolik částí?]
+
 Naši implementaci můžeme rozdělit na několik logických celků. [TODO doplnit]
 
 \section{Formát a uložení vstupní matice}
@@ -322,11 +327,21 @@ Mějme řídkou matici $A$ o rozměrech $n \times n$, která obsahuje $n_e$ nenu
   \end{verbatim}
 \end{example}
 
-Pokud budeme uvažovat pouze pole \texttt{ia}, \texttt{ja}, je podle teorie popsané v oddíle \ref{GrMatRel} výsledná reprezentace matice $A$ zároveň reprezentací neorientovaného grafu, kterému matice $A$ odpovídá.
+Pokud budeme uvažovat pouze pole \texttt{ia}, \texttt{ja}, je podle teorie popsané v oddíle \ref{GrMatRel} výsledná reprezentace matice $A$ zároveň reprezentací neorientovaného grafu, kterému matice $A$ odpovídá. Pokud tedy nebudeme brát v úvahu hodnoty jednotlivých prvků matice, můžeme při popisu implementace bez újmy na obecnosti pojmy graf a matice zaměňovat.
 
 \begin{example}
-  Pokud vezmeme matici z příkladu \ref{CSRexample}, pak graf, který je reprezentován pomocí polí \texttt{ia}, \texttt{ja} je zobrazen na obrázku \ref{MatGrPicture}
+  Vezměme matici z příkladu \ref{CSRexample}. Pak graf, který je reprezentován pomocí polí \texttt{ia}, \texttt{ja} je zobrazen na obrázku \ref{MatGrPicture}
 \end{example}
+
+\section{Knihovna METIS pro dělení grafu}
+
+Pro samotné dělení grafu jsme využili knihovnu pro dělení grafů METIS \cite{kary:13} verze 5.1.0.
+
+Vzhledem k tomu, že jsme dělení grafů používali jako nástroj pro vyvažování počtu operací při Choleského rozkladu na jednotlivých oblastech, potřebovali jsme nalézt rozdělení grafu pomocí vrcholového separátoru. Takové rozdělení nám poskytne rutina \texttt{METIS\_ComputeVertexSeparator}, kterou jsme ve Fortranu implementovali pomocí rozhraní \texttt{metis\_interface.f95} a \texttt{metisinclude.c}. 
+
+\section{Softwarové požadavky pro běh}
+Pro úspěšné slinkování a zkompilování
+[TODO nainstalovaný METIS]
 
 
 

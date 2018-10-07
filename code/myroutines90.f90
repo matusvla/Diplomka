@@ -1026,22 +1026,25 @@
 !
 ! internals
 !              
-      integer :: i, ordering(n), distFromSep(n)
+      integer :: i, distFromSep(n)
       integer, allocatable, dimension(:) :: permMD, invpermMD, permDist, invpermDist      
+      double precision :: ordering(n)
+
       !
 ! start of orderCoefMixed
-!	          
+!	                
       call orderByMD(ia, ja, n, permMD, invpermMD, ierr)
       call orderByDistance(ia, ja, n, part, parts, permDist, invpermDist, ierr)      
-      ordering = NINT((1 - distCoef) * invpermMD + distCoef * invpermDist)      
+      ordering = ((1 - distCoef) * permMD) + (distCoef * permDist)
       deallocate(permMD, invpermMD, permDist, invpermDist) 
+      write(*,'(30F6.2)') ordering
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n), invperm(n), stat=ierr)
-      call MRGRNK (ordering, perm);
+      call MRGRNK (ordering, invperm)      
       do i = 1, n
-        invperm(perm(i)) = i
+        perm(invperm(i)) = i
       end do       
 !
 ! end of orderCoefMixed

@@ -186,7 +186,10 @@
       !call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
       
       call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(1,8), ierr)       
+        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(0.5,8), ierr)       
+
+        write(*,'(50I3)') ordperm
+        write(*,'(50I3)') invordperm
 
       if(TESTswitch) then        
         call testUniqueness(ordperm)

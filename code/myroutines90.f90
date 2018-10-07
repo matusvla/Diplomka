@@ -840,7 +840,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine orderByDistance
 ! (c) Vladislav Matus
-! last edit: 19. 09. 2018  
+! last edit: 07. 10. 2018  
 !
 ! Purpose:
 !   Computes the permutation of vertices in graph to be ordered.
@@ -882,10 +882,10 @@
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n), invperm(n), stat=ierr)
-      call MRGRNK (distFromSep, invperm);
+      call MRGRNK (distFromSep, perm);
       do i = 1, n
-        perm(invperm(i)) = i
-      end do
+        invperm(perm(i)) = i
+      end do  
 !
 ! end of orderByDistance
 !  
@@ -894,7 +894,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine orderByMD
 ! (c) Vladislav Matus
-! last edit: 19. 09. 2018  
+! last edit: 07. 10. 2018  
 !
 ! Purpose:
 !   Computes the permutation of vertices in graph to be ordered using MD algorithm
@@ -930,9 +930,9 @@
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n), invperm(n), stat=ierr)
-      call MRGRNK (minOrdering, invperm);
+      call MRGRNK (minOrdering, perm);
       do i = 1, n
-        perm(invperm(i)) = i
+        invperm(perm(i)) = i
       end do      
 !
 ! end of orderByMD
@@ -942,7 +942,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine orderMixed
 ! (c) Vladislav Matus
-! last edit: 19. 09. 2018  
+! last edit: 07. 10. 2018  
 !
 ! Purpose:
 !   Computes the permutation of vertices in graph to be ordered
@@ -983,10 +983,10 @@
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n), invperm(n), stat=ierr)
-      call MRGRNK (ordering, invperm);
+      call MRGRNK (ordering, perm);
       do i = 1, n
-        perm(invperm(i)) = i
-      end do      
+        invperm(perm(i)) = i
+      end do        
 !
 ! end of orderMixed
 !  
@@ -1033,15 +1033,15 @@
 !	          
       call orderByMD(ia, ja, n, permMD, invpermMD, ierr)
       call orderByDistance(ia, ja, n, part, parts, permDist, invpermDist, ierr)      
-      ordering = NINT((1 - distCoef) * permMD + distCoef * permDist)      
+      ordering = NINT((1 - distCoef) * invpermMD + distCoef * invpermDist)      
       deallocate(permMD, invpermMD, permDist, invpermDist) 
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n), invperm(n), stat=ierr)
-      call MRGRNK (ordering, invperm);
+      call MRGRNK (ordering, perm);
       do i = 1, n
-        perm(invperm(i)) = i
+        invperm(perm(i)) = i
       end do       
 !
 ! end of orderCoefMixed

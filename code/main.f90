@@ -64,7 +64,7 @@
       ! Corresponding permutations from original to partitioned and back
       integer, allocatable, dimension(:) :: np, perm
       type(intRaggedArr) :: invperm      
-! -- permutations from original to ordered matrix and back      
+! -- permutations from original to ordered matrix and back, describes position in new matrix, old matrix
       integer, allocatable, dimension(:) :: ordperm, invordperm
 ! -- command line arguments
       character*(matrixtype_max_len) matrixtype
@@ -173,12 +173,12 @@
       call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
         logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
 
-        write(*,'(50I3)') ordperm
-        write(*,'(50I3)') invordperm
+        write(*,'(50I3)') ordperm        
 
       call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
          ordperm, invordperm, ierr)
-         write(*,'(50I3)') part
+
+         write(*,'(50I3)') ordperm
 
       ! call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
       !    logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
@@ -186,7 +186,9 @@
       !call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
       
       call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(0.9,8), ierr)       
+        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(1,8), ierr)       
+
+        write(*,'(50I3)') ordperm
 
       if(TESTswitch) then        
         call testUniqueness(ordperm)
@@ -194,7 +196,7 @@
       end if
 
 
-      write(*,'(50I3)') ordperm
+      rite(*,'(50I3)') ordperm
 
 !
 ! -- Write out partitioned graph in Graphviz format
@@ -225,7 +227,7 @@
         call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
            logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm1, TESTinvordperm1, ierr)
         call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-           logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(1,8), ierr)          
+           logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(1,8), ierr)
         if(ALL(TESTordperm1 == TESTordperm2)) then 
           write(*,*) "TEST: First final test OK!"
         else 

@@ -188,16 +188,10 @@
       call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
         logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(1,8), ierr)       
 
-        write(*,'(50I3)') ordperm
-
       if(TESTswitch) then        
         call testUniqueness(ordperm)
         call testUniqueness(invordperm)
       end if
-
-
-      rite(*,'(50I3)') ordperm
-
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          

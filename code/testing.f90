@@ -3,6 +3,8 @@
 ! last edit: 21. 09. 2018      
 
       module testing
+        use auxroutines
+        implicit none
       contains
 !--------------------------------------------------------------------           
       subroutine loadTestGraph(ia, ja, aa, n, graphID)
@@ -44,4 +46,17 @@
         end select
       end subroutine loadTestPart
 !--------------------------------------------------------------------                         
-      end module testing
+      subroutine testUniqueness(arr)
+        implicit none        
+        integer, allocatable, dimension(:) :: arr        
+        integer, allocatable, dimension(:) :: uniqueArr 
+        integer :: ierr        
+        call uniquify(arr, uniqueArr, ierr)
+        if(.not. SIZE(arr) == SIZE(uniqueArr)) then
+          write(*,*) "TEST: Array not unique"
+          write(*,'(50I4)') arr
+          stop "aborting"
+        end if
+      end subroutine testUniqueness
+!--------------------------------------------------------------------                         
+    end module testing

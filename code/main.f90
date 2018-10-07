@@ -90,6 +90,11 @@
       character*(partsch_max_len) :: partsch       
       integer :: mformat ! matrix format for loading             
       integer :: testGraphNumber ! which matrix should be loaded in test mode
+! -- for testing purposes only
+      logical :: TESTswitch
+      integer, allocatable, dimension(:) :: TESTordperm1, TESTordperm2
+      integer, allocatable, dimension(:) :: TESTinvordperm1, TESTinvordperm2
+
 !--------------------------------------------------------------------
 !
 ! program start
@@ -99,7 +104,8 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     TESTswitch = .true.
+     matrixtype = 'P' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
      testGraphNumber = 4
      nfull = 5
@@ -164,18 +170,31 @@
 ! -- Find best ordering of vertices
 !     TODO order vertices in all parts      
 !            
-      ! call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-      !   logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)
+      call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
 
-      ! call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-      !    ordperm, invordperm, ierr)
+        write(*,'(50I3)') ordperm
+        write(*,'(50I3)') invordperm
+
+      call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+         ordperm, invordperm, ierr)
+         write(*,'(50I3)') part
 
       ! call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
       !    logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
 
-      call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
+      !call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
+      
+      call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(0.9,8), ierr)       
 
-      write(*,'(30I3)') ordperm
+      if(TESTswitch) then        
+        call testUniqueness(ordperm)
+        call testUniqueness(invordperm)
+      end if
+
+
+      write(*,'(50I3)') ordperm
 
 !
 ! -- Write out partitioned graph in Graphviz format
@@ -202,9 +221,38 @@
 !
 ! -- final tests in test mode
 !            
-      ! if(TRIM(matrixtype) = 'T') then
-      !   !TODO tests
-      ! end if
+      if(TESTswitch) then
+        call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+           logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm1, TESTinvordperm1, ierr)
+        call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+           logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(1,8), ierr)          
+        if(ALL(TESTordperm1 == TESTordperm2)) then 
+          write(*,*) "TEST: First final test OK!"
+        else 
+          write(*,*) "TEST: First test failed!"
+        end if
+        if(ALL(TESTinvordperm1 == TESTinvordperm2)) then 
+          write(*,*) "TEST: Second final test OK!"
+        else 
+          write(*,*) "TEST: Second final test failed!"
+        end if        
+
+        call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+          TESTordperm1, TESTinvordperm1, ierr)
+        call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+          logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(0,8), ierr)    
+        if(ALL(TESTordperm1 == TESTordperm2)) then 
+          write(*,*) "TEST: Third final test OK!"
+        else 
+          write(*,*) "TEST: Third final test failed!"
+        end if
+        if(ALL(TESTinvordperm1 == TESTinvordperm2)) then 
+          write(*,*) "TEST: Fourth test OK!"
+        else 
+          write(*,*) "TEST: Fourth test failed!"
+        end if         
+
+      end if
 !
 ! -- deallocate all allocated fields
 !

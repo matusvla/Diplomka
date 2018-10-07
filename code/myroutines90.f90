@@ -925,8 +925,7 @@
 !
 ! start of orderByMD
 !	    
-      call minimumOrdering(ia, ja, n, minOrdering)
-      write(*,'(30I3)')   
+      call minimumOrdering(ia, ja, n, minOrdering)            
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  
@@ -980,7 +979,6 @@
 ! start of orderMixed
 !	    
       call mixedOrdering(ia, ja, n, part, parts, ordering)
-      write(*,'(30I3)')   
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  
@@ -995,6 +993,63 @@
       end subroutine orderMixed
         
 !--------------------------------------------------------------------   
+
+! subroutine orderCoefMixed
+! (c) Vladislav Matus
+! last edit: 07. 10. 2018  
+!
+! Purpose:        
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices    
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs 
+!   distCoef ... coeficient [0,1], what weight should be used for ordering by distance           
+!   
+! Output:
+!   perm ... permutation: original ordering -> new ordering
+!   invperm ... permutation: new ordering -> original ordering 
+!   ierr ... error code (0 if succesful, 1 otherwise)             
+!   
+! Allocations:  perm, invperm
+
+      subroutine orderCoefMixed(ia, ja, n, part, parts, perm, invperm, distCoef, ierr)
+        implicit none
+!
+! parameters
+!
+      integer :: ierr, n, parts
+      integer :: ia(n+1), ja(ia(n+1)-1), part(n) 
+      integer, allocatable, dimension(:) :: perm, invperm      
+      double precision :: distCoef
+!
+! internals
+!              
+      integer :: i, ordering(n), distFromSep(n)
+      integer, allocatable, dimension(:) :: permMD, invpermMD, permDist, invpermDist      
+      !
+! start of orderCoefMixed
+!	          
+      call orderByMD(ia, ja, n, permMD, invpermMD, ierr)
+      call orderByDistance(ia, ja, n, part, parts, permDist, invpermDist, ierr)      
+      ordering = NINT((1 - distCoef) * permMD + distCoef * permDist)      
+      deallocate(permMD, invpermMD, permDist, invpermDist) 
+!      
+! -- fill in invperm and perm using sorted order values
+!                  
+      allocate(perm(n), invperm(n), stat=ierr)
+      call MRGRNK (ordering, invperm);
+      do i = 1, n
+        perm(invperm(i)) = i
+      end do       
+!
+! end of orderCoefMixed
+!  
+      end subroutine orderCoefMixed
+        
+!--------------------------------------------------------------------  
+
 
 !
 ! end of module

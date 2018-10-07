@@ -281,21 +281,14 @@ Topologické číslování vrcholů stromu je intuitivní způsob pro očíslov�
 
 
 \section{Eliminační stromy}
-V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic. Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění
-v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty.Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.
+V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic. Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty. Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.
 
-V této kapitole bez újmy na obecnosti předpokládáme, že matice, jejíž Choleského rozklad chceme napočítávat, je ireducibilní,
-a tedy přidružený graf této matice je souvislý.
+V této kapitole bez újmy na obecnosti předpokládáme, že matice, jejíž Choleského rozklad chceme napočítávat, je ireducibilní, a tedy graf odpovídající této matici je souvislý.
 
 \subsection{Definice eliminačního stromu matice}
 
-Nejprve se omezme na ireducibilní, pozitivně definitní, symetrickou matici $A_T$ o rozměrech $n \times n$,
-jejíž přidružený graf $G(A_T)$ je strom. V tomto případě je $A_T$ tzv. perfektní eliminační matice, tj. existuje permutační matice $P$ taková,
-že Choleského rozklad matice $PA_TP^T$ nebude obsahovat žádné zaplnění \cite{rose:72}
-(Matici $PA_TP^T$ můžeme vnímat pouze jako přečíslování řádků a sloupců matice $A_T$).
-Aby při choleského rozkladu matice $A_T$ nedošlo k žádnému zaplnění, stačí když pomocí topologického číslování očíslujeme vrcholy jí přidruženého grafu (z předpokladu se jedná o strom)
-a řádky a sloupce matice $A_T$ seřadíme odpovídajícím způsobem. Pak zjevně platí, že matice $A_T$ má, s výjimkou posledního řádku,
-pod diagonálou vždy právě jeden nenulový prvek.
+Nejprve se omezme na ireducibilní, pozitivně definitní, symetrickou matici $A_T$ o rozměrech $n \times n$, jejíž přidružený graf $G(A_T)$ je strom. V tomto případě je $A_T$ tzv. perfektní eliminační matice, tj. existuje permutační matice $P$ taková, že Choleského rozklad matice $PA_TP^T$ nebude obsahovat žádné zaplnění \cite{rose:72} (Matici $PA_TP^T$ můžeme vnímat pouze jako přečíslování řádků a sloupců matice $A_T$).
+Aby při Choleského rozkladu matice $A_T$ nedošlo k žádnému zaplnění, stačí když pomocí topologického číslování očíslujeme vrcholy jí přidruženého grafu (z předpokladu se jedná o strom) a řádky a sloupce matice $A_T$ seřadíme odpovídajícím způsobem. Pak zjevně platí, že matice $A_T$ má, s výjimkou posledního řádku, pod diagonálou vždy právě jeden nenulový prvek.
 Díky tomu můžeme definovat pro matici $A_T$ funkci $\texttt{PARENT}: \{1,\ldots,n\} \rightarrow {1,\ldots,n}$ následovně:
 \begin{align*}
   \forall j \in \{1,\ldots,n-1\} \quad \texttt{PARENT}[j] & := p \quad \Leftrightarrow \quad a_{p,j} \neq 0 \wedge p > j \\
@@ -303,8 +296,9 @@ Díky tomu můžeme definovat pro matici $A_T$ funkci $\texttt{PARENT}: \{1,\ldo
 \end{align*}
 Zřejmě ve stromu přidruženém k matici $A_T$ platí, že předchůdcem vrcholu $x_j$ je vrchol $x_{\texttt{PARENT}[j]}$.
 
-Většinou však nepracujeme s maticemi, jejichž přidružený graf by byl stromem. Zavedeme tedy konstrukci pro libovolnou
-řídkou, ireducibilní, pozitivně definitní, symetrickou matici $A$ o rozměrech $n \times n$.
+\TODO{Ilustrace teorie pomoci obrazku}
+
+Většinou však nepracujeme s maticemi, jejichž přidružený graf by byl stromem. Zavedeme tedy konstrukci pro libovolnou řídkou, ireducibilní, pozitivně definitní, symetrickou matici $A$ o rozměrech $n \times n$.
 Předpokládejme, že známe Choleského rozklad této matice, tj. $A = LL^T$. Maticí se zaplněním nazveme matici $F$ definovanou jako $F = L + L^T$.
 Dále zavedeme matice $L_t$ a $F_t$ následovně. $L_t$ je matice vzniklá z $L$ tím, že v každém sloupci vynulujeme všechny prvky pod diagonálou
 kromě prvku s nejnižším řádkovým indexem a $F_t = L_t L_t^T$.
@@ -312,8 +306,8 @@ kromě prvku s nejnižším řádkovým indexem a $F_t = L_t L_t^T$.
 Z definice $F_t$ vidíme, že se jedná o matici, jejíž přidružený graf $G(F_t)$ je strom.
 
 \begin{definition}
-    Eliminačním stromem matice $A$ nazveme graf $G(F_t)$ popsaný výše, značíme $T(A)$.
-    Podstrom $T(A)$ s kořenem $x_j$ značíme $T[x_j]$. Množinu vrcholů tohoto stromu značíme také $T[x_j]$.
+    \textbf{Eliminačním stromem} matice $A$ nazveme graf $G(F_t)$ popsaný výše, značíme $T(A)$.
+    Podstrom $T(A)$ s kořenem $x_j$ značíme $T[x_j]$. Množinu vrcholů tohoto stromu značíme taktéž $T[x_j]$.
 \end{definition}
 
 Díky této definici můžeme definici funkce $\texttt{PARENT}$ přirozeně rozšířit na matici $A$ následovně:

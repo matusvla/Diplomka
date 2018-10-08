@@ -210,8 +210,8 @@
 !      
       open(unit=graphvizunit, file=graphvizfilename)                  
       ! call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
-      call  gvColorGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        logical2intArr(nvs%vectors(1)%elements) + 1, graphvizunit, ierr)  
+      call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+        graphvizunit, ierr)  
       close(graphvizunit)  
       
       ! open(unit=15, file="GVgraph1.txt")   

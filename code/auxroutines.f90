@@ -41,7 +41,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine uniquify
 ! (c) Vladislav Matus
-! last edit: 20. 09. 2018  
+! last edit: 07. 10. 2018  
 !      
 ! Purpose:
 !   Return array with all duplicates removed
@@ -57,7 +57,7 @@
         implicit none       
 
         integer, dimension(:) :: arr
-        integer, allocatable, dimension(:) :: uniqueArr
+        integer, allocatable, dimension(:) :: uniqueArr, arrCopy
         integer, dimension(:), optional :: omitElements
         integer :: n, i, j, uI, uniqueL, ierr, firstIndex, omitNo    
         logical :: omit, firstFound        
@@ -67,22 +67,31 @@
         else
           omitNo = 0
         endif
-        ierr = 0        
+        ierr = 0     
 
-        n = SIZE(arr)                
-        call insertionSort(arr)                  
+        arrCopy = arr
+        n = SIZE(arrCopy)                
+        call insertionSort(arrCopy)                  
         uniqueL = 0
-        do i = 1, n
-          if (arr(i) /= arr(i - 1)) then
+        omit = .false.
+        do j = 1, omitNo
+          omit = omit .or. (omitElements(j)==arrCopy(1))
+        end do
+        if(.not. omit) then
+          uniqueL = uniqueL + 1            
+        end if 
+
+        do i = 2, n
+          if (arrCopy(i) /= arrCopy(i - 1)) then
             omit = .false.
             do j = 1, omitNo
-              omit = omit .or. (omitElements(j)==arr(i))
+              omit = omit .or. (omitElements(j)==arrCopy(i))
             end do
             if(.not. omit) then
               uniqueL = uniqueL + 1            
             end if          
           end if
-        end do                        
+        end do  
 
         if(uniqueL < 1) then
           write(*,*) "[auxroutines.f90:uniquify] Warning: Nothing to return in uniquify!"
@@ -96,10 +105,10 @@
         do i = 1, n
           omit = .false.
           do j = 1, omitNo
-            omit = omit .or. (omitElements(j)==arr(i))
+            omit = omit .or. (omitElements(j)==arrCopy(i))
           end do
           if(.not. omit) then
-            uniqueArr(1) = arr(i) 
+            uniqueArr(1) = arrCopy(i) 
             firstIndex = i                   
             firstFound = .true.
           end if        
@@ -111,17 +120,17 @@
         uI = 2        
 
         do i = firstIndex + 1, n
-          if (arr(i) /= arr(i - 1)) then
+          if (arrCopy(i) /= arrCopy(i - 1)) then
           omit = .false.
           do j = 1, omitNo
-            omit = omit .or. (omitElements(j)==arr(i))
+            omit = omit .or. (omitElements(j)==arrCopy(i))
           end do
             if(.not. omit) then
-              uniqueArr(uI) = arr(i)
+              uniqueArr(uI) = arrCopy(i)
               uI = uI + 1              
             end if            
           end if
-        end do                  
+        end do  
       end subroutine uniquify
 !-------------------------------------------------------------------- 
 ! subroutine trimArr

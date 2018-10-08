@@ -192,18 +192,19 @@
 
       !call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
       
-      ! do m = -5, 105
-      !   call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-      !     logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(m,8)/100, ierr)       
+      do m = -5, 105
+        call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+          logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(m,8)/100, ierr)       
       
-      !   write(*,'(50I3)') ordperm
-      !   !write(*,'(50I3)') invordperm
+        write(*,'(50I3)') ordperm
+        !write(*,'(50I3)') invordperm
 
-      !   if(TESTswitch) then        
-      !     call testUniqueness(ordperm)
-      !     call testUniqueness(invordperm)
-      !   end if
-      ! end do
+        if(TESTswitch) then        
+          call testUniqueness(ordperm)
+          call testUniqueness(invordperm)
+        end if
+        deallocate(ordperm,invordperm)
+      end do
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          

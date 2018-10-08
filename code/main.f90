@@ -170,31 +170,40 @@
 ! -- Find best ordering of vertices
 !     TODO order vertices in all parts      
 !            
+      write(*,'(50I3)') iap%vectors(1)%elements
+      write(*,'(50I3)') jap%vectors(1)%elements
+      write(*,'(50I3)') part
+
+
       call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
         logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
 
-        write(*,'(50I3)') ordperm        
+        write(*,'(50I3)') ordperm    
+        deallocate(ordperm,invordperm)    
 
       call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
          ordperm, invordperm, ierr)
 
          write(*,'(50I3)') ordperm
+         deallocate(ordperm,invordperm)
 
       ! call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
       !    logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
 
       !call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
       
-      call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(0.5,8), ierr)       
+      ! do m = -5, 105
+      !   call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !     logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(m,8)/100, ierr)       
+      
+      !   write(*,'(50I3)') ordperm
+      !   !write(*,'(50I3)') invordperm
 
-        write(*,'(50I3)') ordperm
-        write(*,'(50I3)') invordperm
-
-      if(TESTswitch) then        
-        call testUniqueness(ordperm)
-        call testUniqueness(invordperm)
-      end if
+      !   if(TESTswitch) then        
+      !     call testUniqueness(ordperm)
+      !     call testUniqueness(invordperm)
+      !   end if
+      ! end do
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          

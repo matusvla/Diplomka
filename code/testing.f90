@@ -54,6 +54,8 @@
         call uniquify(arr, uniqueArr, ierr)
         if(.not. SIZE(arr) == SIZE(uniqueArr)) then
           write(*,*) "TEST: Array not unique"
+          write(*,*) arr
+          write(*,*) uniqueArr
           write(*,'(50I4)') arr
           stop "aborting"
         end if

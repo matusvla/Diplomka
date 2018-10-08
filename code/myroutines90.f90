@@ -1032,12 +1032,21 @@
 
       !
 ! start of orderCoefMixed
-!	                
+!	      
+      if (distCoef > 1) then 
+        write(*,*) "[orderCoefMixed] WARNING: distCoef > 1 set to 1"
+        distCoef = 1
+      else if (distCoef < 0) then
+        write(*,*) "[orderCoefMixed] WARNING: distCoef < 0 set to 0"
+        distCoef = 0
+      end if 
+!
+! -- ordering
+!                          
       call orderByMD(ia, ja, n, permMD, invpermMD, ierr)
       call orderByDistance(ia, ja, n, part, parts, permDist, invpermDist, ierr)      
       ordering = ((1 - distCoef) * permMD) + (distCoef * permDist)
       deallocate(permMD, invpermMD, permDist, invpermDist) 
-      write(*,'(30F6.2)') ordering
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  

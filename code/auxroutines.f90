@@ -73,7 +73,15 @@
         n = SIZE(arrCopy)                
         call insertionSort(arrCopy)                  
         uniqueL = 0
-        do i = 1, n
+        omit = .false.
+        do j = 1, omitNo
+          omit = omit .or. (omitElements(j)==arrCopy(1))
+        end do
+        if(.not. omit) then
+          uniqueL = uniqueL + 1            
+        end if 
+
+        do i = 2, n
           if (arrCopy(i) /= arrCopy(i - 1)) then
             omit = .false.
             do j = 1, omitNo
@@ -83,7 +91,7 @@
               uniqueL = uniqueL + 1            
             end if          
           end if
-        end do                        
+        end do  
 
         if(uniqueL < 1) then
           write(*,*) "[auxroutines.f90:uniquify] Warning: Nothing to return in uniquify!"
@@ -122,7 +130,7 @@
               uI = uI + 1              
             end if            
           end if
-        end do                  
+        end do  
       end subroutine uniquify
 !-------------------------------------------------------------------- 
 ! subroutine trimArr

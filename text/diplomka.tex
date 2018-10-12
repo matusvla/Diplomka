@@ -136,7 +136,7 @@ Pokud bychom chtěli do grafu zanést i numerické hodnoty jednotlivých prvků 
   Pro jednoduchost zaveďme následující terminologii. Říkáme, že graf $G$ \textbf{odpovídá} matici $A$ právě tehdy, když matice $A$ je maticí sousednosti grafu $G$.
 \end{remark}
 
-\TODO{rozhodnout, jestli tam tohle dávat}
+\TODO{rozhodnout, jestli tam tohle dávat - jo, a def. bipart graf tady}
 Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můžeme také použít bipartitní graf $G=(R,B,E)$ pro nějž platí $|R|=m$, $|B|=n$ a $E = \{(i,j') \ | \ i \in R, j' \in B, a_{ij} \neq 0 \}$.
 \TODO{end}
 
@@ -151,12 +151,13 @@ Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můž
 %----------------------------------------------------------------------
 
 \chapter{Dělení grafů}
-\TODO{doplnit}
+\TODO{doplnit, nejdriv viceurovnove, cela prace smeruje k tomu, ze se prerozdeluje. Metis, profesionalni kod - aplikuje viceurovnove deleni. Vicurovnove deleni - hlavni koncept. Spekral na nejhrubsi, KL pri zjemnovani. OHODNOCENE - pri zdrcavani vrcholu i hran v multilevelu.}
+\TODO{Co ta ND?}
 
 %----------------------------------------------------------------------
 
 \chapter{Rozklady matic}
-\TODO{doplnit}
+\TODO{doplnit, neuplne asi ani ne}
 
 %----------------------------------------------------------------------
 
@@ -223,7 +224,7 @@ Soustavu $L^Tx=y$ poté vyřešíme obdobně.
 Jak vidíme, vyvstávají nám při dělení grafu s cílem vypočítávat Choleského rozklad na oblastech dvě základní otázky:
 \begin{enumerate}
   \item Jak najít očíslování grafu takové, aby Choleského rozklad na jednotlivých podgrafech byl vyvážený? \TODO{Přikláněl bych se k tomu rovnat až výsledné podgrafy}
-  \item Jak určit počet nenulových prvků v Choleského rozkladu matice sousednosti jednotlivých podgrafů?
+  \item Jak určit počet nenulových prvků v Choleského rozkladu matice se strukturou matice sousednosti jednotlivých podgrafů?
 \end{enumerate}
 Způsob hledání odpovědí na tyto dvě otázky popíšeme v následujících dvou oddílech.
 

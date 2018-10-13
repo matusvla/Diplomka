@@ -179,48 +179,62 @@ Jinými slovy se jedná go graf, který lze rozdělit na dvě části tak, že v
 \chapter{Dělení grafů}
 \TODO{doplnit, nejdriv viceurovnove, cela prace smeruje k tomu, ze se prerozdeluje. Metis, profesionalni kod - aplikuje viceurovnove deleni. Vicurovnove deleni - hlavni koncept. Spekral na nejhrubsi, KL pri zjemnovani. OHODNOCENE - pri zdrcavani vrcholu i hran v multilevelu.}
 
-V této kapitole formálně popíšeme problém dělení grafu na $k$ podgrafů a definujeme pojmy s ním spojené. Vzhledem k tomu, že v naší implementaci používáme pro dělení grafů profesionální softwarovou knihovnu METIS, zaměříme se při popisu konkrétních algoritmů pro dělení grafů nejprve na schéma víceúrovňového dělení grafu jakožto algoritmus používaný při profesionálních implementacích dělení grafů. Dále se budeme věnovat některým technikám, které tvoří součást víceúrovňového dělení grafů, konkrétně vylepšovacímu algoritmu podle Kernighana a Lina a algoritmu spektrálního dělení. Na závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jakožto konkrétní příklad víceúrovňového algoritmu pro dělení grafů.
+V této kapitole formálně popíšeme problém dělení grafu na $k$ podgrafů a definujeme pojmy s ním spojené. Vzhledem k tomu, že v naší implementaci používáme pro dělení grafů profesionální softwarovou knihovnu METIS \cite{kary:13}, zaměříme se nejprve na schéma víceúrovňového dělení grafu jakožto algoritmus používaný při profesionálních implementacích dělení grafů. Dále se budeme věnovat některým technikám, které tvoří součást víceúrovňového dělení grafů, konkrétně spektrálnímu dělení grafu \TODO{zdroj} a vylepšovacímu algoritmu podle Kernighana a Lina \cite{keli:70}. Na závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jakožto konkrétní příklad víceúrovňového algoritmu pro dělení grafů \TODO{zdroj}.
 
 Dělení grafů na $k$ podgrafů je praktický problém s bohatým teoretickým zázemím a mnoha aplikacemi. Může nám pomoci při řešení parciálních diferenciálních rovnic na moderních počítačových architekturách \cite{posl:90} a nezanedbatelnou roli hraje také při výrobě mikroprocesorů metodou VLSI nebo při řešení velkých systémů lineárních rovnic \cite{keli:70, pis:84}. Často dochází k omezení se na dělení grafu na dva podgrafy, v této práce se však pokusíme prozkoumat i vliv dělení grafu na více částí.
 
-Podmínky, která jsou na výsledné rozdělení grafu kladeny se mohou lišit v závislosti na daném použití. V této kapitole popíšeme klasická kritéria, která se používají pro určování kvality rozdělení, v kapitole \ref{dalsiParametry} poté bude popsán problém dělení grafů vzhledem k dodatečným kritériím (například vzhledem k maticovým operacím) a s ohledem na více kritérií.
+Podmínky, která jsou na výsledné rozdělení grafu kladeny, se mohou lišit v závislosti na daném použití. V této kapitole popíšeme klasická kritéria, která se používají pro určování kvality rozdělení grafu, v kapitole \ref{dalsiParametry} poté bude popsán problém dělení grafů vzhledem k dodatečným kritériím (například vzhledem k maticovým operacím).
 
 \section{Formální definice dělení grafu}
 
 Jako dělení grafu na $k$ částí označujeme hledání rozkladu množiny vrcholů tohoto grafu na $k$ podmnožin. V nejklasičtějším případě je problém dělení grafů na $k$ podgrafů definován následovně.
 
-Mějme graf $G=(V,E)$ s počtem vrcholů $n$. Hledání optimálního rozdělení grafu na $k$ podgrafů je ve~své podstatě hledání rozkladu $V_1,V_2,\ldots,V_k$ množiny vrcholů $V$ splňujícího:
+Mějme graf $G=(V,E)$, $|V| = n$. \textbf{Rozdělením grafu} $G$ na $k$ podgrafů nazveme rozklad množiny vrcholů $V$ na vzájemně disjunktní podmnožiny $V_1, V_2, \ldots, V_k$. Řekneme, že rozdělení je \textbf{optimální} vzhledem k základním kritériím, pokud splňuje:
 \begin{enumerate}
-  \item $|V_i|=n/k$
+  \item $\forall i \in \{1, \ldots, k \} \ |V_i|=n/k$
   \item Počet hran spojujících vrcholy ležící v různých podmnožinách je minimální možný.
 \end{enumerate}
-\textbf{Rozdělení grafu} běžně zapisujeme jako vektor $P$ o délce $n$ takový, že pro každý vrchol $v \in V$ je podgraf, v němž se vrchol v nachází, určen $v$-tou složkou vektoru $P$.
 
-Pokud má graf $G$ sudý počet vrcholů a rozdělíme ho na dvě části s množinami vrcholů $V_1, V_2$, které mají stejný počet prvků, nazveme toto rozdělení \textbf{bisekcí} a velikost hranového separátoru nazýváme šířkou bisekce.
+Rozdělení grafu běžně zapisujeme jako vektor $P$ o délce $n$ takový, že pro každý vrchol $v \in V$ je podgraf, v němž se vrchol v nachází, určen $v$-tou složkou vektoru $P$.
 
-Mějme graf $G=(V,E)$ a jeho rozdělení na $k$ podgrafů s množinami vrcholů $V_1, V_2, \ldots, V_k$. Množinu hran, jejichž jeden koncový bod náleží do $V_i$ a druhý do $V_j$ pro $i \neq j$ nazveme \textbf{hranovým separátorem}, značíme $\delta(A,B)$. 
-\textbf{Vrcholovým separátorem} $V_S$ grafu $G$ nazveme podmnožinu množiny vrcholů $V$ takovou, že odstraněním všech vrcholů náležících do této množiny z grafu $G$ dojde k jeho rozdělení na $k$ podgrafů, mezi nimiž nevede ani jedna hrana. Řešení problému optimální transformace mezi hranovým a vrcholovým separátorem, známe-li jeden z nich, můžeme naleznout v \cite{pofa:90}.
+Pokud má graf $G$ sudý počet vrcholů a rozdělíme ho na dvě části s množinami vrcholů $V_1, V_2$, které mají stejný počet prvků, nazveme toto rozdělení \textbf{bisekcí} a velikost hranového separátoru nazýváme \textbf{šířkou bisekce}.
 
-Ukazuje se, že rozhodovací problém pro optimální rozdělení grafu je NP-úplný \cite{gajo:79}. Existují však algoritmy, které rozdělí graf v rozumném čase, přičemž kvalita jimi nalezeného rozdělení bude poměrně dobrá \cite{lita:79}. To nám ale nic neříká o řešení problému samotného nalezení optimálního hranového nebo vrcholového separátoru \cite{liu:89}
+Mějme graf $G=(V,E)$ a jeho rozdělení na $k$ podgrafů s množinami vrcholů $V_1, V_2, \ldots, V_k$. Množinu hran, jejichž jeden koncový bod náleží do $V_i$ a druhý do $V_j$ pro $i \neq j$ nazveme \textbf{hranovým separátorem}, značíme $\delta(A,B)$. Jinou variantou nalézt rozdělení grafu definované pomocí vrcholového separátoru.
+\textbf{Vrcholovým separátorem} $V_S$ grafu $G$ nazveme podmnožinu množiny vrcholů $V$ takovou, že odstraněním všech vrcholů náležících do $V_S$ z grafu $G$ dojde k jeho rozpadu na nejméně $k$ komponent odpovídajících jednotlivým částem rozdělení. Řešení problému optimální transformace mezi hranovým a vrcholovým separátorem, známe-li jeden z nich, můžeme naleznout v \cite{pofa:90}. To nám ale nic neříká o řešení problému samotného nalezení optimálního hranového nebo vrcholového separátoru \cite{liu:89}.
+
+Ukazuje se, že rozhodovací problém pro optimální rozdělení grafu je NP-úplný \cite{gajo:79}. Existují však algoritmy, které rozdělí graf v rozumném čase, přičemž kvalita jimi nalezeného rozdělení bude poměrně dobrá \cite{lita:79}.
 
 \section{Obecné schéma víceúrovňového dělení grafů}
 \label{multilevel}
 
-Víceúrovňové dělení grafů slouží k převedení problému dělení grafu s velkým počtem vrcholů na problém dělení grafu s počtem vrcholů výrazně menším. Tím může dojít k výraznému zkrácení času potřebného pro běh algoritmu \TODO{zdroj}, proto je tento postup využíván v profesionálních softwarových nástrojích pro dělení grafů. Nejobecnější popis tohoto schématu sestává ze tří základních fází: zhrubovací fáze (coarsening phase), rozdělení vzniklého grafu a projekce tohoto rozdělení zpět na původní graf (refinement phase).
+Víceúrovňové dělení grafů slouží k převedení problému dělení grafu s velkým počtem vrcholů na problém dělení grafu s počtem vrcholů výrazně menším. Tím může dojít k výraznému zkrácení času potřebného pro běh algoritmu \TODO{zdroj}, proto je tento postup využíván v profesionálních softwarových nástrojích pro dělení grafů \cite{lehe:95, kary:13}. Nejobecnější popis tohoto schématu sestává ze tří základních fází: zhrubovací fáze (coarsening phase), rozdělení vzniklého grafu a projekce tohoto rozdělení zpět na původní graf (refinement phase).
 
-\subsection{Zhrubovací fáze}
-Mějme graf $G_0=(V_0,E_0)$. Pak ve zhrubovací fázi dochází k vytváření posloupnosti grafů $G_1,...G_m$ takových, že každý z těchto grafů je vždy faktorgrafem předchozího a má méně vrcholů než předchozí. Pro udržení informací o původním grafu je nutné, abychom ohodnocení vrcholů a hran při tvorbě faktorgrafu položili pro každý vrchol, resp. hranu roven součtu vah všech vrcholů, resp. hran, spojením kterých tento vrchol, resp. hrana vznikl.
+\paragraph{Zhrubovací fáze}
+Základní myšlenkou zhrubovací fáze víceúrovňového schématu dělení grafů je vytvořit z původního grafu $G$ graf $G_m$ s menším počtem vrcholů. Jinými slovy jde o konstrukci posloupnosti grafů $(G_i)_0^m$ takové, že $G_0 := G$ a pro každé dva po sobě jdoucí členy této posloupnosti platí, že $G_{i+1}$ je faktorgrafem $G_i$ s menším počtem vrcholů. 
 
-Pro tvorbu faktorgrafu daného grafu se využívá principu nalezení maximálního párování grafu a následného spojení koncových vrcholů hran náležících do párování \cite{edmo:65,lawl:76}.
+Pro konstrukci posloupnosti $(G_i)_0^m$ existuje několik možných postupů \cite{kaku:98} \TODO{zdroje? kaku je souhrn}. Ve většině schémat pro tvorbu grafu s méně vrcholy jsou podmnožiny množiny vrcholů grafu $G_i$ spojovány v jeden vrchol, čímž vznikne hrubší graf $G_{i+1}$ splňující výše uvedené podmínky kladené na posloupnost $(G_i)_0^m$. Při konstrukci členu $G_{i+1}$ z členu $G_i$ je pro udržení strukturálních informací o původním grafu nutné, abychom použili ohodnocený graf, kde ohodnocení vrcholů a hran při tvorbě faktorgrafu pokládáme pro každý vrchol (resp. hranu) roven součtu vah všech vrcholů (resp. hran) spojením kterých daný vrchol (resp. hrana) vznikl. 
 
-\subsection{Dělení získaného grafu}
-V této fázi dochází k rozdělení grafu $G_m=(V_m,E_m)$ libovolným algoritmem pro dělení grafů. Označme získané rozdělení $P_m$.
+\begin{definition}
+  Mějme graf $G = (V, E)$. Párováním grafu $G$ nazveme podmnožinu množiny $E$, pro kterou platí, že žádné dvě hrany z této množiny nemají společný koncový bod. Maximálním párováním grafu $G$ nazveme párování grafu $G$ s nejvyšším možným počtem hran.
+\end{definition}
 
-\subsection{Zjemňovací fáze}
-Cílem zjemňovací fáze je promítnout rozdělení $P_m$ grafu $G_m$ na rozdělení $P_0$ vstupního grafu $G_0$ přes rozdělení $P_{m-1},...,P_1$ grafů $G_{m-1},...,G_1$. Rozdělení grafu $G_i$ lze vytvořit z rozdělení grafu $G_{i+1}$ tak, že všechny vrcholy grafu $G_i$, jejichž spojením vznikl multivrchol $v$ grafu $G_{i+1}$ přiřadíme do části rozdělení, v níž leží vrchol $v$.
+Pro získání hrubšího grafu byly popsány dva hlavní postupy. První z nich je založen na nalezení vhodného párování a následném spojení každé dvojice vrcholů spojených hranou náležící do párování do jednoho \cite{edmo:65,lawl:76}. Aby došlo k rychlému zmenšení počtu vrcholů grafu, je vhodné volit maximální párování \cite{hele:95}. Druhý postup hledání vhodných množin vrcholů pro sloučení je založen na spojování skupin vrcholů, které jsou spojeny mnoha hranami \cite{kaku:98} \TODO{konkretni? kaku je souhrn}.
 
-Tímto postupem však může dojít ke ztrátě optimality rozdělení. Proto je vhodné v každém kroku zjemňovací fáze zapojit nějaký vylepšovací algoritmus. Většinou se tento vylepšovací algoritmus neaplikuje na celý graf, ale pouze na části jednotlivých podgrafů ležící v blízkosti hranového separátoru. Většina vylepšovacích algoritmů je založena na KL algoritmu.
+\paragraph{Dělení získaného grafu}
+V této fázi dochází k rozdělení grafu $H$ libovolným algoritmem pro dělení grafů, například lze použít spektrální dělení popsané níže v kapitole \ref{spektral}. Pomocí tohoto algoritmu získáme rozdělení $P_m$ grafu $G_m$.
 
+\paragraph{Projekce rozdělení na původní graf}
+Cílem této fáze je převést získané rozdělení $P_m$ grafu $G_m$ na rozdělení $P_0$ vstupního grafu $G$. Toho dosáhneme postupnou tvorbou posloupnosti rozdělení $P_{m-1}, \ldots, P_1$ grafů $G_{m-1}, \ldots, G_1$. Nejjednodušším způsobem projekce rozdělení grafu $G_{i+1}$ na rozdělení grafu $G_i$ je umístit všechny vrcholy grafu $G_i$, jejichž spojením vznikl vrchol $v$ grafu $G_{i+1}$ do části rozdělení, v níž leží vrchol $v$.
+
+Tento postup však není optimální, protože graf $G_i$ má větší počet vrcholů než $G_{i+1}$ a má tedy více stupňů volnosti vzhledem k optimalitě rozdělení. Díky tomu může nastat situace, kdy rozdělení $P_i$ získané z rozdělení $P_{i+1}$ lze dále vylepšit. Nejběžněji využívaným algoritmem pro vylepšování rozdělení grafu je algoritmus podle Kernighana a Lina \cite{keli:70}, který bude popsán v kapitole \ref{KLalgorithm}. Kvůli snížení časové náročnosti aplikace tohoto algoritmu se častěji setkáme s jeho aplikací pouze na části jednotlivých podgrafů ležící v blízkosti hranového či vrcholového separátoru než s jeho aplikací na celý graf \cite{kaku:98}.
+
+\section{Spektrální dělení}
+\label{spektral}
+\TODO{doplnit}
+
+\section{Algoritmus podle Kernighana a Lina}
+\label{KLalgorithm}
+\TODO{doplnit}
 
 
 \TODO{Co ta ND?}

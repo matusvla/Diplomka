@@ -58,22 +58,36 @@ Povšimněme si, že v definici grafu není vyloučen případ, kdy jsou oba kon
   \textbf{Podgrafem} grafu $G$ nazveme libovolný graf $H=(W,F)$ který splňuje: $W\subseteq V$, $F\subseteq E$ a všechny vrcholy incidentní hranám z $F$ náleží do $W$. Úplný podgraf grafu $G$ nazýváme \textbf{klikou} v grafu $G$. Podgrafem grafu $G$ \textbf{indukovaným} množinou vrcholů $W$ nazveme takový podgraf $G$, který obsahuje všechny hrany grafu $G$, jejichž oba koncové body náleží do $W$, značíme $G(W)$.
 \end{definition}
 
-
-\TODO{Potrebuju ohodnoceny, vazeny?}
 \begin{definition}
   Mějme graf $G=(V,E)$ a zobrazení $\omega:V \rightarrow \mathbb{R}$, resp. $c: E \rightarrow \mathbb{R}$. Přidáním zobrazení $\omega$, resp. $c$ ke~grafu $G$ dostaneme graf, který nazýváme \textbf{ohodnocený}, resp. \textbf{vážený} reálným ohodnocením.
 \end{definition}
 
 \begin{definition}
-  \TODO{doplnit definici cesty bez cyklu!, cyklu, delka cesty}
+  Mějme neorientovaný graf $G=(V,E)$, nechť $k$ je přirozené číslo. Posloupnost vrcholů $(v_i)_{i=1}^{k}$ nazveme \textbf{sledem} v grafu $G$, pokud $\forall i \in \{1,...,k\} (\{v_{i-1},v_i\} \in E)$. Pokud navíc  $\forall i,j \in \{1,...,k\} (i \neq j \Rightarrow v_i \neq v_j)$, nazveme posloupnost $(v_i)_{i=1}^{k}$ \textbf{cestou}.
 \end{definition}
 
 Existuje-li mezi libovolnými dvěma vrcholy grafu cesta, řekneme, že graf je \textbf{souvislý}.
-\textbf{Vzdáleností} dvou vrcholů v souvislém grafu $G=(V,E)$ nazveme minimální délku cesty mezi těmito dvěma vrcholy. Vzdáleností vrcholu $v \in V$ od množiny vrcholů $W \subset V$ nazveme minimální vzdálenost mezi vrcholem $v$ a libovolným vrcholem náležícím do $W$. 
+\textbf{Vzdáleností} dvou vrcholů v souvislém grafu $G=(V,E)$ nazveme délku nejkratší cesty mezi těmito dvěma vrcholy. Vzdáleností vrcholu $v \in V$ od množiny vrcholů $W \subset V$ nazveme minimální vzdálenost mezi vrcholem $v$ a libovolným vrcholem náležícím do $W$. 
 
-\TODO{potrebuju bipartitni?}
-\TODO{potrebuju ctvercovou sit?}
-\TODO{potrebuju faktorgraf?}
+\medskip
+
+Při používání víceúrovňových metod dělení grafů (kapitola \TODO{ref{multilevel}}) budeme často odvozovat z grafu jiný graf shluknutím množin jeho vrcholů Takový graf budeme nazývat faktorgraf a formálně jej definujeme následovně.
+\begin{definition}
+Nechť $\mathcal{P} = \{P_1,\ldots,P_n\}$ je rozkladem množiny vrcholů $V$ grafu $G = (V, E)$.
+Faktorgrafem grafu $G$ nazveme graf $G / \mathcal{P} = (\mathcal{P}, \mathcal{E_P})$,
+kde $(P_i, P_j)\in \mathcal{E_P}$ pro $i,j \in \widehat{n}$, $i \neq j \Leftrightarrow {P_i \cap \mathrm{adj}_G(P_j) \neq \emptyset}$.
+\end{definition}
+
+Proces vytváření faktorgrafu $G / \mathcal{P}$ z grafu $G$ je znázorněn na obrázku \ref{faktorgrafImg}
+
+\bigskip
+{
+  \centering
+  \includegraphics[width=0.8\textwidth]{pictures/faktorgrafcomplete.pdf}
+  \captionof{figure}{Proces vytváření faktorgrafu \label{faktorgrafImg}}
+}
+
+\TODO{potrebuju ctvercovou sit}
 
 \section{Strom}
 
@@ -116,7 +130,7 @@ Neorientovaný graf $G=(V,E)$ s vrcholy $V = {v_1, \ldots, v_m}$ a hranami $E = 
   \right.
 \]
 
-V kapitole ref{spektral} \TODO{bude ref spektral?} budeme potřebovat \textbf{Laplaceovu matici} $Q$ grafu $G$, která je definována následovně:
+V kapitole \TODO{ref{spektral}} budeme potřebovat \textbf{Laplaceovu matici} $Q$ grafu $G$, která je definována následovně:
 \[
 Q_{ij} :=
 \left\{
@@ -133,12 +147,8 @@ Pokud chceme reprezentovat matici pomocí grafu, většinou nám stačí zachyti
 Pokud bychom chtěli do grafu zanést i numerické hodnoty jednotlivých prvků matice, museli bychom použít ohodnocený graf.
 
 \begin{remark}
-  Pro jednoduchost zaveďme následující terminologii. Říkáme, že graf $G$ \textbf{odpovídá} matici $A$ právě tehdy, když matice $A$ je maticí sousednosti grafu $G$.
+  Pro jednoduchost zaveďme následující terminologii. Říkáme, že graf $G$ \textbf{odpovídá} matici $A$ právě tehdy, když matice $A$ má nenulové prvky na stejných pozicích jako matice sousednosti grafu $G$.
 \end{remark}
-
-\TODO{rozhodnout, jestli tam tohle dávat - jo, a def. bipart graf tady}
-Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můžeme také použít bipartitní graf $G=(R,B,E)$ pro nějž platí $|R|=m$, $|B|=n$ a $E = \{(i,j') \ | \ i \in R, j' \in B, a_{ij} \neq 0 \}$.
-\TODO{end}
 
 \bigskip
 {
@@ -147,6 +157,17 @@ Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můž
   \includegraphics[width=0.7\textwidth]{pictures/matgr.pdf}
   \captionof{figure}{Příklad grafu a jemu odpovídající struktury matice\label{prGrMat}}
 }
+\bigskip
+
+Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můžeme také použít bipartitní graf, který je definován následovně:
+
+\begin{definition}
+  Graf $G=(V,E)$ nazveme bipartitním, pokud existuje rozklad množiny $V$ na podmnožiny $R$, $B$ takové, že ${R \choose 2} \cap E = {B \choose 2} \cap E = \emptyset$.
+  \end {definition}
+  Takovýto bipartitní graf se standardně značí $G=(R,B,E)$
+a pokud za jeho pomoci chceme reprezentovat matici $B$, pokládáme $|R|=m$, $|B|=n$ a $E = \{(i,j') \ | \ i \in R, j' \in B, a_{ij} \neq 0 \}$.
+
+\TODO{Příklad = obrázek}
 
 %----------------------------------------------------------------------
 

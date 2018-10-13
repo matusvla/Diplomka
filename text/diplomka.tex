@@ -73,9 +73,14 @@ Existuje-li mezi libovolnými dvěma vrcholy grafu cesta, řekneme, že graf je 
 
 Při používání víceúrovňových metod dělení grafů (kapitola \TODO{ref{multilevel}}) budeme často odvozovat z grafu jiný graf shluknutím množin jeho vrcholů Takový graf budeme nazývat faktorgraf a formálně jej definujeme následovně.
 \begin{definition}
-Nechť $\mathcal{P} = \{P_1,\ldots,P_n\}$ je rozkladem množiny vrcholů $V$ grafu $G = (V, E)$.
-Faktorgrafem grafu $G$ nazveme graf $G / \mathcal{P} = (\mathcal{P}, \mathcal{E_P})$,
-kde $(P_i, P_j)\in \mathcal{E_P}$ pro $i,j \in \widehat{n}$, $i \neq j \Leftrightarrow {P_i \cap \mathrm{adj}_G(P_j) \neq \emptyset}$.
+  Nechť $\mathcal{P} = \{P_1,\ldots,P_n\}$ je rozkladem množiny vrcholů $V$ grafu $G = (V, E)$. Faktorgrafem grafu $G$ nazveme graf $G / \mathcal{P} = (\mathcal{P}, \mathcal{E_P})$, kde 
+  \[
+    \left(
+      (P_i, P_j)\in \mathcal{E_P} \mbox{ pro } i,j \in \widehat{n}, i \neq j 
+    \right)
+    \Leftrightarrow {P_i \cap \mathrm{adj}_G(P_j) \neq \emptyset}
+    .
+  \]
 \end{definition}
 
 Proces vytváření faktorgrafu $G / \mathcal{P}$ z grafu $G$ je znázorněn na obrázku \ref{faktorgrafImg}
@@ -159,13 +164,13 @@ Pokud bychom chtěli do grafu zanést i numerické hodnoty jednotlivých prvků 
 }
 \bigskip
 
-Pro reprezentaci ne nutně čtvercové matice $B$ o rozměrech $m\times n$ můžeme také použít bipartitní graf, který je definován následovně:
+Pro reprezentaci ne nutně čtvercové matice $A$ o rozměrech $m\times n$ můžeme také použít bipartitní graf, který je definován následovně:
 
 \begin{definition}
   Graf $G=(V,E)$ nazveme bipartitním, pokud existuje rozklad množiny $V$ na podmnožiny $R$, $B$ takové, že ${R \choose 2} \cap E = {B \choose 2} \cap E = \emptyset$.
-  \end {definition}
-  Takovýto bipartitní graf se standardně značí $G=(R,B,E)$
-a pokud za jeho pomoci chceme reprezentovat matici $B$, pokládáme $|R|=m$, $|B|=n$ a $E = \{(i,j') \ | \ i \in R, j' \in B, a_{ij} \neq 0 \}$.
+\end{definition}
+
+Jinými slovy se jedná go graf, který lze rozdělit na dvě části tak, že v žádné z částí není ani jedna hrana. Takovýto bipartitní graf se standardně značí $G=(R,B,E)$ a pokud za jeho pomoci chceme reprezentovat matici $A$, pokládáme $|R|=m$, $|B|=n$ a $E = \left\{(v_i,v_j) \ | \ v_i \in R, v_j \in B, a_{ij} \neq 0 \right\}$.
 
 \TODO{Příklad = obrázek}
 
@@ -173,6 +178,51 @@ a pokud za jeho pomoci chceme reprezentovat matici $B$, pokládáme $|R|=m$, $|B
 
 \chapter{Dělení grafů}
 \TODO{doplnit, nejdriv viceurovnove, cela prace smeruje k tomu, ze se prerozdeluje. Metis, profesionalni kod - aplikuje viceurovnove deleni. Vicurovnove deleni - hlavni koncept. Spekral na nejhrubsi, KL pri zjemnovani. OHODNOCENE - pri zdrcavani vrcholu i hran v multilevelu.}
+
+V této kapitole formálně popíšeme problém dělení grafu na $k$ podgrafů a definujeme pojmy s ním spojené. Vzhledem k tomu, že v naší implementaci používáme pro dělení grafů profesionální softwarovou knihovnu METIS, zaměříme se při popisu konkrétních algoritmů pro dělení grafů nejprve na schéma víceúrovňového dělení grafu jakožto algoritmus používaný při profesionálních implementacích dělení grafů. Dále se budeme věnovat některým technikám, které tvoří součást víceúrovňového dělení grafů, konkrétně vylepšovacímu algoritmu podle Kernighana a Lina a algoritmu spektrálního dělení. Na závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jakožto konkrétní příklad víceúrovňového algoritmu pro dělení grafů.
+
+Dělení grafů na $k$ podgrafů je praktický problém s bohatým teoretickým zázemím a mnoha aplikacemi. Může nám pomoci při řešení parciálních diferenciálních rovnic na moderních počítačových architekturách \cite{posl:90} a nezanedbatelnou roli hraje také při výrobě mikroprocesorů metodou VLSI nebo při řešení velkých systémů lineárních rovnic \cite{keli:70, pis:84}. Často dochází k omezení se na dělení grafu na dva podgrafy, v této práce se však pokusíme prozkoumat i vliv dělení grafu na více částí.
+
+Podmínky, která jsou na výsledné rozdělení grafu kladeny se mohou lišit v závislosti na daném použití. V této kapitole popíšeme klasická kritéria, která se používají pro určování kvality rozdělení, v kapitole \ref{dalsiParametry} poté bude popsán problém dělení grafů vzhledem k dodatečným kritériím (například vzhledem k maticovým operacím) a s ohledem na více kritérií.
+
+\section{Formální definice dělení grafu}
+
+Jako dělení grafu na $k$ částí označujeme hledání rozkladu množiny vrcholů tohoto grafu na $k$ podmnožin. V nejklasičtějším případě je problém dělení grafů na $k$ podgrafů definován následovně.
+
+Mějme graf $G=(V,E)$ s počtem vrcholů $n$. Hledání optimálního rozdělení grafu na $k$ podgrafů je ve~své podstatě hledání rozkladu $V_1,V_2,\ldots,V_k$ množiny vrcholů $V$ splňujícího:
+\begin{enumerate}
+  \item $|V_i|=n/k$
+  \item Počet hran spojujících vrcholy ležící v různých podmnožinách je minimální možný.
+\end{enumerate}
+\textbf{Rozdělení grafu} běžně zapisujeme jako vektor $P$ o délce $n$ takový, že pro každý vrchol $v \in V$ je podgraf, v němž se vrchol v nachází, určen $v$-tou složkou vektoru $P$.
+
+Pokud má graf $G$ sudý počet vrcholů a rozdělíme ho na dvě části s množinami vrcholů $V_1, V_2$, které mají stejný počet prvků, nazveme toto rozdělení \textbf{bisekcí} a velikost hranového separátoru nazýváme šířkou bisekce.
+
+Mějme graf $G=(V,E)$ a jeho rozdělení na $k$ podgrafů s množinami vrcholů $V_1, V_2, \ldots, V_k$. Množinu hran, jejichž jeden koncový bod náleží do $V_i$ a druhý do $V_j$ pro $i \neq j$ nazveme \textbf{hranovým separátorem}, značíme $\delta(A,B)$. 
+\textbf{Vrcholovým separátorem} $V_S$ grafu $G$ nazveme podmnožinu množiny vrcholů $V$ takovou, že odstraněním všech vrcholů náležících do této množiny z grafu $G$ dojde k jeho rozdělení na $k$ podgrafů, mezi nimiž nevede ani jedna hrana. Řešení problému optimální transformace mezi hranovým a vrcholovým separátorem, známe-li jeden z nich, můžeme naleznout v \cite{pofa:90}.
+
+Ukazuje se, že rozhodovací problém pro optimální rozdělení grafu je NP-úplný \cite{gajo:79}. Existují však algoritmy, které rozdělí graf v rozumném čase, přičemž kvalita jimi nalezeného rozdělení bude poměrně dobrá \cite{lita:79}. To nám ale nic neříká o řešení problému samotného nalezení optimálního hranového nebo vrcholového separátoru \cite{liu:89}
+
+\section{Obecné schéma víceúrovňového dělení grafů}
+\label{multilevel}
+
+Víceúrovňové dělení grafů slouží k převedení problému dělení grafu s velkým počtem vrcholů na problém dělení grafu s počtem vrcholů výrazně menším. Tím může dojít k výraznému zkrácení času potřebného pro běh algoritmu \TODO{zdroj}, proto je tento postup využíván v profesionálních softwarových nástrojích pro dělení grafů. Nejobecnější popis tohoto schématu sestává ze tří základních fází: zhrubovací fáze (coarsening phase), rozdělení vzniklého grafu a projekce tohoto rozdělení zpět na původní graf (refinement phase).
+
+\subsection{Zhrubovací fáze}
+Mějme graf $G_0=(V_0,E_0)$. Pak ve zhrubovací fázi dochází k vytváření posloupnosti grafů $G_1,...G_m$ takových, že každý z těchto grafů je vždy faktorgrafem předchozího a má méně vrcholů než předchozí. Pro udržení informací o původním grafu je nutné, abychom ohodnocení vrcholů a hran při tvorbě faktorgrafu položili pro každý vrchol, resp. hranu roven součtu vah všech vrcholů, resp. hran, spojením kterých tento vrchol, resp. hrana vznikl.
+
+Pro tvorbu faktorgrafu daného grafu se využívá principu nalezení maximálního párování grafu a následného spojení koncových vrcholů hran náležících do párování \cite{edmo:65,lawl:76}.
+
+\subsection{Dělení získaného grafu}
+V této fázi dochází k rozdělení grafu $G_m=(V_m,E_m)$ libovolným algoritmem pro dělení grafů. Označme získané rozdělení $P_m$.
+
+\subsection{Zjemňovací fáze}
+Cílem zjemňovací fáze je promítnout rozdělení $P_m$ grafu $G_m$ na rozdělení $P_0$ vstupního grafu $G_0$ přes rozdělení $P_{m-1},...,P_1$ grafů $G_{m-1},...,G_1$. Rozdělení grafu $G_i$ lze vytvořit z rozdělení grafu $G_{i+1}$ tak, že všechny vrcholy grafu $G_i$, jejichž spojením vznikl multivrchol $v$ grafu $G_{i+1}$ přiřadíme do části rozdělení, v níž leží vrchol $v$.
+
+Tímto postupem však může dojít ke ztrátě optimality rozdělení. Proto je vhodné v každém kroku zjemňovací fáze zapojit nějaký vylepšovací algoritmus. Většinou se tento vylepšovací algoritmus neaplikuje na celý graf, ale pouze na části jednotlivých podgrafů ležící v blízkosti hranového separátoru. Většina vylepšovacích algoritmů je založena na KL algoritmu.
+
+
+
 \TODO{Co ta ND?}
 
 %----------------------------------------------------------------------
@@ -183,6 +233,7 @@ a pokud za jeho pomoci chceme reprezentovat matici $B$, pokládáme $|R|=m$, $|B
 %----------------------------------------------------------------------
 
 \chapter{Další parametry pro dělení grafu}
+\label{dalsiParametry}
 
 Dělení grafu lze využít jako nástroj pro paralelizaci problémů, které lze převést na úlohy na grafech. Vzhledem ke vztahu matic a grafů popsanému výše v odstavci \ref{GrMatRel} je Choleského rozklad popsaný v kapitole \TODO{ref},
 

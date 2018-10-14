@@ -230,13 +230,16 @@ Tento postup však není optimální, protože graf $G_i$ má větší počet vr
 
 \section{Spektrální dělení}
 \label{spektral}
-\TODO{doplnit}
+\TODO{pro $k$ částí?}
+
 
 \section{Algoritmus podle Kernighana a Lina}
 \label{KLalgorithm}
-\TODO{doplnit}
+Algoritmus podle Kernighana a Lina (KL algoritmus) vznikl v roce 1970 s cílem dělit elektrické obvody na kartách \cite{keli:70}. V jeho základní podobě se jedná o algoritmus pro vylepšování již získaného rozdělení grafu, pro jeho funkci je tedy nutné poskytnout mu vstupní rozdělení grafu. Pokud používáme algoritmus podle Kernighana a Lina přímo jako dělicí algoritmus, můžeme vstupní rozdělení lze zvolit libovolně. Jeho výsledky pro různá počáteční rozdělení se však mohou lišit. Proto je v praxi je výhodné, aby představovalo vstupní rozdělení rozumnou aproximaci optimálního rozdělení. Kvůli tomu se algoritmus podle Kernighana a Lina obvykle používá v kombinaci s jiným algoritmem pro dělení grafů, případně jako součást většího celku - například při víceúrovňovém dělení grafu ve fázi projekce hrubého rozdělení na vstupní graf (viz kapitola \ref{multilevel}). V tomto případě je většinou využita modifikace tohoto algoritmu, která bere v úvahu pouze vrcholy blízko separátoru.
+\TODO{KL algoritmus pro $k$ částí, vrcholový separátor - je to tak, že se vždycky přehazuje mezi dvojicí částí?}
 
 
+\section{Metoda vnořených řezů}
 \TODO{Co ta ND?}
 
 %----------------------------------------------------------------------

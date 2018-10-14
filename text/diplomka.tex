@@ -240,12 +240,30 @@ Algoritmus podle Kernighana a Lina (KL algoritmus) vznikl v roce 1970 s cílem d
 
 
 \section{Metoda vnořených řezů}
-\TODO{Co ta ND?}
+Metoda vnořených řezů byla navržena a publikována v roce 1973 Alanem Georgem \TODO{cite}. Jedná se o analyticky dobře popsaný algoritmus využívající metodu rozděl a panuj pro řešení problémů na řídkých maticích pomocí jejich převedení na grafy a dělení těchto grafů. Tento algoritmus je teoreticky velmi dobře popsán pro některé speciální typy grafů, například pro čtvercové sítě. V této práci jej uvádíme jako konkrétní příklad přístupu k víceúrovňovému dělení grafů a proto se \TODO{?budeme zabývat jeho obecnou formou pomocí níž lze dělit libovolné grafy.}
+
 
 %----------------------------------------------------------------------
 
 \chapter{Rozklady matic}
-\TODO{doplnit, neuplne asi ani ne}
+
+Při řešení maticových úloh velkých rozměrů je často výhodné si danou matici rozložit na součin dvou nebo více matic a díky tomu původní problém převést na sérii výpočetně jednodušších problémů. Jako klasické příklady úloh z numerické lineární algebry, při jejichž řešení nám mohou rozklady matic pomoci, uveďme hledání řešení soustav lineárních algebraických rovnic či problém nalezení vlastních či singulárních čísel a příslušných vektorů. Rozklady matic navíc hrají nezanedbatelnou roli například v QR algoritmu, LR algoritmu \cite{govl:83} nebo Lanczosově algoritmu \cite{lanc:50,paig:72}. Rozklady matic nám mohou pomoci odhalit i teoretické vlastnosti a strukturu matic a odpovídajících maticových problémů. Příkladem takového rozkladu je singulární rozklad (SVD decomposition) \cite{govl:83}.
+
+Rozklady matic můžeme rozdělit na dvě základní skupiny - úplné rozklady a neúplné rozklady. V této práci nás budou zajímat především rozklady, které se týkají řídkých matic, tedy matic, které obsahují velké množství nulových prvků. U takových matic bereme pro zefektivnění výpočtů do úvahy strukturu jejich nenulových prvků. Při výpočtu úplného rozkladu řídké matice může v průběhu rozkladu docházet ke změnám ve struktuře jejích nenulových prvků. Proces výpočtu úplného rozkladu může být pak výpočetně velmi náročný. V takovém případě je častou praxí nepočítat úplný rozklad, ale vypočítat jen jeho aproximaci, o které hovoříme jako o neúplném rozkladu a pro získání řešení soustavy je třeba jej kombinovat s nějakou iterační metodou \cite{temp94}. 
+
+\TODO{Je to potreba?}
+V námi popisovaném základním modelu rozkladů matic se omezíme na úplný rozklad symetrické a pozitivně definitní matice. Nejedná se o samoúčelné omezení, při řešení mnoha praktických úloh se setkáváme právě s maticemi splňujícími tyto podmínky. Navíc se ukazuje, že i pro matice, které nejsou symetrické nebo pozitivně definitní, lze při jejich rozkladech vyjít z tohoto modelu.
+\TODO{end}
+
+\section{Úplné rozklady}
+
+Společným znakem algoritmů pro úplný rozklad matice je, že při práci v přesné aritmetice, dokážou tyto algoritmy najít přesný rozklad matice v konečně mnoha krocích. Nejklasičtějším příkladem takovéhoto algoritmu je symetrická eliminace, jejímž speciálním případem je Choleského rozklad, který pro nás bude obzvláště zajímavý. V této kapitole nebudeme ve schématech rozlišovat řídké a husté matice.
+
+\subsection{Symetrická eliminace}
+\TODO{doplnit}
+
+
+\TODO{neuplne asi ani ne}
 
 %----------------------------------------------------------------------
 

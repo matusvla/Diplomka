@@ -259,7 +259,207 @@ V námi popisovaném základním modelu rozkladů matic se omezíme na úplný r
 
 Společným znakem algoritmů pro úplný rozklad matice je, že při práci v přesné aritmetice, dokážou tyto algoritmy najít přesný rozklad matice v konečně mnoha krocích. Nejklasičtějším příkladem takovéhoto algoritmu je symetrická eliminace, jejímž speciálním případem je Choleského rozklad, který pro nás bude obzvláště zajímavý. V této kapitole nebudeme ve schématech rozlišovat řídké a husté matice.
 
+V této práci pro nás bude zajímavý především Choleského rozklad jakožto konkrétní příklad algoritmu pro úplný rozklad matice. Jedná se o speciální případ symetrické eliminace, která bude v této kapitole taktéž popsána. 
+
 \subsection{Symetrická eliminace}
+
+Cílem \textbf{symetrické eliminace} je rozložit danou čtvercovou matici $A$ na tvar $LDL^T$, kde $L$ je dolní trojúhelníková matice a $D$ je diagonální matice. Obecně pro indefinitní matice je třeba pro zajištění numerické stability tohoto algoritmu vynásobit danou matici nějakou permutační maticí \cite{fomo:67}. Pro pozitivně definitní matice je však stabilita zajištěna i bez toho.\TODO{cite}
+
+Mějme matici $A$ o rozměrech $N \times N$. Symetrickou eliminací matice $A$ nazveme hledání konečných posloupností $A_0,\ldots,A_{N-1}$, $L_1,\ldots,L_{N-1}$ splňujících, že $\left(\forall i \in \{1,...,N-1\}\right)\left(A_{i-1}=L_i A_i L_i^T \right)$ a $A_{N-1}=D$.
+Předpis pro hledání těchto posloupností je následující:
+
+\begin{gather}
+\begin{aligned}
+\label{SymEl}
+A_0 & = A = \left( \begin{matrix}
+               d_1 & v_1^T \\
+               v_1 & \bar{H}_1
+             \end{matrix} \right)
+           =\left(\begin{matrix}
+              1               & 0 \\
+              \frac{v_1}{d_1} & I_{N-1}
+            \end{matrix} \right)
+            \left(\begin{matrix}
+              d_1 & 0 \\
+              0   & \bar{H}_1-\frac{v_1v_1^T}{d_1}
+            \end{matrix} \right)
+            \left(\begin{matrix}
+              1 & \frac{v_1^T}{d_1} \\
+              0 & I_{N-1}
+            \end{matrix} \right) \\
+    &     = L_1
+            \left(\begin{matrix}
+              d_1 & 0 \\
+              0 & H_1
+            \end{matrix} \right)
+            L_1^T
+          = L_1 A_1 L_1^T \\
+  A_1 & = \left( \begin{matrix}
+               d_1 &  0   & 0 \\
+               0   &  d_2 & v_2^T \\
+               0   &  v_2 & \bar{H}_2
+             \end{matrix} \right)
+        =  L_2 A_2 L_2^T \\
+    & \vdots \\
+  A_{N-1} & = D,
+\end{aligned}
+\end{gather}
+
+kde $H_i=\bar{H}_i-\frac{v_i v_i^T}{d_i}$.
+Zřejmě pak $A = LDL^T$, kde $L:=L_1\cdots L_{N-1}$
+
+\subsection{Choleského rozklad}
+\textbf{Choleského rozklad} je speciálním případem symetrické eliminace. Jeho cílem je rozložit pozitivně definitní matici $A$ na tvar $A=LL^T$, kde matici $L$ označujeme jako faktor matice $A$. Jinými slovy se jedná o symetrickou eliminaci matice $A$, kde požadujeme, aby matice $D$ byla rovna jednotkové matici. Jedná se o modifikaci Gaussovy eliminace pro symetrické pozitivně definitní matice. Základní informaci o existenci Choleského rozkladu pozitivně definitní matice nám dává následující věta, jejíž důkaz můžeme nalézt například v \cite{govl:83}.
+
+\begin{theorem}
+  Pro libovolnou pozitivně definitní matici $A$ existuje jednoznačný rozklad $A=LL^T$, kde L je dolní trojúhelníková matice s kladnými prvky na diagonále.
+\end{theorem}
+
+Pro výpočet Choleského rozkladu matice $A$ stačí modifikovat algoritmus \ref{SymEl} tak, aby matice $D$ vznikající při symetrické eliminaci matice $A$ byla rovná jednotkové matici. Toho dosáhneme následovně:
+
+\begin{gather}
+\begin{aligned}
+\label{Cholesky}
+A_0 & = A = \left( \begin{matrix}
+               d_1 & v_1^T \\
+               v_1 & \bar{H}_1
+             \end{matrix} \right)
+           =\left(\begin{matrix}
+              \sqrt{d_1}      & 0 \\
+              \frac{v_1}{\sqrt{d_1}} & I_{N-1}
+            \end{matrix} \right)
+            \left(\begin{matrix}
+              1   & 0 \\
+              0   & \bar{H}_1-\frac{v_1v_1^T}{d_1}
+            \end{matrix} \right)
+            \left(\begin{matrix}
+              \sqrt{d_1} & \frac{v_1^T}{\sqrt{d_1}} \\
+              0 & I_{N-1}
+            \end{matrix} \right) \\
+    &     = L_1
+            \left(\begin{matrix}
+              1 & 0 \\
+              0 & H_1
+            \end{matrix} \right)
+            L_1^T
+          = L_1 A_1 L_1^T \\
+  A_1 & = \left( \begin{matrix}
+               1   &  0   & 0 \\
+               0   &  d_2 & v_2^T \\
+               0   &  v_2 & \bar{H}_2
+             \end{matrix} \right)
+        =  L_2 A_2 L_2^T \\
+    & \vdots \\
+  A_{N-1} & = L_N I_N L_N^T,
+\end{aligned}
+\end{gather}
+
+kde opět zřejmě platí, že $L=L_1...L_N$.
+
+\medskip
+
+Matici $L$ můžeme však z matic $L_1,\ldots,L_N$ vypočítat výrazně jednodušším způsobem.
+
+\begin{lemma}
+\label{Lsoucet}
+    Při konstrukci Choleského rozkladu $LL^T$ matice $A$ pomocí algoritmu (\ref{Cholesky}) platí
+    \begin{equation}
+      L = L_1 + L_2 + \ldots + L_N - (N-1)I_N,
+    \end{equation}
+    tj. $i$-tý sloupec $L$ je roven $i$-tému sloupci $L_i$.
+\end{lemma}
+\begin{proof}
+  Matice $L_i$ má tvar
+  \[
+  \left(
+  \begin{matrix}
+    1 &        &   &                              &   &        &   \\
+      & \ddots &   &                              &   & 0      &   \\
+      &        & 1 &                              &   &        &   \\
+      &        &   & \sqrt{d_i}                   &   &        &   \\
+      &        &   & \frac{\vec{v_i}}{\sqrt{d_i}} & 1 &        &   \\
+      & 0      &   &                              &   & \ddots &   \\
+      &        &   &                              &   &        & 1
+  \end{matrix}
+  \right).
+  \]
+  Vynásobením matice $L_i$ a $L_j$, kde $i < j$, zjevně dostanu
+  \[
+  \left(
+  \begin{matrix}
+    1 &        &   &                              &   &        &   \\
+      & \ddots &   &                              &   & 0      &   \\
+      &        & \sqrt{d_i} &     &   &        &   \\
+      &        & \frac{\vec{v_i}}{\sqrt{d_i}}  &     \ddots               &   &        &   \\
+      &        &   &  & \sqrt{d_j} &        &   \\
+      & 0      &   &  & \frac{\vec{v_j}}{\sqrt{d_j}}  & \ddots &   \\
+      &        &   &  &   &        & 1
+  \end{matrix}
+  \right),
+  \]
+  což je přesně matice $L_i + L_j - I$.
+  Z toho již plyne tvrzení lemmatu.
+\end{proof}
+
+Pro výpočet prvků matice $L$ existují tři základní postupy: submaticové schéma vyplývající přímo z lemmatu \ref{Lsoucet}, řádkové schéma s použitím metody ohraničování a sloupcové schéma. V přesné aritmetice jsou všechna tři tato schémata ekvivalentní, ale v případě \TODO{nepřesné aritmetiky? Je to vhodné pojmenování?}, se kterou se standardně při počítačových výpočtech setkáváme, můžou schémata dávat různé výsledky. Tato schémata napočítávají prvky matice $L$ v různém pořadí. Navíc, efektivní modifikace rozdělení je velmi pevně propojena s očíslováním vrcholů částí rozděleného grafu (popsáno v \ref{Numbering}).
+
+\paragraph{Submaticové schéma}
+S pomocí lemmatu \ref{Lsoucet} můžeme navrhnout submaticové schéma pro výpočet faktoru $L$ následovně. Matici $L$ získáváme po sloupcích, ale při výpočtu $i$-tého sloupce zároveň počítáme submatici $H_i = \bar{H}_i-\frac{v_i v_i^T}{d_i}$ matice $A$, kterou potřebujeme pro výpočet zbylých částí faktoru matice $A$ (viz algoritmus (\ref{Cholesky})).
+
+\paragraph{Řádkové schéma - metoda ohraničování}
+Jiným přístupem, který můžeme zvolit pro získání Choleského rozkladu $L L^T$ matice $A$ je řádkové schéma využívající metodu ohraničování (bordering method) \TODO{cite}. Nejprve přepišme matici $A$ do tvaru
+\[
+A =
+\begin{pmatrix}
+  M & \vec{u} \\
+  \vec{u^T} & s
+\end{pmatrix},
+\]
+přičemž pro odvození vztahu pro výpočet prvků faktoru $L$ předpokládejme, že Choleského rozklad $L_M L_M^T$ matice $M$ již známe. Pak pro Choleského rozklad matice $A$ platí:
+\[
+A =
+\begin{pmatrix}
+  L_M & 0 \\
+  \vec{w}^T & t
+\end{pmatrix}
+\begin{pmatrix}
+  L_M^T & \vec{w} \\
+  0 & t
+\end{pmatrix},
+\]
+kde je zřejmě $\vec{w}=L_M^{-1}\vec{u}$ a $t=(s-\vec{w}^T\vec{w})^{1/2}$.
+
+Pro získání Choleského rozkladu matice $M$, jehož znalost jsme výše předpoládali, můžeme použít stejný postup. Rekurzivním použitím této metody dostáváme soustavu lineárních algebraických rovnic pro výpočet $i$-tého řádku matice $L$.
+\begin{gather*}
+\begin{pmatrix}
+  l_{1,1} &  & 0 \\
+  \vdots  & \ddots &  \\
+  l_{i-1,1} & \cdots & l_{i-1,i-1}
+\end{pmatrix}
+\begin{pmatrix}
+  l_{i,1} \\
+  \vdots \\
+  l_{i,i-1}
+\end{pmatrix}
+=
+\begin{pmatrix}
+  a_{i,1} \\
+  \vdots \\
+  a_{i,i-1}
+\end{pmatrix} \\
+ l_{i,i} = \left(a_{i,i} - \sum_{j=1}^{i-1}{l_{i,j}^2}\right)^\frac12.
+\end{gather*}
+
+\paragraph{Sloupcové schéma}
+Jedná se o obdobný postup jako v řádkovém schématu, pouze napočítáváme prvky matice $L$ po sloupcích. Vzorce, které nám vznikou jsou pro $j = 1,2,\ldots, N$ a pro $i = j+1,j+2,\ldots,N$ následující:
+\begin{align*}
+  l_{j,j} &= \left(a_{j,j} - \sum_{k=1}^{j-1}{l_{j,k}^2}\right)^\frac12 \\
+  l_{i,j} &= \left(a_{i,j} - \sum_{k=1}^{j-1}{l_{i,k}l_{j,k}}\right)/l_{j,j}.
+\end{align*}
+
+
+
+
 \TODO{doplnit}
 
 
@@ -270,7 +470,7 @@ Společným znakem algoritmů pro úplný rozklad matice je, že při práci v p
 \chapter{Další parametry pro dělení grafu}
 \label{dalsiParametry}
 
-Dělení grafu lze využít jako nástroj pro paralelizaci problémů, které lze převést na úlohy na grafech. Vzhledem ke vztahu matic a grafů popsanému výše v odstavci \ref{GrMatRel} je Choleského rozklad popsaný v kapitole \TODO{ref},
+Dělení grafu lze využít jako nástroj pro paralelizaci problémů, které lze převést na úlohy na grafech. Vzhledem ke vztahu matic a grafů popsanému výše v odstavci \ref{GrMatRel} je Choleského rozklad popsaný v kapitole \ref{SymElCholDec},
 
 Jak bylo zmíněno, při dělení grafu podle klasické definice bereme ohled pouze na dvě kritéria: na velikost separátoru a vyváženost jednotlivých částí rozdělení. V případě, že dělení grafu využíváme jako součást komplexnějšího algoritmu, například pro paralelizaci nějaké maticové úlohy, nemusí být rozdělení vytvořené s ohledem na tato kritéria optimální. V takovém případě je nutné brát ohled na to, jaké operace budeme na výsledných podgrafech provádět a v závislosti na tom specifikovat nová kritéria.
 
@@ -336,6 +536,7 @@ Jak vidíme, vyvstávají nám při dělení grafu s cílem vypočítávat Chole
 Způsob hledání odpovědí na tyto dvě otázky popíšeme v následujících dvou oddílech.
 
 \section{Algoritmy pro očíslování vrcholů grafu}
+\label{Numbering}
 V tomto oddíle popíšeme základní algoritmy pro očíslování vrcholů grafu. Zřejmě platí, že přečíslováním vrcholů grafu dojde k permutaci řádků a sloupů v jeho matici sousednosti. Hlavní motivací, proč je pro nás číslování vrcholů grafu důležité, tedy je, že permutací řádků matice můžeme výrazně redukovat počet operací potřebných pro její Choleského rozklad.
 
 Na závěr kapitoly se zmíníme o topologickém číslování vrcholů stromu, které pro nás bude potřebné při popisu eliminačních stromů.

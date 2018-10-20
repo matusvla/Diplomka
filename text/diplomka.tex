@@ -15,6 +15,7 @@
     \usepackage{multirow}
     \usepackage{url}
     \usetikzlibrary{calc}
+    \setcounter{secnumdepth}{3}
 
 \theoremstyle{plain}
     \newtheorem{theorem}{Věta}
@@ -457,13 +458,45 @@ Jedná se o obdobný postup jako v řádkovém schématu, pouze napočítáváme
   l_{i,j} &= \left(a_{i,j} - \sum_{k=1}^{j-1}{l_{i,k}l_{j,k}}\right)/l_{j,j}.
 \end{align*}
 
+\subsubsection{Choleského rozklad pro řídké matice}
+\TODO{Tohle je z VU upravené jen minimálně. Vadí to?}
 
+V praktických aplikacích Choleského rozkladu se často setkáváme s řídkými maticemi, navíc jsou pro nás řídké matice zajímavé i z hlediska dělení příslušných grafů. Pokud máme řídkou matici, v optimálním případě bychom chtěli, aby i její Choleského faktor byl řídká matice, jejíž dolní trojúhelník má stejnou strukturu jako dolní trojúhelník původní matice.
 
+Mějme čtvercovou matici $A$ o rozměrech $N\times N$ a její Choleského rozklad $LL^T$. Základním problémem výše zmíněných algoritmů je, že matice $L$ běžně obsahuje nenulové prvky na místech, na nichž měla matice $A$ nuly. Toto zaplňování je způsobeno při vytváření posloupnosti matic $H_i$ (viz algoritmus \ref{Cholesky}), konkrétně při přechodu od matice $\bar{H}_i$ k matici $H_i$. Připomeňme, že mezi těmito dvěma maticemi platí vztah
+\[
+H_i = \bar{H}_i - \frac{\vec{v_i}\vec{v_i}^T}{d_i}.
+\]
+Označme $\eta(A)$, resp. $\eta(\vec{v})$ počet nenulových prvků matice $A$, resp. vektoru $v$. Pak z lemmatu \ref{Lsoucet} a ze vztahu pro výpočet $L_i$ v Choleského algoritmu \ref{Cholesky} zřejmě platí
+\[
+\eta(L) = N + \sum_{i=1}^{N-1}\eta(\vec{v_i}).
+\]
+Vyslovme větu, ze které nám vyplyne počet informaci o počtu multiplikativních operací (násobení a dělení) potřebných pro pro výpočet Choleského rozkladu matice $A$.
+\begin{theorem}
+\label{Cholesky_operace}
+  Počet multiplikativních operací potřebných pro výpočet Choleského rozkladu $LL^T$ matice $A$ o rozměrech $N \times N$ je roven
+  \[
+  \frac12\sum_{i=1}^{N-1}\eta(v_i)\left(\eta(v_i)+3\right)=
+  \frac12\sum_{i=1}^{N-1}\left(\eta(L_{*i})-1\right)\left(\eta(L_{*i})+2\right),
+  \]
+  kde $L_{*i}$ označuje $i$-tý sloupec matice $L$.
+\end{theorem}
+\begin{proof}
+  Jednotlivá schémata pro výpočet matice $L$ popsaná v předchozí kapitole se liší pouze v pořadí, v němž výpočet prvků matice $L$ provádějí.
 
-\TODO{doplnit}
+  V $i$-tém kroku algoritmu potřebujeme $\eta(\vec{v_i})$ operací pro výpočet $v_i/\sqrt{d_i}$ a $\frac12\eta(\vec{v_i})\left(\eta(\vec{v_i})+1\right)$ operací pro vytvoření matice $\frac{\vec{v_i}\vec{v_i}^T}{d_i}$. Tvrzení věty dostaneme sečtením přes všechna $i$.
+\end{proof}
 
+\begin{remark}
+Pro hustou matici $B$ platí, že počet nenulových prvků v jejím Choleského faktoru $L_B$ je roven $\frac12 N(N+1)$.
+Z věty \ref{Cholesky_operace} je tedy počet operací potřebný pro výpočet Choleského rozkladu matice $B$ roven
+\begin{equation}\label{pocetoperaci}
+  \frac12 \sum_{1}^{N-1}i(i+3) = \frac16 N^3 + \frac12 N^2 - \frac23 N.
+\end{equation}
+Z toho plyne, že počet operací pro výpočet Choleského rozkladu libovolné řídké matice o rozměrech $N \times N $ lze seshora odhadnout číslem daným vztahem (\ref{pocetoperaci}).
+\end{remark}
 
-\TODO{neuplne asi ani ne}
+Problém zaplňování se dá alespoň částečně vyřešit tím, že místo rozkladu matice $A$ provádíme rozklad matice $PAP^T$, kde $P$ je nějaká permutační matice (tj. matice, kterou když vynásobíme matici $A$, dojde pouze k permutaci řádků, resp. sloupců matice $A$). Vzhledem k tomu, že jsme od začátku předpokládali, že je matice $A$ symetrická a pozitivně definitní, je i matice $PAP^T$ symetrická a pozitivně definitní. Pokud máme zadán problém řešení soustavy $Ax=b$, převedeme jej na problém řešení soustavy $(PAP^T)(Px)=Pb$. Tento problém je úzce spjat s problémem očíslování grafů při jejich dělení a budeme se jím zabývat v dalších kapitolách.
 
 %----------------------------------------------------------------------
 
@@ -718,13 +751,6 @@ Výstupem rutiny \texttt{METIS\_ComputeVertexSeparator} je pole $part$ o délce 
 \TODO{mám to tam vůbec dávat?}
 Pro úspěšné slinkování a zkompilování
 \TODO{nainstalovaný METIS}
-
-%----------------------------------------------------------------------
-
-\chapter{Různé}
-\TODO{rozdistribuovat}
-\section{Další témata}
-\TODO{Řídké matice vs. husté matice}
 
 %----------------------------------------------------------------------
 

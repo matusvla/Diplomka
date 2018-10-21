@@ -34,6 +34,7 @@
 
 \begin{document}
 \TODO{nekonzistence v n a N}
+\TODO{udelat poradek v citacich}
 
 %----------------------------------------------------------------------
 
@@ -626,7 +627,9 @@ Topologické číslování vrcholů stromu je intuitivní způsob pro očíslov�
 
 
 \section{Eliminační stromy}
-V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic. Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty. Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.
+\TODO{vic citaci}
+
+V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic \cite{liu:90}. Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty. Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.
 
 V této kapitole bez újmy na obecnosti předpokládáme, že matice, jejíž Choleského rozklad chceme napočítávat, je ireducibilní, a tedy graf odpovídající této matici je souvislý.
 
@@ -677,8 +680,15 @@ Pokud $x_i$ je vlastním předchůdcem $x_j$ v eliminačním stromu, pak $i > j$
 Přímým důsledkem tvrzení \ref{ColDepProposition} je, že graf $G(F)$ zachycuje informace o závislostech mezi jednotlivými sloupci při výpočtu Choleského rozkladu. 
 
 \subsection{Eliminační stromy a Choleského rozklad}
+Z definice eliminačních stromů je zřejmé, že budou obsahovat velké množství informací o rozkladu matice a procesu jeho vytváření. Například v \cite{schr:82} byly popsány vlastnosti eliminačních stromů vzhledem ke Gaussově eliminaci. My však budeme eliminační stromy využívat jako nástroj pro výpočet počtu nenulových prvků v Choleského faktoru matice \cite{liu:90}. Uveďme větu, která dává do souvislosti nenulové prvky v Choleského faktoru a strukturu eliminačního stromu \cite{liu:86}.
 
-\TODO{doplnit}
+\begin{theorem}
+  Nechť $A$ je řídká, ireducibilní, pozitivně definitní, symetrická matice o rozměrech $n \times n$ s Choleského rozkladem $LL^T$ a nechť $i,j \in \left\{1,\ldots,n \right\}$. Pak $[L]_{ij} \neq 0$ právě tehdy, když vrchol $v_j$ je v eliminačním stromě následníkem vrcholu $v_k$ takového, že $[A]_{ij} \neq 0$.
+\end{theorem}
+
+Tato věta nám dává návod, jak vypočítat počet nenulových prvků v Choleského faktoru. Uveďme algoritmus popsaný v \cite{liu:90}. Obdobný algoritmus s důrazem na implementaci na multiprocesorech můžeme nalézt v \cite{zmgi:88}. V \cite{basm:87} pak můžeme najít postup, jakým napočítávat počet nenulových prvků ve faktoru a strukturu eliminačního stromu současně.
+
+\TODO{doplnit algoritmus}
 
 %----------------------------------------------------------------------
 

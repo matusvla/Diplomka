@@ -7,6 +7,8 @@
     \usepackage{amsmath,amssymb,amsfonts,amsthm}
     \usepackage{indentfirst}
     \usepackage{graphicx}
+    \usepackage[boxed]{algorithm2e}
+    \SetKwArray{Marker}{marker}
 
     \usepackage{tikz}
     \usepackage{caption,lipsum}
@@ -312,7 +314,7 @@ kde $H_i=\bar{H}_i-\frac{v_i v_i^T}{d_i}$.
 Zřejmě pak $A = LDL^T$, kde $L:=L_1\cdots L_{N-1}$
 
 \subsection{Choleského rozklad}
-\label{Cholesky}
+\label{CholeskyChapter}
 \textbf{Choleského rozklad} je speciálním případem symetrické eliminace. Jeho cílem je rozložit pozitivně definitní matici $A$ na tvar $A=LL^T$, kde matici $L$ označujeme jako faktor matice $A$. Jinými slovy se jedná o symetrickou eliminaci matice $A$, kde požadujeme, aby matice $D$ byla rovna jednotkové matici. Jedná se o modifikaci Gaussovy eliminace pro symetrické pozitivně definitní matice. Základní informaci o existenci Choleského rozkladu pozitivně definitní matice nám dává následující věta, jejíž důkaz můžeme nalézt například v \cite{govl:83}.
 
 \begin{theorem}
@@ -627,6 +629,8 @@ Topologické číslování vrcholů stromu je intuitivní způsob pro očíslov�
 
 \section{Eliminační stromy}
 
+\TODO{Udelat poradek s $[A],[L],a,l$}
+
 V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic \cite{liu:86,liu:90}. Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty. Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.
 
 V této kapitole bez újmy na obecnosti předpokládáme, že matice, jejíž Choleského rozklad chceme napočítávat, je ireducibilní, a tedy graf odpovídající této matici je souvislý.
@@ -672,7 +676,7 @@ Pokud $x_i$ je vlastním předchůdcem $x_j$ v eliminačním stromu, pak $i > j$
   když $l_{i,j} \neq 0$.
 \end{proposition}
 \begin{proof}
-  Tvrzení plyne přímo ze vzorců pro výpočet Choleského rozkladu pomocí sloupcového algoritmu popsaného v kapitole \ref{Cholesky}
+  Tvrzení plyne přímo ze vzorců pro výpočet Choleského rozkladu pomocí sloupcového algoritmu popsaného v kapitole \ref{CholeskyChapter}
 \end{proof}
 
 Přímým důsledkem tvrzení \ref{ColDepProposition} je, že graf $G(F)$ zachycuje informace o závislostech mezi jednotlivými sloupci při výpočtu Choleského rozkladu. 
@@ -684,9 +688,46 @@ Z definice eliminačních stromů je zřejmé, že budou obsahovat velké množs
   Nechť $A$ je řídká, ireducibilní, pozitivně definitní, symetrická matice o rozměrech $n \times n$ s Choleského rozkladem $LL^T$ a nechť $i,j \in \left\{1,\ldots,n \right\}$. Pak $[L]_{ij} \neq 0$ právě tehdy, když vrchol $v_j$ je v eliminačním stromě následníkem vrcholu $v_k$ takového, že $[A]_{ij} \neq 0$.
 \end{theorem}
 
-Tato věta nám dává návod, jak vypočítat počet nenulových prvků v Choleského faktoru. Uveďme algoritmus popsaný v \cite{liu:90}. Obdobný algoritmus s důrazem na implementaci na multiprocesorech můžeme nalézt v \cite{zmgi:88}. Námi popsaný algoritmus je poměrně jednoduchý, efektivnější ale složitější algoritmus pro výpočet počtu nenulových prvků můžeme najít v \cite{gil:94}. Dále v \cite{basm:87} můžeme najít postup, jakým napočítávat počet nenulových prvků ve faktoru a strukturu eliminačního stromu současně.
+Tato věta nám dává návod, jak vypočítat počet nenulových prvků v Choleského faktoru. Uveďme algoritmus popsaný v \cite{liu:90}, který nám dává návod, jak napočítat počty nenulových prvků v jednotlivých řádcích a sloupcích Choleského faktoru. Obdobný algoritmus s důrazem na implementaci na multiprocesorech můžeme nalézt v \cite{zmgi:88}. Námi popsaný algoritmus je poměrně jednoduchý, efektivnější ale složitější algoritmus pro výpočet počtu nenulových prvků můžeme najít v \cite{gil:94}. Dále v \cite{basm:87} můžeme najít postup, jakým napočítávat počet nenulových prvků ve faktoru a strukturu eliminačního stromu současně.
 
-\TODO{algoritmus napocitavani nenul ze stromu}
+V uvedeném algoritmu \ref{nonzerosAlgorithm} je použit pracovní vektor \Marker, který složí k označování vrcholů eliminačního stromu, které byly v dané iteraci již uvažovány - indexování vrcholů eliminačního stromu uvažujeme tak, že odpovídá vstupní matici. Eliminační strom je popsán pomocí vektoru $\texttt{PARENT}$, který byl zmíněn výše.
+
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}{.5\linewidth}
+    \begin{algorithm}[H]
+      \SetAlgoNoLine
+      
+      \SetKwArray{Parent}{$\texttt{PARENT}$}
+      \TODO{Neni to plagiatorstvi?}
+
+      \For{$j:=1$ \KwTo $n$}{
+        $\eta(L_{*j}) := 1$\;
+      }
+      \For{$i:=1$ \KwTo $n$}{
+        $\eta(L_{i*}) := 1$\;
+        \Marker{$i$} $ := i$\;
+        \For{$k:=1$ \KwTo $i-1$}{
+          \If{$[A]_{i,k} \neq 0$}{
+            $j:= k$\;
+            \While{\Marker{$j$} $\neq i$}{
+              $\eta(L_{i*}) := \eta(L_{i*}) + 1$\;
+              $\eta(L_{*j}) := \eta(L_{*j}) + 1$\;
+              \Marker{$j$} $=i$\;
+              $j := $\Parent{j}\;
+            }
+          }
+        }
+      }
+    \end{algorithm}
+  \end{minipage}
+  \captionof{algocf}{Výpočet počtu nenulových prvků z eliminačního stromu (\cite{liu:90}, upraveno) \label{nonzerosAlgorithm}}
+\end{figure}
+
+Algoritmus \ref{nonzerosAlgorithm} nám dává návod jak vypočítat počet prvků v jednotlivých řádcích a sloupcích matice. Pokud nás zajímá pouze počet nenulových prvků v celé matici, můžeme počítat pouze počet prvků v řádcích, resp. sloupcích.
+
+Tento algoritmus nám dává odpověď na to, jak zjistit počet nenulových prvků v matici $L$ z eliminačního stromu matice $A$. Pokud bychom eliminační strom vytvářeli přímo z definice, museli bychom vypočítat Choleského rozklad. Proto potřebujeme algoritmus, který nám sestrojí Eliminační strom bez toho.
+
 \TODO{doplnit algoritmus liu:86 algoritmus 4.2}
 
 %----------------------------------------------------------------------

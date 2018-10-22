@@ -234,7 +234,7 @@ Tento postup však není optimální, protože graf $G_i$ má větší počet vr
 \section{Spektrální dělení}
 \label{spektral}
 \TODO{pro $k$ částí?}
-
+\TODO{cite hendrickson multisekce}
 
 \section{Algoritmus podle Kernighana a Lina}
 \label{KLalgorithm}
@@ -266,7 +266,7 @@ V této práci pro nás bude zajímavý především Choleského rozklad jakožt
 
 \subsection{Symetrická eliminace}
 
-Cílem \textbf{symetrické eliminace} je rozložit danou čtvercovou matici $A$ na tvar $LDL^T$, kde $L$ je dolní trojúhelníková matice a $D$ je diagonální matice. Obecně pro indefinitní matice je třeba pro zajištění numerické stability tohoto algoritmu vynásobit danou matici nějakou permutační maticí \cite{fomo:67}. Pro pozitivně definitní matice je však stabilita zajištěna i bez toho.\TODO{cite}
+Cílem \textbf{symetrické eliminace} je rozložit danou čtvercovou matici $A$ na tvar $LDL^T$, kde $L$ je dolní trojúhelníková matice a $D$ je diagonální matice. Obecně pro indefinitní matice je třeba pro zajištění numerické stability tohoto algoritmu vynásobit danou matici nějakou permutační maticí \cite{fomo:67}. Pro pozitivně definitní matice je však stabilita zajištěna i bez toho \cite{wil:68}.
 
 Mějme matici $A$ o rozměrech $N \times N$. Symetrickou eliminací matice $A$ nazveme hledání konečných posloupností $A_0,\ldots,A_{N-1}$, $L_1,\ldots,L_{N-1}$ splňujících, že $\left(\forall i \in \{1,...,N-1\}\right)\left(A_{i-1}=L_i A_i L_i^T \right)$ a $A_{N-1}=D$.
 Předpis pro hledání těchto posloupností je následující:
@@ -405,13 +405,13 @@ Matici $L$ můžeme však z matic $L_1,\ldots,L_N$ vypočítat výrazně jednodu
   Z toho již plyne tvrzení lemmatu.
 \end{proof}
 
-Pro výpočet prvků matice $L$ existují tři základní postupy: submaticové schéma vyplývající přímo z lemmatu \ref{Lsoucet}, řádkové schéma s použitím metody ohraničování a sloupcové schéma. V přesné aritmetice jsou všechna tři tato schémata ekvivalentní, ale v případě \TODO{nepřesné aritmetiky? Je to vhodné pojmenování?}, se kterou se standardně při počítačových výpočtech setkáváme, můžou schémata dávat různé výsledky. Tato schémata napočítávají prvky matice $L$ v různém pořadí. Navíc, efektivní modifikace rozdělení je velmi pevně propojena s očíslováním vrcholů částí rozděleného grafu (popsáno v \ref{Numbering}).
+Pro výpočet prvků matice $L$ existují tři základní postupy: submaticové schéma vyplývající přímo z lemmatu \ref{Lsoucet}, řádkové schéma s použitím metody ohraničování a sloupcové schéma. V přesné aritmetice jsou všechna tři tato schémata ekvivalentní, ale v případě aritmetiky v konečné přesnosti, se kterou se standardně při počítačových výpočtech setkáváme, můžou schémata dávat různé výsledky. Tato schémata napočítávají prvky matice $L$ v různém pořadí. Navíc, efektivní modifikace rozdělení je velmi pevně propojena s očíslováním vrcholů částí rozděleného grafu (popsáno v \ref{Numbering}).
 
 \paragraph{Submaticové schéma}
 S pomocí lemmatu \ref{Lsoucet} můžeme navrhnout submaticové schéma pro výpočet faktoru $L$ následovně. Matici $L$ získáváme po sloupcích, ale při výpočtu $i$-tého sloupce zároveň počítáme submatici $H_i = \bar{H}_i-\frac{v_i v_i^T}{d_i}$ matice $A$, kterou potřebujeme pro výpočet zbylých částí faktoru matice $A$ (viz algoritmus (\ref{Cholesky})).
 
 \paragraph{Řádkové schéma - metoda ohraničování}
-Jiným přístupem, který můžeme zvolit pro získání Choleského rozkladu $L L^T$ matice $A$ je řádkové schéma využívající metodu ohraničování (bordering method) \TODO{cite}. Nejprve přepišme matici $A$ do tvaru
+Jiným přístupem, který můžeme zvolit pro získání Choleského rozkladu $L L^T$ matice $A$ je řádkové schéma využívající metodu ohraničování (bordering method) \cite{fad:59, ort:88}. Nejprve přepišme matici $A$ do tvaru
 \[
 A =
 \begin{pmatrix}
@@ -463,7 +463,6 @@ Jedná se o obdobný postup jako v řádkovém schématu, pouze napočítáváme
 
 \subsubsection{Choleského rozklad pro řídké matice}
 \label{Choleskysparse}
-\TODO{Tohle je z VU upravené jen minimálně. Vadí to?}
 
 V praktických aplikacích Choleského rozkladu se často setkáváme s řídkými maticemi, navíc jsou pro nás řídké matice zajímavé i z hlediska dělení příslušných grafů. Pokud máme řídkou matici, v optimálním případě bychom chtěli, aby i její Choleského faktor byl řídká matice, jejíž dolní trojúhelník má stejnou strukturu jako dolní trojúhelník původní matice.
 
@@ -627,9 +626,8 @@ Topologické číslování vrcholů stromu je intuitivní způsob pro očíslov�
 
 
 \section{Eliminační stromy}
-\TODO{vic citaci}
 
-V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic \cite{liu:90}. Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty. Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.
+V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic \cite{liu:86,liu:90}. Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty. Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.
 
 V této kapitole bez újmy na obecnosti předpokládáme, že matice, jejíž Choleského rozklad chceme napočítávat, je ireducibilní, a tedy graf odpovídající této matici je souvislý.
 
@@ -686,9 +684,10 @@ Z definice eliminačních stromů je zřejmé, že budou obsahovat velké množs
   Nechť $A$ je řídká, ireducibilní, pozitivně definitní, symetrická matice o rozměrech $n \times n$ s Choleského rozkladem $LL^T$ a nechť $i,j \in \left\{1,\ldots,n \right\}$. Pak $[L]_{ij} \neq 0$ právě tehdy, když vrchol $v_j$ je v eliminačním stromě následníkem vrcholu $v_k$ takového, že $[A]_{ij} \neq 0$.
 \end{theorem}
 
-Tato věta nám dává návod, jak vypočítat počet nenulových prvků v Choleského faktoru. Uveďme algoritmus popsaný v \cite{liu:90}. Obdobný algoritmus s důrazem na implementaci na multiprocesorech můžeme nalézt v \cite{zmgi:88}. V \cite{basm:87} pak můžeme najít postup, jakým napočítávat počet nenulových prvků ve faktoru a strukturu eliminačního stromu současně.
+Tato věta nám dává návod, jak vypočítat počet nenulových prvků v Choleského faktoru. Uveďme algoritmus popsaný v \cite{liu:90}. Obdobný algoritmus s důrazem na implementaci na multiprocesorech můžeme nalézt v \cite{zmgi:88}. Námi popsaný algoritmus je poměrně jednoduchý, efektivnější ale složitější algoritmus pro výpočet počtu nenulových prvků můžeme najít v \cite{gil:94}. Dále v \cite{basm:87} můžeme najít postup, jakým napočítávat počet nenulových prvků ve faktoru a strukturu eliminačního stromu současně.
 
-\TODO{doplnit algoritmus}
+\TODO{algoritmus napocitavani nenul ze stromu}
+\TODO{doplnit algoritmus liu:86 algoritmus 4.2}
 
 %----------------------------------------------------------------------
 

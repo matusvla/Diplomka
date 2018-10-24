@@ -57,7 +57,7 @@ Povšimněme si, že v definici grafu není vyloučen případ, kdy jsou oba kon
   V neorientovaném grafu $G=(V,E)$ platí, že jeho množina hran $E$ je podmnožinou ${V \choose 2} \cup V$, kde $V \choose 2$ značí množinu všech dvouprvkových podmnožin množiny $V$. V orientovaném grafu $H=(W,F)$ je $F$ podmnožinou množiny $W \times W$, tj. všech uspořádaných dvojic vrcholů z $W$.
 \end{remark}
 
-\textbf{Stupněm vrcholu} $v \in V$ rozumíme počet vrcholů spojených s vrcholem $v$, značíme $d(v)$. Množinu všech vrcholů, které jsou v grafu $G$ spojeny s vrcholem $v$ značíme $\mathrm{adj}_G(v)$.
+\textbf{Stupněm vrcholu} $v \in V$ rozumíme počet vrcholů spojených s vrcholem $v$, značíme $d(v)$. Množinu všech vrcholů, které jsou v grafu $G$ spojeny s vrcholem $v$ značíme $\mathrm{adj}_G(v)$. Pokud je z kontextu jasné o jaký graf se jedná, dolní index vynecháváme.
 
 \begin{definition}
   \textbf{Podgrafem} grafu $G$ nazveme libovolný graf $H=(W,F)$ který splňuje: $W\subseteq V$, $F\subseteq E$ a všechny vrcholy incidentní hranám z $F$ náleží do $W$. Úplný podgraf grafu $G$ nazýváme \textbf{klikou} v grafu $G$. Podgrafem grafu $G$ \textbf{indukovaným} množinou vrcholů $W$ nazveme takový podgraf $G$, který obsahuje všechny hrany grafu $G$, jejichž oba koncové body náleží do $W$, značíme $G(W)$.
@@ -714,7 +714,7 @@ V uvedeném algoritmu \ref{nonzerosAlgorithm} je použit pracovní vektor \Marke
               $\eta(L_{i*}) := \eta(L_{i*}) + 1$\;
               $\eta(L_{*j}) := \eta(L_{*j}) + 1$\;
               \Marker{$j$} $=i$\;
-              $j := $\Parent{j}\;
+              $j := $\Parent{$j$}\;
             }
           }
         }
@@ -726,9 +726,75 @@ V uvedeném algoritmu \ref{nonzerosAlgorithm} je použit pracovní vektor \Marke
 
 Algoritmus \ref{nonzerosAlgorithm} nám dává návod jak vypočítat počet prvků v jednotlivých řádcích a sloupcích matice. Pokud nás zajímá pouze počet nenulových prvků v celé matici, můžeme počítat pouze počet prvků v řádcích, resp. sloupcích.
 
-Tento algoritmus nám dává odpověď na to, jak zjistit počet nenulových prvků v matici $L$ z eliminačního stromu matice $A$. Pokud bychom eliminační strom vytvářeli přímo z definice, museli bychom vypočítat Choleského rozklad. Proto potřebujeme algoritmus, který nám sestrojí Eliminační strom bez toho.
+Tento algoritmus nám dává odpověď na to, jak zjistit počet nenulových prvků v matici $L$ z eliminačního stromu matice $A$. Pokud bychom eliminační strom vytvářeli přímo z definice, museli bychom vypočítat Choleského rozklad. Proto potřebujeme algoritmus, který nám sestrojí Eliminační strom - tedy vektor $\texttt{PARENT}$ - bez toho.
 
-\TODO{doplnit algoritmus liu:86 algoritmus 4.2}
+Uveďme základní algoritmus pro sestrojení eliminačního stromu matice bez výpočtu jejího Choleského rozkladu. Dále popišme jeho vylepšení, které budeme používat v implementaci. Oba algoritmy jsou převzaté z \cite{liu:86}. 
+
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}{.7\linewidth}
+    \begin{algorithm}[H]
+      \SetAlgoNoLine
+      
+      \SetKwArray{Parent}{$\texttt{PARENT}$}
+
+      \For{$i:=1$ \KwTo $n$}{
+        \Parent{$i$} $= 0$\;
+        \For{$j:=1$ \KwTo $i-1$}{
+          \If{$[A]_{i,j} \neq 0$}{
+            $r:= j$\;
+            \While{\Parent{$r$} $\neq 0$ {\bf and} \Parent{$r$} $\neq i$}{
+              $r := $\Parent{$r$}\;
+            }
+            \If{\Parent{$r$} $== 0$}{
+              \Parent{$r$} $:= i$\;
+            }
+          }
+        }
+      }
+    \end{algorithm}
+  \end{minipage}
+  \captionof{algocf}{Základní algoritmus pro hledání eliminačního stromu (\cite{liu:86}, upraveno) \label{eltree1Algorithm}}
+\end{figure}
+
+Pro zrychlení tohoto algoritmu použijeme pomocný vektor $\texttt{ANCESTOR}$, který nám zkrátí procházení stromu směrem ke kořeni díky tomu, že v něm bude pro každý vrchol zaznamenáván poslední zpracovaný předek daného vrcholu. Algoritmus pak bude vypadat následovně:
+
+\begin{figure}[ht]
+  \centering
+  \begin{minipage}{.75\linewidth}
+    \begin{algorithm}[H]
+      \SetAlgoNoLine
+      
+      \SetKwArray{Parent}{$\texttt{PARENT}$}
+      \SetKwArray{Ancestor}{$\texttt{ANCESTOR}$}
+
+      \For{$i:=1$ \KwTo $n$}{
+        \Parent{$i$} $= 0$\;
+        \Ancestor{$i$} $= 0$\;
+        \For{$j:=1$ \KwTo $i-1$}{
+          \If{$[A]_{i,j} \neq 0$}{
+            $r:= j$\;
+            \While{\Ancestor{$r$} $\neq 0$ {\bf and} \Ancestor{$r$} $\neq i$}{
+              $t := $\Ancestor{$r$}\;
+              $\Ancestor{$r$} := i$\;
+              $r := t$\;
+            }
+            \If{\Ancestor{$r$} $== 0$}{
+              \Ancestor{$r$} $:= i$\;
+              \Parent{$r$} $:= i$\;
+            }
+          }
+        }
+      }
+    \end{algorithm}
+  \end{minipage}
+  \captionof{algocf}{ Vylepšený algoritmus pro hledání eliminačního stromu (\cite{liu:86}, upraveno) \label{eltree2Algorithm}}
+\end{figure}
+
+
+Algoritmus \ref{eltree2Algorithm} má složitost $O(|E|\log_2 n)$ \TODO{slozitost+citace viz liu:86}. Existuje ještě efektivnější verze tohoto algoritmu, kterou můžeme nalézt v \TODO{ cite Tarjan Data structures and network algorithms}.
+
+Algoritmy uvedené v této kapitole jsou popsány tak, aby byly dostatečně názorné. Ve skutečnosti pro řídké matice uložené v CSR formátu (viz \ref{matrixProgReprez}) neprocházíme všechny prvky dané matice, ale pouze nenulové prvky uložené ve struktuře.
 
 %----------------------------------------------------------------------
 
@@ -754,6 +820,7 @@ Jako základní matice pro testování výsledků našeho programu nám poslouž
 Pro testování jsme dále používali matice vygenerované při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice (podprogram \texttt(poisson)) a několik jednoduchých testovacích matic, které jsme si ručně zapsali do souboru \texttt{testing.f90}
 
 \subsection{Reprezentace matice v programu}
+\label{matrixProgReprez}
 
 Matice je v našem programu uložena v \textbf{CSR formátu} (compressed sparse row format) \cite{pis:84,saad:94}, který je běžně využívaným formátem sloužícím pro reprezentaci řídkých matic a grafů. 
 

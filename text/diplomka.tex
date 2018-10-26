@@ -31,8 +31,10 @@
     \newtheorem{observation}{Pozorování}
 \renewcommand*{\proofname}{Důkaz}
 
-%\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}\PackageWarning{TODO:}{TODO: #1!}}
-\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}\PackageWarning{TODO:}{TODO: #1!}}
+%\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
 
 \begin{document}
 \TODO{nekonzistence v n a N}
@@ -76,12 +78,13 @@ Existuje-li mezi libovolnými dvěma vrcholy grafu cesta, řekneme, že graf je 
 
 \medskip
 
-Při používání víceúrovňových metod dělení grafů (kapitola \TODO{ref{multilevel}}) budeme často odvozovat z grafu jiný graf shluknutím množin jeho vrcholů Takový graf budeme nazývat faktorgraf a formálně jej definujeme následovně.
+Při používání víceúrovňových metod dělení grafů (viz kapitola \ref{multilevel}) budeme často odvozovat z grafu jiný graf shluknutím množin jeho vrcholů Takový graf budeme nazývat faktorgraf a formálně jej definujeme následovně.
+\TODO{n}
 \begin{definition}
-  Nechť $\mathcal{P} = \{P_1,\ldots,P_n\}$ je rozkladem množiny vrcholů $V$ grafu $G = (V, E)$. Faktorgrafem grafu $G$ nazveme graf $G / \mathcal{P} = (\mathcal{P}, \mathcal{E_P})$, kde 
+  Nechť $\mathcal{P} = \{P_1,\ldots,P_n\}$ je rozkladem množiny vrcholů $V$ grafu $G = (V, E)$ a $|V|=n$. Faktorgrafem grafu $G$ nazveme graf $G / \mathcal{P} = (\mathcal{P}, \mathcal{E_P})$, kde 
   \[
     \left(
-      (P_i, P_j)\in \mathcal{E_P} \mbox{ pro } i,j \in \widehat{n}, i \neq j 
+      (P_i, P_j)\in \mathcal{E_P} \mbox{ pro } i,j \in \{1,\ldots,n\}, i \neq j 
     \right)
     \Leftrightarrow {P_i \cap \mathrm{adj}_G(P_j) \neq \emptyset}
     .
@@ -97,7 +100,7 @@ Proces vytváření faktorgrafu $G / \mathcal{P}$ z grafu $G$ je znázorněn na 
   \captionof{figure}{Proces vytváření faktorgrafu \label{faktorgrafImg}}
 }
 
-\TODO{potrebuju ctvercovou sit}
+\TODO{potrebuju ctvercovou sit? Kdyz budu delat ND, tak jo}
 
 \section{Strom}
 
@@ -108,17 +111,17 @@ Nyní zaveďme základní pojmy týkající speciální třídy grafů nazývan�
 \end{definition}
 
 Z definice stromu je patrné, že každý vrchol $v$ kořenového stromu $(T,r)$ spojuje s kořenem tohoto stromu právě jedna cesta.
-Vrcholy ležící na této cestě nazveme \textbf{předchůdci} vrcholu $v$. Předchůdce vrcholu $v$ různé od $v$ nazýváme \textbf{vlastními předchůdci} vrcholu $v$. Vrcholy, jejichž předchůdcem je vrchol $v$, nazýváme \textbf{následníky} vrcholu $v$. Vrcholy bez následníků nazýváme \textbf{listy stromu} $T$, vrcholy alespoň s jedním následníkem nazýváme \textbf{vnitřní vrcholy} stromu.
+Vrcholy ležící na této cestě nazveme \textbf{předchůdci} vrcholu $v$. Předchůdce vrcholu $v$ různé od $v$ nazýváme \textbf{vlastními předchůdci} vrcholu $v$. Vrcholy, jejichž předchůdcem je vrchol $v$, nazýváme \textbf{následníky} vrcholu $v$. Vrcholy bez následníků nazýváme \textbf{listy stromu} $T$, vrcholy alespoň s jedním následníkem nazýváme \textbf{vnitřní vrcholy} stromu $T$.
 
 \begin{definition}
-  \textbf{Podstromem} stromu $T$ určeným vrcholem $v$ nazveme indukovaný podgraf stromu $T$ tvořený vrcholem $v$ a a všemi jeho následníky.
+  \textbf{Podstromem} stromu $T$ určeným vrcholem $v$ nazveme podgraf stromu $T$ indukovaný vrcholem $v$ a a všemi jeho následníky.
 \end{definition}
 
 \section{Vztah grafu a matice}
 \label{GrMatRel}
 Grafy a matice spolu úzce souvisí, což nám umožňuje převádět problémy na maticích na problémy na grafech a naopak. Nezanedbatelným praktickým důsledkem jejich vzájemného vztahu je i možnost používat grafové algoritmy při řešení některých maticových úloh, především může být tento přístup výhodný pro řídké matice. Dělení grafů může posloužit například při snaze o paralelizaci rozkladu matice.
 
-Neorientovaný graf $G=(V,E)$ s vrcholy $V = {v_1, \ldots, v_m}$ a hranami $E = {e_1, \ldots, e_n}$ Tento graf lze reprezentovat pomocí matice dvěma základními způsoby. \textbf{Maticí sousednosti}, neboli adjacenční matici, nazveme matici $A_G$ o rozměrech $m \times m$, jejíž prvek na pozici $(i,j)$ je definován jako:
+Uvažujme neorientovaný graf $G=(V,E)$ s vrcholy $V = \{v_1, \ldots, v_n\}$ a hranami $E = \{e_1, \ldots, e_m\}$. Tento graf lze reprezentovat pomocí matice dvěma základními způsoby. \textbf{Maticí sousednosti} grafu $G$, neboli adjacenční maticí, nazveme matici $A_G$ o rozměrech $n \times n$, jejíž prvek na pozici $(i,j)$ je definován jako:
 \[
   {(A_G)}_{i,j} :=
   \left\{
@@ -129,7 +132,7 @@ Neorientovaný graf $G=(V,E)$ s vrcholy $V = {v_1, \ldots, v_m}$ a hranami $E = 
   \right.
 \]
 
- \textbf{Maticí incidence} grafu $G$ nazveme matici o rozměrech $m \times n$  definovanou následovně:
+ \textbf{Maticí incidence} grafu $G$ nazveme matici o rozměrech $n \times m$  definovanou následovně:
 \[
   {(\bar{A}_G)}_{i,j} :=
   \left\{
@@ -140,7 +143,7 @@ Neorientovaný graf $G=(V,E)$ s vrcholy $V = {v_1, \ldots, v_m}$ a hranami $E = 
   \right.
 \]
 
-V kapitole \TODO{ref{spektral}} budeme potřebovat \textbf{Laplaceovu matici} $Q$ grafu $G$, která je definována následovně:
+V kapitole \ref{spektral} budeme potřebovat \textbf{Laplaceovu matici} $Q$ grafu $G$. Jedná se o matici o rozměrech $n \times n$ definovanou následovně:
 \[
 Q_{ij} :=
 \left\{
@@ -153,7 +156,9 @@ Q_{ij} :=
 \]
 Laplaceovu matici $Q$ lze tedy vyjádřit jako $Q = D - A_G$, kde $D$  značí diagonální matici se stupni jednotlivých vrcholů na diagonále.
 
-Pokud chceme reprezentovat matici pomocí grafu, většinou nám stačí zachytit její strukturu. V takovém případě můžeme pro popis obecně nesymetrické matice $A$ o rozměrech $n \times n$ použít orientovaný graf s množinou vrcholů $V = {v_1,\ldots,v_n}$ a množinou hran $E =\{(v_i,v_j)|a_{ij}\neq 0\}$. V případě, že je matice $A$ symetrická, můžeme ji analogickým způsobem reprezentovat pomocí neorientovaného grafu.
+\medskip
+
+Pokud chceme reprezentovat matici pomocí grafu, většinou nám stačí zachytit její strukturu. V takovém případě můžeme pro popis obecně nesymetrické matice $A$ o rozměrech $n \times n$ použít orientovaný graf s množinou vrcholů $V = {v_1,\ldots,v_n}$ a množinou hran $E =\left\{(v_i,v_j) \ | \ a_{ij}\neq 0\right\}$. V případě, že je matice $A$ symetrická, můžeme ji analogickým způsobem reprezentovat pomocí neorientovaného grafu.
 Pokud bychom chtěli do grafu zanést i numerické hodnoty jednotlivých prvků matice, museli bychom použít ohodnocený graf.
 
 \begin{remark}
@@ -175,7 +180,7 @@ Pro reprezentaci ne nutně čtvercové matice $A$ o rozměrech $m\times n$ můž
   Graf $G=(V,E)$ nazveme bipartitním, pokud existuje rozklad množiny $V$ na podmnožiny $R$, $B$ takové, že ${R \choose 2} \cap E = {B \choose 2} \cap E = \emptyset$.
 \end{definition}
 
-Jinými slovy se jedná go graf, který lze rozdělit na dvě části tak, že v žádné z částí není ani jedna hrana. Takovýto bipartitní graf se standardně značí $G=(R,B,E)$ a pokud za jeho pomoci chceme reprezentovat matici $A$, pokládáme $|R|=m$, $|B|=n$ a $E = \left\{(v_i,v_j) \ | \ v_i \in R, v_j \in B, a_{ij} \neq 0 \right\}$.
+Jinými slovy se jedná o graf, který lze rozdělit na dvě části tak, že v žádné z částí není ani jedna hrana. Takovýto bipartitní graf se standardně značí $G=(R,B,E)$ a pokud za jeho pomoci chceme reprezentovat matici $A$, pokládáme $|R|=m$, $|B|=n$ a $E = \left\{(v_i,v_j) \ | \ v_i \in R, v_j \in B, a_{ij} \neq 0 \right\}$.
 
 \TODO{Příklad = obrázek}
 
@@ -226,7 +231,7 @@ Pro konstrukci posloupnosti $(G_i)_0^m$ existuje několik možných postupů \ci
 Pro získání hrubšího grafu byly popsány dva hlavní postupy. První z nich je založen na nalezení vhodného párování a následném spojení každé dvojice vrcholů spojených hranou náležící do párování do jednoho \cite{edmo:65,lawl:76}. Aby došlo k rychlému zmenšení počtu vrcholů grafu, je vhodné volit maximální párování \cite{hele:95}. Druhý postup hledání vhodných množin vrcholů pro sloučení je založen na spojování skupin vrcholů, které jsou spojeny mnoha hranami \cite{kaku:98} \TODO{konkretni? kaku je souhrn}.
 
 \paragraph{Dělení získaného grafu}
-V této fázi dochází k rozdělení grafu $H$ libovolným algoritmem pro dělení grafů, například lze použít spektrální dělení popsané níže v kapitole \ref{spektral}. Pomocí tohoto algoritmu získáme rozdělení $P_m$ grafu $G_m$.
+V této fázi dochází k rozdělení grafu $H$ libovolným algoritmem pro dělení grafů, například lze použít spektrální dělení popsané níže v kapitole \ref{spektral}. Pomocí tohoto algoritmu získáme rozdělení $P_m$ grafu $G_m$. \TODO{tahle faze se muze preskocit}
 
 \paragraph{Projekce rozdělení na původní graf}
 Cílem této fáze je převést získané rozdělení $P_m$ grafu $G_m$ na rozdělení $P_0$ vstupního grafu $G$. Toho dosáhneme postupnou tvorbou posloupnosti rozdělení $P_{m-1}, \ldots, P_1$ grafů $G_{m-1}, \ldots, G_1$. Nejjednodušším způsobem projekce rozdělení grafu $G_{i+1}$ na rozdělení grafu $G_i$ je umístit všechny vrcholy grafu $G_i$, jejichž spojením vznikl vrchol $v$ grafu $G_{i+1}$ do části rozdělení, v níž leží vrchol $v$.
@@ -235,18 +240,87 @@ Tento postup však není optimální, protože graf $G_i$ má větší počet vr
 
 \section{Spektrální dělení}
 \label{spektral}
-\TODO{pro $k$ částí?}
-\TODO{cite hendrickson multisekce}
+
+Spektrální algoritmus je jedním ze základních algoritmů řešících bisekci grafu. Rozdělení grafu nalezená spektrálním algoritmem bývají dobrá, ale jeho cena je poměrně vysoká. Z tohoto důvodu je pro velké grafy používán jako součást víceúrovňového dělení grafu, kde slouží k nalezení rozdělení hrubého grafu (viz kapitola \ref{multilevel}).
+
+Mějme graf $G=(V,E)$ se sudým počtem vrcholů a řešme problém bisekce tohoto grafu na dva podgrafy $G_1=(V_1,E_1)$ a $G_2=(V_2,E_2)$. Základní myšlenkou spektrálního dělení je převést tento problém na problém minimalizace kvadratické formy.
+Definujme vektor $\vec{x}$ délky $n:=|V_1|=|V_2|$ po složkách následovně:
+\[
+x_i =
+\left\{
+	\begin{array}{@{\,}ll}
+		1  & \mbox{pro } i \in V_1 \\
+		-1 & \mbox{pro } i \in V_2
+	\end{array}
+\right.
+\]
+Pak pro Laplaceovu matici $Q$ grafu $G$ a diagonální matici $D$ se stupni vrcholů grafu $G$ na diagonále platí:
+\begin{align*}
+  \vec{x}^T Q \vec{x} &= \vec{x}^T D \vec{x} - \vec{x}^T A_G \vec{x} = \sum_{i=1}^{n}d_i x_i^2 - 2 \sum_{(i,j)\in E} x_i x_j = \\
+&=\sum_{(i,j)\in E}(x_i-x_j)^2 =
+\sum\limits_{\substack{i \in X, j \in Y \\ (i,j)\in E}}(x_i-x_j)^2 =
+4|\delta(X, Y)|,
+\end{align*}
+\noindent
+čímž jsme převedli problém dělení grafu na problém minimalizace kvadratické formy $\vec{x}^T Q \vec{x}$ přes vektory $\vec{x}$ délky $n$ se složkami $x_i = \pm 1$ takové, že $\sum_{i=1 }^{n}x_i = 0$, tj.
+\[
+4 |\delta_{min}(X, Y)| = \min_{\substack{x_i = \pm 1 \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x}.
+\]
+Tento problém dále relaxujeme následovně:
+\begin{equation}\label{spektralaprox}
+\min_{\substack{x_i = \pm 1 \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x} \geq \min_{\substack{\sum_{i=1}^{n}x_i^2 = n \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x}
+\end{equation}
+Označme $\vec{v_2}$ vlastní vektor matice $Q$ příslušný druhému nejmenšímu vlastnímu číslu matice $Q$. Pak můžeme pomocí Courantovy-Fischerovy věty \cite{hojo:85} výraz na pravé stran nerovnosti \ref{spektralaprox} přepsat jako
+\[
+\min_{\substack{\sum_{i=1}^{n}x_i^2 = n \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x} = \vec{v_2}^T Q \vec{v_2} = \lambda_2 \vec{v_2}^T \vec{v_2} = n \lambda_2.
+\]
+V případě relaxovaného problému nabývá tedy kvadratická forma svého minima pro vektor $v_2$. Nalezneme medián ze složek tohoto vektoru a podle něj provedeme bisekci grafu $G$.
+
+Hlavní myšlenkou spektrálního algoritmu je tedy převést problém dělení grafu na problém hledání vlastních čísel matice, který umíme řešit. Pokud bychom chtěli graf dělit na více než dvě části, potřebovali bychom více vlastních vektorů matice $Q$. Pro dělení na čtyři, resp. osm částí by nám stačily dva, resp. tři vlastní vektory, pro dělení na více částí už nelze postupovat obdobně \cite{lehe:94}. Proto se v takovém případě přistupuje k rekurzivnímu dělení jednotlivých částí.
+
 
 \section{Algoritmus podle Kernighana a Lina}
 \label{KLalgorithm}
 Algoritmus podle Kernighana a Lina (KL algoritmus) vznikl v roce 1970 s cílem dělit elektrické obvody na kartách \cite{keli:70}. V jeho základní podobě se jedná o algoritmus pro vylepšování již získaného rozdělení grafu, pro jeho funkci je tedy nutné poskytnout mu vstupní rozdělení grafu. Pokud používáme algoritmus podle Kernighana a Lina přímo jako dělicí algoritmus, můžeme vstupní rozdělení lze zvolit libovolně. Jeho výsledky pro různá počáteční rozdělení se však mohou lišit. Proto je v praxi je výhodné, aby představovalo vstupní rozdělení rozumnou aproximaci optimálního rozdělení. Kvůli tomu se algoritmus podle Kernighana a Lina obvykle používá v kombinaci s jiným algoritmem pro dělení grafů, případně jako součást většího celku - například při víceúrovňovém dělení grafu ve fázi projekce hrubého rozdělení na vstupní graf (viz kapitola \ref{multilevel}). V tomto případě je většinou využita modifikace tohoto algoritmu, která bere v úvahu pouze vrcholy blízko separátoru.
-\TODO{KL algoritmus pro $k$ částí, vrcholový separátor - je to tak, že se vždycky přehazuje mezi dvojicí částí?}
 
+\TODO{KL algoritmus pro $k$ částí - je to tak, že se vždycky přehazuje mezi dvojicí částí?}
+Popišme algoritmus podle Kernighana a Lina pro graf rozdělený na dva podgrafy. Kdyby byl graf obecně rozdělen na $k$ částí, mohli bychom použít tento algoritmus na jednotlivé dvojice podgrafů. \TODO{cite\{suaris, kedem(viz pothen)\}, kteri deli rovnou na 4 casti}
+\TODO{end}
+
+Mějme graf $G=(V,E)$ rozdělený na dva podgrafy $G_1=(V_1,E_1)$ a $G_2=(V_2,E_2)$. Základním principem KL algoritmu je, že v každé jeho iteraci dojde k výměně určitého počtu vrcholů z množiny $V_1$ za stejný počet vrcholů z množiny $V_2$ tak, aby byla snížena velikost hranového separátoru. \TODO{a co vrcholový?}
+
+Vrcholy vhodné pro výměnu vybíráme tak, aby při jejich přesunu z části rozdělení, v níž se daný vrchol nachází, do části druhé došlo k maximálnímu zmenšení velikosti hranového separátoru. Tento rozdíl ve velikosti hranového separátoru při přesunu vrcholu $v$ nazveme \textbf{ziskem} $D(v)$ a zřejmě jdo o rozdíl počtu hran (případně vah hran) spojujících vrchol $v$ s vrcholy v podgrafu, v němž se vrchol $v$ nachází, a počtu hran spojujících vrchol $v$ s vrcholy v druhém podgrafu. Formálně můžeme zisk pro graf $G=(V,E)$ s rozdělením $P$ a hranovým ohodnocením $c$ zapsat následovně:
+\[
+D(v) := \sum\limits_{\substack{(u,v) \in E \\ P[u] \neq P[v]}}c(u,v) - \sum\limits_{\substack{(u,v) \in E \\ P[u] = P[v]}}c(u,v).
+\]
+Pokud přesuneme vrchol s kladným ziskem, dojde ke zmenšení hranového separátoru.Abychom mohli popsat reálný zisk při výměně vrcholů, je vhodné zavést si ještě pro $u,v \in V$ hodnotu $C_{uv}$.
+\[
+C_{uv}=
+    \left\{
+    \begin{array}{@{\,}ll}
+		1  & \mbox{} {u,v} \in E\\
+		0 & \mbox{jinak}
+	\end{array}
+\right.
+\]
+Pak \textbf{reálný zisk} při výměně vrcholů $u$ a $v$ ležících ve vzájemně různých částech rozdělení grafu $G$ je zřejmě
+\[
+g_{uv}=D(u)+D(v)-2C_{uv}.
+\]
+Základní varianta KL algoritmu se skládá ze dvou do sebe vnořených cyklů, z nichž vnější běží do té doby, dokud se velikost hranového separátoru zmenšuje a obsahuje tyto kroky
+\begin{enumerate}
+  \item Vypočítáme zisk jednotlivých vrcholů.
+  \item Postupně spárujeme všechny vrcholy $v_i \in V_1$ s vrcholy s $w_j \in V_2$ tak, aby reálný zisk $g_i$ při výměně dvojice vrcholů $(v_k,w_k)$ pro $k \in \left\{1,\ldots,\min(|V_1|,|V_2|)\right\}$ za předpokladu, že by všechny dvojice vrcholů $(v_1,w_1),\ldots,(v_{k-1},w_{k-1})$ byly vyměněné, byl maximální.
+  \item Nalezneme takové $N \in \left\{1,\ldots,\min{|V_1|,|V_2|}\right\}$, aby $\sum_{j=1}^{N}g_i$ byla maximální.
+  \item Vyměníme vrcholy $v_1,...,v_N$ s vrcholy $w_1,...,w_N$.
+\end{enumerate}
+
+Nejjednodušším vylepšením tohoto algoritmu je nechat vnější cyklus běžet po pevně stanovený počet iterací i poté, co již nedochází ke zmenšování velikosti hranového separátoru. Můžeme se díky tomu dostat z lokálního minima \TODO{cite}. Nejznámějším praktickým vylepšením algoritmu podle Kernighana a Lina je algoritmus publikovaný v \cite{fima:89}, který optimalizuje rychlost výpočtu a aktualizaci zisku pro jednotlivé vrcholy.
 
 \section{Metoda vnořených řezů}
+\TODO{Je vubec tahle kapitola vhodna?}
 Metoda vnořených řezů byla navržena a publikována v roce 1973 Alanem Georgem \TODO{cite}. Jedná se o analyticky dobře popsaný algoritmus využívající metodu rozděl a panuj pro řešení problémů na řídkých maticích pomocí jejich převedení na grafy a dělení těchto grafů. Tento algoritmus je teoreticky velmi dobře popsán pro některé speciální typy grafů, například pro čtvercové sítě. V této práci jej uvádíme jako konkrétní příklad přístupu k víceúrovňovému dělení grafů a proto se \TODO{?budeme zabývat jeho obecnou formou pomocí níž lze dělit libovolné grafy.}
-
+\TODO{ND je prikladem multilevel - jak?}
 
 %----------------------------------------------------------------------
 
@@ -256,9 +330,7 @@ Při řešení maticových úloh velkých rozměrů je často výhodné si danou
 
 Rozklady matic můžeme rozdělit na dvě základní skupiny - úplné rozklady a neúplné rozklady. V této práci nás budou zajímat především rozklady, které se týkají řídkých matic, tedy matic, které obsahují velké množství nulových prvků. U takových matic bereme pro zefektivnění výpočtů do úvahy strukturu jejich nenulových prvků. Při výpočtu úplného rozkladu řídké matice může v průběhu rozkladu docházet ke změnám ve struktuře jejích nenulových prvků. Proces výpočtu úplného rozkladu může být pak výpočetně velmi náročný. V takovém případě je častou praxí nepočítat úplný rozklad, ale vypočítat jen jeho aproximaci, o které hovoříme jako o neúplném rozkladu a pro získání řešení soustavy je třeba jej kombinovat s nějakou iterační metodou \cite{temp94}. 
 
-\TODO{Je to potreba?}
 V námi popisovaném základním modelu rozkladů matic se omezíme na úplný rozklad symetrické a pozitivně definitní matice. Nejedná se o samoúčelné omezení, při řešení mnoha praktických úloh se setkáváme právě s maticemi splňujícími tyto podmínky. Navíc se ukazuje, že i pro matice, které nejsou symetrické nebo pozitivně definitní, lze při jejich rozkladech vyjít z tohoto modelu.
-\TODO{end}
 
 \section{Úplné rozklady}
 
@@ -637,7 +709,7 @@ V této kapitole bez újmy na obecnosti předpokládáme, že matice, jejíž Ch
 
 \subsection{Definice eliminačního stromu matice}
 
-Nejprve se omezme na ireducibilní, pozitivně definitní, symetrickou matici $A_T$ o rozměrech $n \times n$, jejíž přidružený graf $G(A_T)$ je strom. Aby při Choleského rozkladu matice $A_T$ nedošlo k žádnému zaplnění, stačí když pomocí topologického číslování očíslujeme vrcholy jí přidruženého grafu (z předpokladu se jedná o strom) a řádky a sloupce matice $A_T$ seřadíme odpovídajícím způsobem. Pak zjevně platí, že matice $A_T$ má, s výjimkou posledního řádku, pod diagonálou vždy právě jeden nenulový prvek. Díky této vlastnosti označujeme $A_T$ jako perfektní eliminační matici, tj. existuje permutační matice $P$ taková, že Choleského rozklad matice $PA_TP^T$ nebude obsahovat žádné zaplnění \cite{rose:72} (Matici $PA_TP^T$ můžeme vnímat pouze jako přečíslování řádků a sloupců matice $A_T$). 
+Nejprve se omezme na ireducibilní, pozitivně definitní, symetrickou matici $A_T$ o rozměrech $n \times n$, jejíž přidružený graf $G(A_T)$ je kořenový strom. Aby při Choleského rozkladu matice $A_T$ nedošlo k žádnému zaplnění, stačí když pomocí topologického číslování očíslujeme vrcholy jí přidruženého grafu (z předpokladu se jedná o strom) a řádky a sloupce matice $A_T$ seřadíme odpovídajícím způsobem. Pak zjevně platí, že matice $A_T$ má, s výjimkou posledního řádku, pod diagonálou vždy právě jeden nenulový prvek. Díky této vlastnosti označujeme $A_T$ jako perfektní eliminační matici, tj. existuje permutační matice $P$ taková, že Choleského rozklad matice $PA_TP^T$ nebude obsahovat žádné zaplnění \cite{rose:72} (Matici $PA_TP^T$ můžeme vnímat pouze jako přečíslování řádků a sloupců matice $A_T$). 
 
 Proto pro matici $A_T$ můžeme definovat funkci $\texttt{PARENT}:\{1,\ldots,n\} \rightarrow \{1,\ldots,n\}$ následovně:
 \begin{align*}

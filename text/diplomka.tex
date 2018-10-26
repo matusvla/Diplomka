@@ -33,8 +33,8 @@
 
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
-\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}\PackageWarning{TODO:}{TODO: #1!}}
-%\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
+%\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}\PackageWarning{TODO:}{TODO: #1!}}
+\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
 
 \begin{document}
 \TODO{nekonzistence v n a N}
@@ -188,35 +188,40 @@ Jinými slovy se jedná o graf, který lze rozdělit na dvě části tak, že v 
 
 \chapter{Dělení grafů}
 
-V této kapitole formálně popíšeme problém dělení grafu na $k$ podgrafů a definujeme pojmy s ním spojené. Vzhledem k tomu, že v naší implementaci používáme pro dělení grafů profesionální softwarovou knihovnu METIS \cite{kary:13}, zaměříme se nejprve na schéma víceúrovňového dělení grafu jakožto algoritmus používaný při profesionálních implementacích dělení grafů. Dále se budeme věnovat některým technikám, které tvoří součást víceúrovňového dělení grafů, konkrétně spektrálnímu dělení grafu \TODO{zdroj} a vylepšovacímu algoritmu podle Kernighana a Lina \cite{keli:70}. \TODO{Doresit ND}Na závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jakožto konkrétní příklad víceúrovňového algoritmu pro dělení grafů \TODO{zdroj}.
+V této kapitole formálně popíšeme problém dělení grafu na $k$ podgrafů a definujeme pojmy s ním spojené. Vzhledem k tomu, že v naší implementaci používáme pro dělení grafů profesionální softwarovou knihovnu METIS \cite{kary:13}, zaměříme se nejprve na schéma víceúrovňového dělení grafu jakožto algoritmus používaný při profesionálních implementacích dělení grafů. Dále se budeme věnovat některým technikám, které tvoří součást víceúrovňového dělení grafů, konkrétně spektrálnímu dělení grafu a vylepšovacímu algoritmu podle Kernighana a Lina \cite{keli:70}. \TODO{Doresit ND}Na závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jakožto konkrétní příklad víceúrovňového algoritmu pro dělení grafů \TODO{zdroj}.
 
-Dělení grafů na $k$ podgrafů je praktický problém s bohatým teoretickým zázemím a mnoha aplikacemi. Může nám pomoci při řešení parciálních diferenciálních rovnic na moderních počítačových architekturách \cite{posl:90} a nezanedbatelnou roli hraje také při výrobě mikroprocesorů metodou VLSI nebo při řešení velkých systémů lineárních rovnic \cite{keli:70, pis:84}. Často dochází k omezení se na dělení grafu na dva podgrafy, v této práce se však pokusíme prozkoumat i vliv dělení grafu na více částí.
+Dělení grafů na $k$ podgrafů je praktický problém s bohatým teoretickým zázemím a mnoha aplikacemi. Může nám pomoci při řešení parciálních diferenciálních rovnic na moderních počítačových architekturách \cite{posl:90} a nezanedbatelnou roli hraje také při výrobě mikroprocesorů metodou VLSI nebo při řešení velkých systémů lineárních rovnic \cite{keli:70, pis:84}. Často dochází k omezení se na dělení grafu na dva podgrafy, v této práce se však pokusíme prozkoumat i dělení grafu na více částí.
 
-Podmínky, která jsou na výsledné rozdělení grafu kladeny, se mohou lišit v závislosti na daném použití. V této kapitole popíšeme klasická kritéria, která se používají pro určování kvality rozdělení grafu, v kapitole \ref{dalsiParametry} poté bude popsán problém dělení grafů vzhledem k dodatečným kritériím (například vzhledem k maticovým operacím).
+Podmínky, které jsou na výsledné rozdělení grafu kladeny, se mohou lišit v závislosti na daném použití. V této kapitole popíšeme klasická kritéria, která se používají pro určování kvality rozdělení grafu, v kapitole \ref{dalsiParametry} poté bude popsán problém dělení grafů vzhledem k dodatečným kritériím s důrazem na rozklady matic.
 
 \section{Formální definice dělení grafu}
 
 Jako dělení grafu na $k$ částí označujeme hledání rozkladu množiny vrcholů tohoto grafu na $k$ podmnožin. V nejklasičtějším případě je problém dělení grafů na $k$ podgrafů definován následovně.
+\begin{definition}
+  Mějme graf $G=(V,E)$, $|V| = n$. \textbf{Rozdělením grafu} $G$ na $k$ podgrafů nazveme rozklad množiny vrcholů $V$ na vzájemně disjunktní podmnožiny $V_1, V_2, \ldots, V_k$.   
+\end{definition}
 
-Mějme graf $G=(V,E)$, $|V| = n$. \textbf{Rozdělením grafu} $G$ na $k$ podgrafů nazveme rozklad množiny vrcholů $V$ na vzájemně disjunktní podmnožiny $V_1, V_2, \ldots, V_k$. Řekneme, že rozdělení je \textbf{optimální} vzhledem k základním kritériím, pokud splňuje:
+\begin{remark}
+  Rozdělení grafu běžně zapisujeme jako vektor $P$ o délce $n$ takový, že pro každý vrchol $v_i \in V$ je index podgrafu, v němž se vrchol v nachází, určen $i$-tou složkou vektoru $P$.  
+\end{remark}
+
+Řekneme, že rozdělení je \textbf{optimální} vzhledem k základním kritériím, pokud splňuje:
 \begin{enumerate}
   \item $\forall i \in \{1, \ldots, k \} \ |V_i|=n/k$
   \item Počet hran spojujících vrcholy ležící v různých podmnožinách je minimální možný.
 \end{enumerate}
 
-Rozdělení grafu běžně zapisujeme jako vektor $P$ o délce $n$ takový, že pro každý vrchol $v \in V$ je podgraf, v němž se vrchol v nachází, určen $v$-tou složkou vektoru $P$.
-
 Pokud má graf $G$ sudý počet vrcholů a rozdělíme ho na dvě části s množinami vrcholů $V_1, V_2$, které mají stejný počet prvků, nazveme toto rozdělení \textbf{bisekcí} a velikost hranového separátoru nazýváme \textbf{šířkou bisekce}.
 
-Mějme graf $G=(V,E)$ a jeho rozdělení na $k$ podgrafů s množinami vrcholů $V_1, V_2, \ldots, V_k$. Množinu hran, jejichž jeden koncový bod náleží do $V_i$ a druhý do $V_j$ pro $i \neq j$ nazveme \textbf{hranovým separátorem}, značíme $\delta(A,B)$. Jinou variantou nalézt rozdělení grafu definované pomocí vrcholového separátoru.
-\textbf{Vrcholovým separátorem} $V_S$ grafu $G$ nazveme podmnožinu množiny vrcholů $V$ takovou, že odstraněním všech vrcholů náležících do $V_S$ z grafu $G$ dojde k jeho rozpadu na nejméně $k$ komponent odpovídajících jednotlivým částem rozdělení. Řešení problému optimální transformace mezi hranovým a vrcholovým separátorem, známe-li jeden z nich, můžeme naleznout v \cite{pofa:90}. To nám ale nic neříká o řešení problému samotného nalezení optimálního hranového nebo vrcholového separátoru \cite{liu:89}.
+Mějme graf $G=(V,E)$ a jeho rozdělení na $k$ podgrafů s množinami vrcholů $V_1, V_2, \ldots, V_k$. Množinu hran, jejichž jeden koncový bod náleží do $V_i$ a druhý do $V_j$ pro $i \neq j$ nazveme \textbf{hranovým separátorem}, značíme $\delta(V_1,\ldots,V_k)$. Jinou variantou je hledat rozdělení grafu pomocí vrcholového separátoru.
+\textbf{Vrcholovým separátorem} $S_G$ grafu $G$ nazveme podmnožinu množiny vrcholů $V$ takovou, že odstraněním všech vrcholů náležících do $S_G$ z grafu $G$ dojde k jeho rozpadu na nejméně $k$ komponent odpovídajících jednotlivým částem rozdělení. Řešení problému optimální transformace mezi hranovým a vrcholovým separátorem, známe-li jeden z nich, můžeme naleznout v \cite{pofa:90}. To nám ale nic neříká o řešení problému nalezení optimálního hranového nebo vrcholového separátoru \cite{liu:89}.
 
 Ukazuje se, že rozhodovací problém pro optimální rozdělení grafu je NP-úplný \cite{gajo:79}. Existují však algoritmy, které rozdělí graf v rozumném čase, přičemž kvalita jimi nalezeného rozdělení bude poměrně dobrá \cite{lita:79}.
 
 \section{Obecné schéma víceúrovňového dělení grafů}
 \label{multilevel}
 
-Víceúrovňové dělení grafů slouží k převedení problému dělení grafu s velkým počtem vrcholů na problém dělení grafu s počtem vrcholů výrazně menším. Tím může dojít k výraznému zkrácení času potřebného pro běh algoritmu \TODO{zdroj}, proto je tento postup využíván v profesionálních softwarových nástrojích pro dělení grafů \cite{lehe:95, kary:13}. Nejobecnější popis tohoto schématu sestává ze tří základních fází: zhrubovací fáze (coarsening phase), rozdělení vzniklého grafu a projekce tohoto rozdělení zpět na původní graf (refinement phase).
+Víceúrovňové dělení grafů slouží k převedení problému dělení grafu s velkým počtem vrcholů na problém dělení grafu s počtem vrcholů výrazně menším. Tím může dojít k výraznému zkrácení času potřebného pro celkovou dobu běhu algoritmu \TODO{zdroj}, proto je tento postup využíván v profesionálních softwarových nástrojích pro dělení grafů \cite{lehe:95, kary:13}. Nejobecnější popis tohoto schématu sestává ze tří základních fází: zhrubovací fáze (coarsening phase), rozdělení vzniklého grafu a projekce tohoto rozdělení zpět na původní graf (refinement phase).
 
 \paragraph{Zhrubovací fáze}
 Základní myšlenkou zhrubovací fáze víceúrovňového schématu dělení grafů je vytvořit z původního grafu $G$ graf $G_m$ s menším počtem vrcholů. Jinými slovy jde o konstrukci posloupnosti grafů $(G_i)_0^m$ takové, že $G_0 := G$ a pro každé dva po sobě jdoucí členy této posloupnosti platí, že $G_{i+1}$ je faktorgrafem $G_i$ s menším počtem vrcholů. 
@@ -224,13 +229,15 @@ Základní myšlenkou zhrubovací fáze víceúrovňového schématu dělení gr
 Pro konstrukci posloupnosti $(G_i)_0^m$ existuje několik možných postupů \cite{kaku:98} \TODO{zdroje? kaku je souhrn}. Ve většině schémat pro tvorbu grafu s méně vrcholy jsou podmnožiny množiny vrcholů grafu $G_i$ spojovány v jeden vrchol, čímž vznikne hrubší graf $G_{i+1}$ splňující výše uvedené podmínky kladené na posloupnost $(G_i)_0^m$. Při konstrukci členu $G_{i+1}$ z členu $G_i$ je pro udržení strukturálních informací o původním grafu nutné, abychom použili ohodnocený graf, kde ohodnocení vrcholů a hran při tvorbě faktorgrafu pokládáme pro každý vrchol (resp. hranu) roven součtu vah všech vrcholů (resp. hran) spojením kterých daný vrchol (resp. hrana) vznikl. 
 
 \begin{definition}
-  Mějme graf $G = (V, E)$. Párováním grafu $G$ nazveme podmnožinu množiny $E$, pro kterou platí, že žádné dvě hrany z této množiny nemají společný koncový bod. Maximálním párováním grafu $G$ nazveme párování grafu $G$ s nejvyšším možným počtem hran.
+  Mějme graf $G = (V, E)$. \textbf{Párováním} grafu $G$ nazveme podmnožinu množiny hran $E$, pro kterou platí, že žádné dvě hrany z této množiny nemají společný koncový bod. \textbf{Maximálním párováním} grafu $G$ nazveme párování grafu $G$ obsahující nejvyšší možný počet hran. \TODO{maximalni parovani pro ohodnocene grafy?}
 \end{definition}
 
-Pro získání hrubšího grafu byly popsány dva hlavní postupy. První z nich je založen na nalezení vhodného párování a následném spojení každé dvojice vrcholů spojených hranou náležící do párování do jednoho \cite{edmo:65,lawl:76}. Aby došlo k rychlému zmenšení počtu vrcholů grafu, je vhodné volit maximální párování \cite{hele:95}. Druhý postup hledání vhodných množin vrcholů pro sloučení je založen na spojování skupin vrcholů, které jsou spojeny mnoha hranami \cite{kaku:98} \TODO{konkretni? kaku je souhrn}.
+Pro získání hrubšího grafu byly popsány dva hlavní postupy. První z nich je založen na nalezení vhodného párování a následném spojení každé dvojice vrcholů spojených hranou náležící do párování do jednoho \cite{edmo:65,lawl:76}. Aby došlo k rychlému zmenšení počtu vrcholů grafu, je vhodné volit maximální párování \cite{hele:95}. Druhý postup hledání vhodných množin vrcholů pro sloučení je založen na spojování skupin vrcholů, v nichž je vysoká hustota hran \cite{kaku:98} \TODO{konkretni? kaku je souhrn}.
 
 \paragraph{Dělení získaného grafu}
-V této fázi dochází k rozdělení grafu $H$ libovolným algoritmem pro dělení grafů, například lze použít spektrální dělení popsané níže v kapitole \ref{spektral}. Pomocí tohoto algoritmu získáme rozdělení $P_m$ grafu $G_m$. \TODO{tahle faze se muze preskocit}
+V této fázi dochází k rozdělení grafu $H$ libovolným algoritmem pro dělení grafů, například lze použít spektrální dělení popsané níže v kapitole \ref{spektral}. Pomocí tohoto algoritmu získáme rozdělení $P_m$ grafu $G_m$.
+
+Tato fáze víceúrovňového dělení grafu může být vynechána \TODO{cite}. V takovém případě ve zhrubovací fázi víceúrovňového dělení pokračujeme až do té doby než má výsledný graf $G_m$ počet vrcholů roven počtu částí, na které chceme graf $G$ rozdělit. Každý z vrcholů grafu $G_m$ pak přiřadíme do jiné části rozdělení $P_m$ a můžeme přímo přistoupit k projekci tohoto rozdělení na původní graf.
 
 \paragraph{Projekce rozdělení na původní graf}
 Cílem této fáze je převést získané rozdělení $P_m$ grafu $G_m$ na rozdělení $P_0$ vstupního grafu $G$. Toho dosáhneme postupnou tvorbou posloupnosti rozdělení $P_{m-1}, \ldots, P_1$ grafů $G_{m-1}, \ldots, G_1$. Nejjednodušším způsobem projekce rozdělení grafu $G_{i+1}$ na rozdělení grafu $G_i$ je umístit všechny vrcholy grafu $G_i$, jejichž spojením vznikl vrchol $v$ grafu $G_{i+1}$ do části rozdělení, v níž leží vrchol $v$.
@@ -257,14 +264,14 @@ Pak pro Laplaceovu matici $Q$ grafu $G$ a diagonální matici $D$ se stupni vrch
 \begin{align*}
   \vec{x}^T Q \vec{x} &= \vec{x}^T D \vec{x} - \vec{x}^T A_G \vec{x} = \sum_{i=1}^{n}d_i x_i^2 - 2 \sum_{(i,j)\in E} x_i x_j = \\
 &=\sum_{(i,j)\in E}(x_i-x_j)^2 =
-\sum\limits_{\substack{i \in X, j \in Y \\ (i,j)\in E}}(x_i-x_j)^2 =
-4|\delta(X, Y)|,
+\sum\limits_{\substack{i \in V_1, j \in V_2 \\ (i,j)\in E}}(x_i-x_j)^2 =
+4|\delta(V_1, V_2)|,
 \end{align*}
 \noindent
 čímž jsme převedli problém dělení grafu na problém minimalizace kvadratické formy $\vec{x}^T Q \vec{x}$ přes vektory $\vec{x}$ délky $n$ se složkami $x_i = \pm 1$ takové, že $\sum_{i=1 }^{n}x_i = 0$, tj.
 \[
-4 |\delta_{min}(X, Y)| = \min_{\substack{x_i = \pm 1 \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x}.
-\]
+  4 |\delta_{min}(V_1, V_2)| = \min_{\substack{x_i = \pm 1 \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x}.
+  \]
 Tento problém dále relaxujeme následovně:
 \begin{equation}\label{spektralaprox}
 \min_{\substack{x_i = \pm 1 \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x} \geq \min_{\substack{\sum_{i=1}^{n}x_i^2 = n \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x}
@@ -275,15 +282,14 @@ Označme $\vec{v_2}$ vlastní vektor matice $Q$ příslušný druhému nejmenš�
 \]
 V případě relaxovaného problému nabývá tedy kvadratická forma svého minima pro vektor $v_2$. Nalezneme medián ze složek tohoto vektoru a podle něj provedeme bisekci grafu $G$.
 
-Hlavní myšlenkou spektrálního algoritmu je tedy převést problém dělení grafu na problém hledání vlastních čísel matice, který umíme řešit. Pokud bychom chtěli graf dělit na více než dvě části, potřebovali bychom více vlastních vektorů matice $Q$. Pro dělení na čtyři, resp. osm částí by nám stačily dva, resp. tři vlastní vektory, pro dělení na více částí už nelze postupovat obdobně \cite{lehe:94}. Proto se v takovém případě přistupuje k rekurzivnímu dělení jednotlivých částí.
-
+Hlavní myšlenkou spektrálního algoritmu je tedy převést problém dělení grafu na problém hledání vlastních čísel matice, který umíme řešit. Pokud bychom chtěli graf dělit na více než dvě části, potřebovali bychom více vlastních vektorů matice $Q$. Pro dělení na čtyři, resp. osm částí by nám stačily dva, resp. tři vlastní vektory, pro dělení na více částí už nelze postupovat obdobně \cite{lehe:94}. Proto se v takovém případě obvykle přistupuje k rekurzivnímu dělení jednotlivých částí.
 
 \section{Algoritmus podle Kernighana a Lina}
 \label{KLalgorithm}
-Algoritmus podle Kernighana a Lina (KL algoritmus) vznikl v roce 1970 s cílem dělit elektrické obvody na kartách \cite{keli:70}. V jeho základní podobě se jedná o algoritmus pro vylepšování již získaného rozdělení grafu, pro jeho funkci je tedy nutné poskytnout mu vstupní rozdělení grafu. Pokud používáme algoritmus podle Kernighana a Lina přímo jako dělicí algoritmus, můžeme vstupní rozdělení lze zvolit libovolně. Jeho výsledky pro různá počáteční rozdělení se však mohou lišit. Proto je v praxi je výhodné, aby představovalo vstupní rozdělení rozumnou aproximaci optimálního rozdělení. Kvůli tomu se algoritmus podle Kernighana a Lina obvykle používá v kombinaci s jiným algoritmem pro dělení grafů, případně jako součást většího celku - například při víceúrovňovém dělení grafu ve fázi projekce hrubého rozdělení na vstupní graf (viz kapitola \ref{multilevel}). V tomto případě je většinou využita modifikace tohoto algoritmu, která bere v úvahu pouze vrcholy blízko separátoru.
+Algoritmus podle Kernighana a Lina (KL algoritmus) vznikl v roce 1970 s cílem dělit elektrické obvody na kartách \cite{keli:70}. V jeho základní podobě se jedná o algoritmus pro vylepšování již získaného rozdělení grafu, pro jeho funkci je tedy nutné poskytnout mu vstupní rozdělení grafu. Pokud používáme KL algoritmus přímo jako dělicí algoritmus, lze vstupní rozdělení zvolit libovolně. Jeho výsledky pro různá počáteční rozdělení se však mohou lišit. Proto je v praxi je výhodné, aby představovalo vstupní rozdělení rozumnou aproximaci optimálního rozdělení. Kvůli tomu se KL algoritmus obvykle používá v kombinaci s jiným algoritmem pro dělení grafů, případně jako součást většího celku - například víceúrovňového dělení grafu ve fázi projekce hrubého rozdělení na vstupní graf (viz kapitola \ref{multilevel}). V tomto případě je vzhledem ke specifickému charakteru úlohy běžně využívána modifikace tohoto algoritmu, která bere v úvahu pouze vrcholy blízko separátoru.
 
 \TODO{KL algoritmus pro $k$ částí - je to tak, že se vždycky přehazuje mezi dvojicí částí?}
-Popišme algoritmus podle Kernighana a Lina pro graf rozdělený na dva podgrafy. Kdyby byl graf obecně rozdělen na $k$ částí, mohli bychom použít tento algoritmus na jednotlivé dvojice podgrafů. \TODO{cite\{suaris, kedem(viz pothen)\}, kteri deli rovnou na 4 casti}
+Popišme KL algoritmus pro graf rozdělený na dva podgrafy. Kdyby byl graf obecně rozdělen na $k$ částí, mohli bychom použít tento algoritmus na jednotlivé dvojice podgrafů. \TODO{cite\{suaris, kedem(viz pothen)\}, kteri deli rovnou na 4 casti}
 \TODO{end}
 
 Mějme graf $G=(V,E)$ rozdělený na dva podgrafy $G_1=(V_1,E_1)$ a $G_2=(V_2,E_2)$. Základním principem KL algoritmu je, že v každé jeho iteraci dojde k výměně určitého počtu vrcholů z množiny $V_1$ za stejný počet vrcholů z množiny $V_2$ tak, aby byla snížena velikost hranového separátoru. \TODO{a co vrcholový?}
@@ -306,7 +312,7 @@ Pak \textbf{reálný zisk} při výměně vrcholů $u$ a $v$ ležících ve vzá
 \[
 g_{uv}=D(u)+D(v)-2C_{uv}.
 \]
-Základní varianta KL algoritmu se skládá ze dvou do sebe vnořených cyklů, z nichž vnější běží do té doby, dokud se velikost hranového separátoru zmenšuje a obsahuje tyto kroky
+Základní varianta KL algoritmu se skládá ze dvou do sebe vnořených cyklů, z nichž vnější běží do té doby, dokud se velikost hranového separátoru zmenšuje a obsahuje tyto kroky:
 \begin{enumerate}
   \item Vypočítáme zisk jednotlivých vrcholů.
   \item Postupně spárujeme všechny vrcholy $v_i \in V_1$ s vrcholy s $w_j \in V_2$ tak, aby reálný zisk $g_i$ při výměně dvojice vrcholů $(v_k,w_k)$ pro $k \in \left\{1,\ldots,\min(|V_1|,|V_2|)\right\}$ za předpokladu, že by všechny dvojice vrcholů $(v_1,w_1),\ldots,(v_{k-1},w_{k-1})$ byly vyměněné, byl maximální.
@@ -327,21 +333,21 @@ Metoda vnořených řezů byla navržena a publikována v roce 1973 Alanem Georg
 
 Při řešení maticových úloh velkých rozměrů je často výhodné si danou matici rozložit na součin dvou nebo více matic a díky tomu původní problém převést na sérii výpočetně jednodušších problémů. Jako klasické příklady úloh z numerické lineární algebry, při jejichž řešení nám mohou rozklady matic pomoci, uveďme hledání řešení soustav lineárních algebraických rovnic či problém nalezení vlastních či singulárních čísel a příslušných vektorů. Rozklady matic navíc hrají nezanedbatelnou roli například v QR algoritmu, LR algoritmu \cite{govl:83} nebo Lanczosově algoritmu \cite{lanc:50,paig:72}. Rozklady matic nám mohou pomoci odhalit i teoretické vlastnosti a strukturu matic a odpovídajících maticových problémů. Příkladem takového rozkladu je singulární rozklad (SVD decomposition) \cite{govl:83}.
 
-Rozklady matic můžeme rozdělit na dvě základní skupiny - úplné rozklady a neúplné rozklady. V této práci nás budou zajímat především rozklady, které se týkají řídkých matic, tedy matic, které obsahují velké množství nulových prvků. U takových matic bereme pro zefektivnění výpočtů do úvahy strukturu jejich nenulových prvků. Při výpočtu úplného rozkladu řídké matice může v průběhu rozkladu docházet ke změnám ve struktuře jejích nenulových prvků. Proces výpočtu úplného rozkladu může být pak výpočetně velmi náročný. V takovém případě je častou praxí nepočítat úplný rozklad, ale vypočítat jen jeho aproximaci, o které hovoříme jako o neúplném rozkladu a pro získání řešení soustavy je třeba jej kombinovat s nějakou iterační metodou \cite{temp94}. 
+Rozklady matic můžeme rozdělit na dvě základní skupiny - úplné rozklady a neúplné rozklady. Úplné rozklady dokážou nalézt z teoretického hlediska přesný výsledek v konečně mnoha krocích. Naopak neúplné rozklady jsou iterativními metodami, tj. algoritmy, které získávají v každém svém kroku přesnější aproximaci řešení s použitím výsledku předchozí aproximace a k přesnému výsledku konvergují. Pro získání celkového řešení soustavy je pak třeba je kombinovat s nějakou iterační metodou \cite{temp94}. Vzhledem k našemu cíli zkoumat Choleského rozklad, jakožto zástupce úplných rozkladů, se v dalším textu nebudeme neúplnými rozklady hlouběji zabývat. 
 
-V námi popisovaném základním modelu rozkladů matic se omezíme na úplný rozklad symetrické a pozitivně definitní matice. Nejedná se o samoúčelné omezení, při řešení mnoha praktických úloh se setkáváme právě s maticemi splňujícími tyto podmínky. Navíc se ukazuje, že i pro matice, které nejsou symetrické nebo pozitivně definitní, lze při jejich rozkladech vyjít z tohoto modelu.
+V této práci nás budou zajímat především rozklady, které se týkají řídkých matic, tedy matic, které obsahují velké množství nulových prvků. U takových matic bereme pro zefektivnění výpočtů do úvahy strukturu jejich nenulových prvků. Při výpočtu úplného rozkladu řídké matice může v průběhu rozkladu docházet ke změnám ve struktuře jejích nenulových prvků. Proces výpočtu úplného rozkladu může být pak výpočetně velmi náročný \TODO{cite}.
+
+V námi popisovaném základním modelu rozkladů matic se omezíme na úplný rozklad symetrické a pozitivně definitní matice. Nejedná se o samoúčelné omezení, při řešení mnoha praktických úloh se setkáváme právě s maticemi splňujícími tyto podmínky. Navíc se ukazuje, že i pro matice, které nejsou symetrické nebo pozitivně definitní, lze při jejich rozkladech vyjít z tohoto modelu. \TODO{cite}
 
 \section{Úplné rozklady}
 
-Společným znakem algoritmů pro úplný rozklad matice je, že při práci v přesné aritmetice, dokážou tyto algoritmy najít přesný rozklad matice v konečně mnoha krocích. Nejklasičtějším příkladem takovéhoto algoritmu je symetrická eliminace, jejímž speciálním případem je Choleského rozklad, který pro nás bude obzvláště zajímavý. V této kapitole nebudeme ve schématech rozlišovat řídké a husté matice.
-
-V této práci pro nás bude zajímavý především Choleského rozklad jakožto konkrétní příklad algoritmu pro úplný rozklad matice. Jedná se o speciální případ symetrické eliminace, která bude v této kapitole taktéž popsána. 
+Společným znakem algoritmů pro úplný rozklad matice je, že při práci v přesné aritmetice dokážou tyto algoritmy najít přesný rozklad matice v konečně mnoha krocích. Nejklasičtějším příkladem takovéhoto algoritmu je symetrická eliminace, jejímž speciálním případem je Choleského rozklad, který pro nás bude obzvláště zajímavý. V této kapitole nebudeme ve schématech rozlišovat řídké a husté matice.
 
 \subsection{Symetrická eliminace}
 
 Cílem \textbf{symetrické eliminace} je rozložit danou čtvercovou matici $A$ na tvar $LDL^T$, kde $L$ je dolní trojúhelníková matice a $D$ je diagonální matice. Obecně pro indefinitní matice je třeba pro zajištění numerické stability tohoto algoritmu vynásobit danou matici nějakou permutační maticí \cite{fomo:67}. Pro pozitivně definitní matice je však stabilita zajištěna i bez toho \cite{wil:68}.
 
-Mějme matici $A$ o rozměrech $N \times N$. Symetrickou eliminací matice $A$ nazveme hledání konečných posloupností $A_0,\ldots,A_{N-1}$, $L_1,\ldots,L_{N-1}$ splňujících, že $\left(\forall i \in \{1,...,N-1\}\right)\left(A_{i-1}=L_i A_i L_i^T \right)$ a $A_{N-1}=D$.
+Mějme matici $A$ o rozměrech $N \times N$. Symetrickou eliminací matice $A$ nazveme hledání konečných posloupností $(A_j)_{j=0}^{N-1}$, $(L_j)_{j=1}^{N-1}$ splňujících, že $\left(\forall i \in \{1,...,N-1\}\right)\left(A_{i-1}=L_i A_i L_i^T \right)$ a $A_{N-1}=D$.
 Předpis pro hledání těchto posloupností je následující:
 
 \begin{gather}
@@ -382,11 +388,11 @@ A_0 & = A = \left( \begin{matrix}
 \end{gather}
 
 kde $H_i=\bar{H}_i-\frac{v_i v_i^T}{d_i}$.
-Zřejmě pak $A = LDL^T$, kde $L:=L_1\cdots L_{N-1}$
+Zřejmě pak $A = LDL^T$, kde $L:=L_1\cdots L_{N-1}$.
 
 \subsection{Choleského rozklad}
 \label{CholeskyChapter}
-\textbf{Choleského rozklad} je speciálním případem symetrické eliminace. Jeho cílem je rozložit pozitivně definitní matici $A$ na tvar $A=LL^T$, kde matici $L$ označujeme jako faktor matice $A$. Jinými slovy se jedná o symetrickou eliminaci matice $A$, kde požadujeme, aby matice $D$ byla rovna jednotkové matici. Jedná se o modifikaci Gaussovy eliminace pro symetrické pozitivně definitní matice. Základní informaci o existenci Choleského rozkladu pozitivně definitní matice nám dává následující věta, jejíž důkaz můžeme nalézt například v \cite{govl:83}.
+\textbf{Choleského rozklad} je speciálním případem symetrické eliminace. Jeho cílem je rozložit pozitivně definitní matici $A$ na tvar $A=LL^T$, kde matici $L$ označujeme jako Choleského faktor matice $A$. Jinými slovy se jedná o symetrickou eliminaci matice $A$, kde požadujeme, aby matice $D$ byla rovna jednotkové matici. Z praktického hlediska jde o modifikaci Gaussovy eliminační metody pro symetrické pozitivně definitní matice. Základní informaci o existenci Choleského rozkladu pozitivně definitní matice nám dává následující věta, jejíž důkaz můžeme nalézt například v \cite{govl:83}.
 
 \begin{theorem}
   Pro libovolnou pozitivně definitní matici $A$ existuje jednoznačný rozklad $A=LL^T$, kde L je dolní trojúhelníková matice s kladnými prvky na diagonále.
@@ -460,7 +466,7 @@ Matici $L$ můžeme však z matic $L_1,\ldots,L_N$ vypočítat výrazně jednodu
   \end{matrix}
   \right).
   \]
-  Vynásobením matice $L_i$ a $L_j$, kde $i < j$, zjevně dostanu
+  Vynásobením matic $L_i$ a $L_j$, kde $i < j$, zjevně dostanu
   \[
   \left(
   \begin{matrix}
@@ -478,7 +484,7 @@ Matici $L$ můžeme však z matic $L_1,\ldots,L_N$ vypočítat výrazně jednodu
   Z toho již plyne tvrzení lemmatu.
 \end{proof}
 
-Pro výpočet prvků matice $L$ existují tři základní postupy: submaticové schéma vyplývající přímo z lemmatu \ref{Lsoucet}, řádkové schéma s použitím metody ohraničování a sloupcové schéma. V přesné aritmetice jsou všechna tři tato schémata ekvivalentní, ale v případě aritmetiky v konečné přesnosti, se kterou se standardně při počítačových výpočtech setkáváme, můžou schémata dávat různé výsledky. Tato schémata napočítávají prvky matice $L$ v různém pořadí. Navíc, efektivní modifikace rozdělení je velmi pevně propojena s očíslováním vrcholů částí rozděleného grafu (popsáno v \ref{Numbering}).
+Pro výpočet prvků matice $L$ existují tři základní postupy: submaticové schéma vyplývající přímo z lemmatu \ref{Lsoucet}, řádkové schéma s použitím metody ohraničování a sloupcové schéma. V přesné aritmetice jsou všechna tři tato schémata ekvivalentní, ale v případě aritmetiky v konečné přesnosti, se kterou se standardně při počítačových výpočtech setkáváme, můžou schémata dávat různé výsledky. Tato schémata napočítávají prvky matice $L$ v různém pořadí.
 
 \paragraph{Submaticové schéma}
 S pomocí lemmatu \ref{Lsoucet} můžeme navrhnout submaticové schéma pro výpočet faktoru $L$ následovně. Matici $L$ získáváme po sloupcích, ale při výpočtu $i$-tého sloupce zároveň počítáme submatici $H_i = \bar{H}_i-\frac{v_i v_i^T}{d_i}$ matice $A$, kterou potřebujeme pro výpočet zbylých částí faktoru matice $A$ (viz algoritmus (\ref{Cholesky})).
@@ -506,7 +512,7 @@ A =
 \]
 kde je zřejmě $\vec{w}=L_M^{-1}\vec{u}$ a $t=(s-\vec{w}^T\vec{w})^{1/2}$.
 
-Pro získání Choleského rozkladu matice $M$, jehož znalost jsme výše předpoládali, můžeme použít stejný postup. Rekurzivním použitím této metody dostáváme soustavu lineárních algebraických rovnic pro výpočet $i$-tého řádku matice $L$.
+Pro získání Choleského rozkladu matice $M$, jehož znalost jsme výše předpoládali, můžeme použít stejný postup. Rekurzivním použitím této metody dostáváme soustavu lineárních algebraických rovnic pro výpočet $i$-tého řádku matice $L$, kde $l_{i,j}$ značí $(i,j)$-tý prvek matice $L$.
 \begin{gather*}
 \begin{pmatrix}
   l_{1,1} &  & 0 \\
@@ -528,13 +534,13 @@ Pro získání Choleského rozkladu matice $M$, jehož znalost jsme výše před
 \end{gather*}
 
 \paragraph{Sloupcové schéma}
-Jedná se o obdobný postup jako v řádkovém schématu, pouze napočítáváme prvky matice $L$ po sloupcích. Vzorce, které nám vznikou jsou pro $j = 1,2,\ldots, N$ a pro $i = j+1,j+2,\ldots,N$ následující:
+Jedná se o obdobný postup jako v řádkovém schématu, pouze napočítáváme prvky matice $L$ po sloupcích. Vzorce, které nám pro výpočet prvků matice $L$ vznikou jsou pro $j = 1,2,\ldots, N$ a pro $i = j+1,j+2,\ldots,N$ následující:
 \begin{align*}
   l_{j,j} &= \left(a_{j,j} - \sum_{k=1}^{j-1}{l_{j,k}^2}\right)^\frac12 \\
   l_{i,j} &= \left(a_{i,j} - \sum_{k=1}^{j-1}{l_{i,k}l_{j,k}}\right)/l_{j,j}.
 \end{align*}
 
-\subsubsection{Choleského rozklad pro řídké matice}
+\subsubsection{Choleského rozklad řídkých matic}
 \label{Choleskysparse}
 
 V praktických aplikacích Choleského rozkladu se často setkáváme s řídkými maticemi, navíc jsou pro nás řídké matice zajímavé i z hlediska dělení příslušných grafů. Pokud máme řídkou matici, v optimálním případě bychom chtěli, aby i její Choleského faktor byl řídká matice, jejíž dolní trojúhelník má stejnou strukturu jako dolní trojúhelník původní matice.
@@ -579,19 +585,17 @@ Problém zaplňování se dá alespoň částečně vyřešit tím, že místo r
 \chapter{Další parametry pro dělení grafu}
 \label{dalsiParametry}
 
-Dělení grafu lze využít jako nástroj pro paralelizaci problémů, které lze převést na úlohy na grafech. Vzhledem ke vztahu matic a grafů popsanému výše v kapitole \ref{GrMatRel} lze problém minimalizace zaplnění v Choleského faktoru dané matice pomocí permutace řádků a slouců popsaný v kapitole \ref{Choleskysparse} převést na problém na odpovídajícím grafu.
+Dělení grafu lze využít jako nástroj pro paralelizaci problémů, které lze převést na úlohy na grafech. Jedním z takových problémů je problém minimalizace zaplnění v Choleského faktoru dané matice pomocí permutace řádků a sloupců popsaný v kapitole \ref{Choleskysparse}, který lze vzhledem ke vztahu matic a grafů popsanému výše v kapitole \ref{GrMatRel} převést na problém dělení odpovídajícího grafu.
 
-Jak bylo zmíněno, při dělení grafu podle klasické definice bereme ohled pouze na dvě kritéria: na velikost separátoru a vyváženost jednotlivých částí rozdělení. V případě, že dělení grafu využíváme jako součást komplexnějšího algoritmu, například pro paralelizaci nějaké maticové úlohy, nemusí být rozdělení vytvořené s ohledem na tato kritéria optimální. V takovém případě je nutné brát ohled na to, jaké operace budeme na výsledných podgrafech provádět a v závislosti na tom specifikovat nová kritéria.
+Jak bylo zmíněno, při dělení grafu podle klasické definice bereme ohled pouze na dvě kritéria: na velikost separátoru a vyváženost jednotlivých částí rozdělení. V případě, že dělení grafu využíváme jako součást komplexnějšího algoritmu, například pro paralelizaci nějaké maticové úlohy, nemusí být rozdělení vytvořené s ohledem na tato kritéria optimální. V takovém případě je nutné brát ohled na to, jaké operace budeme na výsledných podgrafech provádět a v závislosti na tom specifikovat nová kritéria. Pro dělení grafu s ohledem na více než dvě základní kritéria popsaná výše existují dva základní přístupy. Můžeme hledat rozdělení grafu optimalizující všechna kritéria zároveň (apriorní přístup), nebo můžeme graf rozdělit pomocí některého ze základních algoritmů pro dělení grafu a poté vzniklé rozdělení vylepšit tak, abychom optimalizovali vyváženost operací (aposteriorní přístup).
 
-Pro dělení grafu s ohledem na více než dvě základní kritéria popsaná výše existují dva základní přístupy. Můžeme hledat rozdělení grafu optimalizující všechna kritéria zároveň (apriorní přístup), nebo můžeme graf rozdělit pomocí některého ze základních algoritmů pro dělení grafu a poté vzniklé rozdělení vylepšit tak, abychom optimalizovali vyváženost operací (aposteriorní přístup).
-
-V této práci se zaměříme na situaci, kdy je dělení grafů použito jako nástroj pro vyvažování počtu operací na jednotlivých oblastech při paralelizaci Choleského rozkladu. Požadujeme tedy, aby počet operací potřebný pro Choleského rozklad na jednotlivých oblastech byl v optimálním případě stejný. Zřejmě nám takto vzniká kritérium, které není zahrnuto v kritériích podle klasické definice - ta totiž neberou v potaz počet hran v grafech odpovídajících jednotlivým oblastech, neboli v řeči matic počet nenulových prvků matic sousednosti jednotlivých podgrafů. Čas pro vypočítání rozkladu na jednotlivých oblastech může být kvůli tomu výrazně odlišný. Námi navržený algoritmus bude využívat aposteriorního přístupu, nejprve tedy nalezneme suboptimální řešení vzhledem k základním kritériím a poté budeme přesouvat vrcholy mezi jednotlivými částmi rozdělení s cílem vylepšit jej vzhledem k Choleského rozkladu.
+V této práci se zaměříme na situaci, kdy je dělení grafů použito jako nástroj pro vyvažování počtu operací na jednotlivých oblastech při paralelizaci Choleského rozkladu. Požadujeme tedy, aby počet operací potřebný pro Choleského rozklad na jednotlivých oblastech byl v optimálním případě stejný a zároveň co nejmenší. Zřejmě nám takto vzniká kritérium, které není zahrnuto v kritériích podle klasické definice - ta totiž neberou v potaz hustotu hran v podgrafech vzniklých dělením původního grafu, neboli v řeči matic počet nenulových prvků matic sousednosti jednotlivých podgrafů. Počet operací potřebných pro vypočítání rozkladu na jednotlivých oblastech může být kvůli tomu výrazně odlišný. Námi navržený algoritmus bude využívat aposteriorního přístupu, nejprve tedy nalezneme suboptimální řešení vzhledem k základním kritériím a poté budeme hledat vhodé očíslování vrcholů daných podgrafů a přesouvat vrcholy mezi jednotlivými částmi rozdělení s cílem vylepšit jej vzhledem k Choleského rozkladu.
 
 Mějme graf $G$ a jeho rozdělení na podgrafy $G_1, \ldots, G_k$ s maticemi sousednosti $A_{G_1}, \ldots, A_{G_k}$. Provedeme Choleského rozklad matic $A_{G_1}$, $A_{G_2}$, označme
 \[
   A_{G_i} = L_{G_i}L_{G_i}^T \ {\rm pro} \ i = 1,2.
 \]
-Pokud existují $i,j \in \{1,\ldots,k \}$ tak, že matice $L_{G_i}^T$ a $L_{G_j}^T$ budou mít výrazně různý počet nenulových prvků, je zřejmé, že toto rozdělení grafu $G$ je nevhodné pro napočítávání Choleského rozkladu na oblastech vzhledem k vyváženosti na počet operací. Někdy pro vyvážení rozdělení za účelem Choleského rozkladu na oblastech stačí vhodně přečíslovat vrcholy grafu $G$ a tím změnit matice sousednosti odpovídající jednotlivým podgrafům.\TODO{Budeme to dělat takhle, nebo budeme číslovat vrcholy až po rozdělení?}
+Pokud existují $i,j \in \{1,\ldots,k \}$ tak, že matice $L_{G_i}^T$ a $L_{G_j}^T$ budou mít výrazně různý počet nenulových prvků, je zřejmé, že toto rozdělení grafu $G$ je nevhodné pro napočítávání Choleského rozkladu na oblastech vzhledem k vyváženosti na počet operací. Někdy pro vyvážení rozdělení za účelem Choleského rozkladu na oblastech stačí vhodně přečíslovat vrcholy podgrafů $G_1, \ldots, G_k$ a tím změnit matice sousednosti odpovídající jednotlivým podgrafům.
 
 \begin{remark}
 Mějme soustavu lineárních algebraických rovnic $Ax=b$ a hledejme její řešení pomocí Choleského rozkladu této matice $A=LL^T$ za pomoci dělení grafů. Pro vyřešení soustavy potřebujeme vyřešit rovnice
@@ -599,7 +603,7 @@ Mějme soustavu lineárních algebraických rovnic $Ax=b$ a hledejme její řeš
   Ly =& b \\
   L^Tx= & y
 \end{align*}
-Pokud rozdělíme graf příslušný matici $A$ na $k$ částí a provedeme rozklad matic $A_1=L_1 L_1^T, \ldots A_k=L_k L_k^T$ odpovídajících vzniklým podgrafům a matice $A_S=L_S L_S^T$ odpovídající vrcholovému separátoru, pak lze soustavu $Ly=b$ napsat ve tvaru
+Pokud rozdělíme graf příslušný matici $A$ na $k$ částí a provedeme rozklad matic $A_1=L_1 L_1^T, \ldots, A_k=L_k L_k^T$ odpovídajících vzniklým podgrafům a matice $A_S=L_S L_S^T$ odpovídající vrcholovému separátoru, pak lze soustavu $Ly=b$ napsat ve tvaru
 \[
 \begin{pmatrix}
   L_1 &     &        &      & \\
@@ -632,23 +636,26 @@ a tedy
   y_k= & L_k^{-1}b_k \\
   y_S= & L_1^{-1}(b_S - S_1 y_1 - S_2 y_2 - \ldots - S_k y_k)
 \end{align*}
-Je vidět, že zatímco výpočet $y_1, \ldots, y_k$ může probíhat paralelně, výpočet $y_S$ je závislý na $y_1, \ldots, y_k$. Je tedy vhodné, aby separátor byl malý.
+Je vidět, že zatímco výpočet $y_1, \ldots, y_k$ může probíhat paralelně, výpočet $y_S$ je závislý na $y_1, \ldots, y_k$. Je tedy vhodné, aby vrcholový separátor byl malý.
+
+
 Soustavu $L^Tx=y$ poté vyřešíme obdobně.
 \end{remark}
 
 \medskip
+
 Jak vidíme, vyvstávají nám při dělení grafu s cílem vypočítávat Choleského rozklad na oblastech dvě základní otázky:
 \begin{enumerate}
-  \item Jak najít očíslování grafu takové, aby Choleského rozklad na jednotlivých podgrafech byl vyvážený? \TODO{Přikláněl bych se k tomu rovnat až výsledné podgrafy}
+  \item Jak najít očíslování grafu takové, aby Choleského rozklad na jednotlivých podgrafech byl vyvážený?
   \item Jak určit počet nenulových prvků v Choleského rozkladu matice se strukturou matice sousednosti jednotlivých podgrafů?
 \end{enumerate}
 Způsob hledání odpovědí na tyto dvě otázky popíšeme v následujících dvou oddílech.
 
 \section{Algoritmy pro očíslování vrcholů grafu}
 \label{Numbering}
-V tomto oddíle popíšeme základní algoritmy pro očíslování vrcholů grafu. Zřejmě platí, že přečíslováním vrcholů grafu dojde k permutaci řádků a sloupů v jeho matici sousednosti. Hlavní motivací, proč je pro nás číslování vrcholů grafu důležité, tedy je, že permutací řádků matice můžeme výrazně redukovat počet operací potřebných pro její Choleského rozklad.
+V tomto oddíle popíšeme základní algoritmy pro očíslování vrcholů grafu. Zřejmě platí, že přečíslování vrcholů grafu odpovídá permutaci řádků a sloupů v jeho matici sousednosti. Hlavní motivací, proč je pro nás číslování vrcholů grafu důležité, tedy je, že permutací řádků matice můžeme výrazně redukovat počet operací potřebných pro její Choleského rozklad.
 
-Na závěr kapitoly se zmíníme o topologickém číslování vrcholů stromu, které pro nás bude potřebné při popisu eliminačních stromů.
+Na závěr kapitoly se zmíníme o topologickém číslování vrcholů stromu, které pro nás bude potřebné při popisu eliminačních stromů v kapitole \ref{eltreeChapter}.
 
 \subsection{Číslování vrcholů grafu v závislosti na vzdálenosti od separátoru}
 \label{sepDistOrdering}
@@ -699,7 +706,7 @@ Topologické číslování vrcholů stromu je intuitivní způsob pro očíslov�
 
 
 \section{Eliminační stromy}
-
+\label{eltreeChapter}
 \TODO{Udelat poradek s $[A],[L],a,l$}
 
 V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic \cite{liu:86,liu:90}. Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty. Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.

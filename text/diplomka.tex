@@ -37,8 +37,6 @@
 \newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
 
 \begin{document}
-\TODO{nekonzistence v n a N}
-\TODO{udelat poradek v citacich}
 
 %----------------------------------------------------------------------
 
@@ -289,7 +287,7 @@ Hlavní myšlenkou spektrálního algoritmu je tedy převést problém dělení 
 Algoritmus podle Kernighana a Lina (KL algoritmus) vznikl v roce 1970 s cílem dělit elektrické obvody na kartách \cite{keli:70}. V jeho základní podobě se jedná o algoritmus pro vylepšování již získaného rozdělení grafu, pro jeho funkci je tedy nutné poskytnout mu vstupní rozdělení grafu. Pokud používáme KL algoritmus přímo jako dělicí algoritmus, lze vstupní rozdělení zvolit libovolně. Jeho výsledky pro různá počáteční rozdělení se však mohou lišit. Proto je v praxi je výhodné, aby představovalo vstupní rozdělení rozumnou aproximaci optimálního rozdělení. Kvůli tomu se KL algoritmus obvykle používá v kombinaci s jiným algoritmem pro dělení grafů, případně jako součást většího celku - například víceúrovňového dělení grafu ve fázi projekce hrubého rozdělení na vstupní graf (viz kapitola \ref{multilevel}). V tomto případě je vzhledem ke specifickému charakteru úlohy běžně využívána modifikace tohoto algoritmu, která bere v úvahu pouze vrcholy blízko separátoru.
 
 \TODO{KL algoritmus pro $k$ částí - je to tak, že se vždycky přehazuje mezi dvojicí částí?}
-Popišme KL algoritmus pro graf rozdělený na dva podgrafy. Kdyby byl graf obecně rozdělen na $k$ částí, mohli bychom použít tento algoritmus na jednotlivé dvojice podgrafů. \TODO{cite\{suaris, kedem(viz pothen)\}, kteri deli rovnou na 4 casti}
+Popišme KL algoritmus pro graf rozdělený na dva podgrafy. Kdyby byl graf obecně rozdělen na $k$ částí, mohli bychom použít tento algoritmus na jednotlivé dvojice podgrafů. \TODO{cite\{suaris, kedem(viz pothen)\}, kteří dělí rovnou na 4 části}
 \TODO{end}
 
 Mějme graf $G=(V,E)$ rozdělený na dva podgrafy $G_1=(V_1,E_1)$ a $G_2=(V_2,E_2)$. Základním principem KL algoritmu je, že v každé jeho iteraci dojde k výměně určitého počtu vrcholů z množiny $V_1$ za stejný počet vrcholů z množiny $V_2$ tak, aby byla snížena velikost hranového separátoru. \TODO{a co vrcholový?}
@@ -323,9 +321,81 @@ Základní varianta KL algoritmu se skládá ze dvou do sebe vnořených cyklů,
 Nejjednodušším vylepšením tohoto algoritmu je nechat vnější cyklus běžet po pevně stanovený počet iterací i poté, co již nedochází ke zmenšování velikosti hranového separátoru. Můžeme se díky tomu dostat z lokálního minima \TODO{cite}. Nejznámějším praktickým vylepšením algoritmu podle Kernighana a Lina je algoritmus publikovaný v \cite{fima:89}, který optimalizuje rychlost výpočtu a aktualizaci zisku pro jednotlivé vrcholy.
 
 \section{Metoda vnořených řezů}
-\TODO{Je vubec tahle kapitola vhodna?}
-Metoda vnořených řezů byla navržena a publikována v roce 1973 Alanem Georgem \TODO{cite}. Jedná se o analyticky dobře popsaný algoritmus využívající metodu rozděl a panuj pro řešení problémů na řídkých maticích pomocí jejich převedení na grafy a dělení těchto grafů. Tento algoritmus je teoreticky velmi dobře popsán pro některé speciální typy grafů, například pro čtvercové sítě. V této práci jej uvádíme jako konkrétní příklad přístupu k víceúrovňovému dělení grafů a proto se \TODO{?budeme zabývat jeho obecnou formou pomocí níž lze dělit libovolné grafy.}
-\TODO{ND je prikladem multilevel - jak?}
+
+Metoda vnořených řezů byla navržena a publikována v roce 1973 Alanem Georgem \cite{geo:73}. Jedná se o analyticky dobře popsaný algoritmus využívající metodu rozděl a panuj pro řešení problémů na řídkých maticích pomocí jejich převedení na grafy a dělení těchto grafů. V této práci jej uvádíme pro úplnost jakožto příklad algoritmu, který je již ze své podstaty zaveden jako víceúrovňový i přestože se striktně nedrží víceúrovňového schématu. Toto schéma z něj však převzalo myšlenku jak vytvářet hierarchii,ale samotná metoda dělení na jednotlivých úrovních a techniky jak hledat oblasti byly nahrazeny. Dalším specifikem metody vnořených řezů je, že se tento algoritmus striktně omezil na dělení grafu na dvě části, zatímco výše popsané víceúrovňové schéma toto omezení nemá.
+Metodu vnořených řezů můžeme dále vnímat i jako algoritmus pro hledání vhodného očíslování vrcholů grafu.
+
+Metoda vnořených řezů je teoreticky velmi dobře popsána pro některé speciální typy grafů, například pro čtvercové sítě. Pro obecné grafy bylo navrženo několik heuristických algoritmů, z nichž jeden popíšeme.
+
+\subsection{Jeden řez grafu}
+
+Mějme graf $G = (V,E)$ s maticí sousednosti $A_G$ a nechť $|V| = n$. Nechť $S \subset V$ je vrcholovým separátorem grafu $G$, jehož odebráním dostaneme dva podgrafy grafu $G$ s množinami vrcholů $C_1$, $C_2$. Mějme dále zobrazení $\varphi: V \rightarrow \{1, 2, \ldots, n\}$, které každému vrcholu $v_i \in V$ přiřadí index $i$. Pokud pro zobrazení $\varphi$ platí
+\begin{enumerate}
+  \item $\varphi^{-1}\left(\{1,\ldots,|C_1|\} \right)=C_1$
+  \item $\varphi^{-1}\left(\{|C_1|+1,\ldots,|C_1|+|C_2|\}\right)=C_2$
+  \item $\varphi^{-1}\left(\{|C_1|+|C_2|+1,\ldots,n\}\right)=S$,
+\end{enumerate}
+pak matici sousednosti $A_G$ grafu $G$ lze blokově zapsat ve tvaru
+\begin{equation}\label{AG nested}
+    A_G =
+    \left(
+        \begin{matrix}
+          A_1   & O     & V_1 \\
+          O     & A_2   & V_2 \\
+          V_1^T & V_2^T & A_S
+        \end{matrix}
+    \right),
+\end{equation}
+kde $A_1$, $A_2$ jsou matice sousednosti podgrafů $G(C_1)$, $G(C_2)$, dále $V_1$, resp. $V_2$ jsou matice charakterizující propojení vrcholů z množiny $C_1$, resp.$C_2$ s vrcholy ze separátoru $S$ a matice $O$ značí nulovou matici. Pro následnou manipulaci s maticí sousednosti $A_G$ je výhodné, aby nulové matice $O$ měly co nejvíce prvků.
+
+Cílem jednoho řezu v metodě vnořených řezů je najít vrcholový separátor $S$ a zobrazení $\varphi$ splňující podmínky výše.
+
+\subsection{Metoda vnořených řezů pro čtvercové sítě}
+
+Popišme metodu vnořených řezů nejprve pro speciální třídu grafů nazývaných čtvercové sítě, se kterými se v praxi můžeme často setkat při diskretizaci složitých systémů.
+
+\textbf{Čtvercovou sítí} o rozměrech $m \times l$, kde $m \leq l$ rozumíme graf o $N = ml$  vrcholech, jehož příklad můžeme vidět zobrazený na obrázku \ref{ctvsit}.
+
+\medskip
+{
+  \centering
+  \includegraphics[scale=0.6]{pictures/ctvercovasit.pdf}
+  \captionof{figure}{Čtvercová síť o rozměrech $m=7$ a $l=10$ \label{ctvsit}}
+}
+
+\paragraph{Jeden řez čtvercové sítě:}
+
+Mějme čtvercovou síť $N = (V,E)$ o rozměrech $n \times n$ a nechť $S_0 \subset V$. Nechť dále vrcholy z množiny $S_0$ leží v síti na jedné přímce a $S_0$ je vrcholovým separátorem sítě $N$, jehož odebráním dojde k rozpadnutí sítě $N$ na dva podgrafy s množinami vrcholů $V_1$ a $V_2$ s pokud možno stejným počtem prvků. Z konstrukce $S$ jsou tyto podgrafy zřejmě také čtvercovými sítěmi. Očíslujme nyní postupně po řádcích vrcholy z množin $V_1$ a $V_2$ a nakonec očíslujme vrcholy $S_0$. Toto očíslování nazýváme jednoúrovňově-dělicím (one-level dissection ordering) a vidíme, že zřejmě splňuje podmínky kladené výše na zobrazení $\varphi$.
+
+\paragraph{Vnořené řezy pro čtvercovou síť: }
+
+Abychom získali očíslování pro metodu vnořených řezů, pokračujeme v dělení komponent s množinami vrcholů $V_1$, $V_2$. Obdobným způsobem jako v prvním kroku vybereme $S_1$, resp. $S_2$ tak, aby byla vhodným vrcholovým separátorem $G(V_1)$, resp. $G(V_2)$. Nyní opět každou část přečíslujeme tak, aby vrcholy v separátoru měly nejvyšší čísla.
+Tím se nám podaří docílit toho, že nejen matice sousednosti, ale i její libovolný diagonální blok má tvar (\ref{AG nested}).
+
+\subsection{Dělení obecných grafů metodou vnořených řezů}
+\label{NDobecne}
+
+Pro použití metody vnořených řezů pro obecné grafy existují různé přístupy \TODO{cite?}. V této kapitole popíšeme jeden z nich. Jedná se o heuristický algoritmus fungující na principu hledání struktury úrovní daného grafu a následného rozdělení grafu podle úrovně "uprostřed".
+
+Mějme souvislý graf $G=(V,E)$. Algoritmus pro jeho rozdělení využívající metodu vnořených řezů pak vypadá následovně.
+
+\begin{enumerate}
+  \item Položíme $W=V$ a $N=|V|$.
+  \item \label{forloop} Nalezneme souvislou komponentu $G(C)$ grafu $G(W)$.
+  \item Vezmeme libovolný vrchol $v\in C$. Vrchol $v$ je vhodné jej volit tak, aby byl daleko od centra grafu \TODO{dodefinovat centrum!} $G(C)$.
+  \item Vytvoříme strukturu úrovní $\mathcal{L}=\{L_0, \ldots ,L_l\}$ grafu $G(C)$ vycházející z vrcholu $v$, tj. rozdělíme množinu vrcholů $C$ grafu $G(C)$ na vzájemně disjunktní množiny $L_1, \ldots, L_l$ definované následovně:
+      \begin{align*}
+        L_0 & := v \\
+        L_i & := \mathrm{adj}_{G(C)}(L_{i-1}) \setminus \bigcup_{k=0}^{i-1} L_k \quad {\rm pro} \ i \in \{2,\ldots,l\}
+      \end{align*}
+  \item Separátor $S$ grafu $G(C)$ volíme následovně. Pokud $l \leq 2$ položíme separátor roven $C$. Jinak definujeme $j := \floor*{\frac{l+1}{2}}$ a separátor položíme roven
+      \[
+        S = \left\{y \in L_j \mid \mathrm{adj}_{G(C)}(y) \cap L_{j+1} \neq \emptyset \right\}
+      \]
+  \item Očíslujeme vrcholy separátoru čísly $N-|S|+1,\ldots,N$
+  \item Položíme $W:=W \setminus S$ a $N := N-|S|$.
+  \item Pokud $W \neq \emptyset$ vrátíme se na krok \ref{forloop}, jinak skončíme.
+\end{enumerate}
 
 %----------------------------------------------------------------------
 
@@ -512,7 +582,7 @@ A =
 \]
 kde je zřejmě $\vec{w}=L_M^{-1}\vec{u}$ a $t=(s-\vec{w}^T\vec{w})^{1/2}$.
 
-Pro získání Choleského rozkladu matice $M$, jehož znalost jsme výše předpoládali, můžeme použít stejný postup. Rekurzivním použitím této metody dostáváme soustavu lineárních algebraických rovnic pro výpočet $i$-tého řádku matice $L$, kde $l_{i,j}$ značí $(i,j)$-tý prvek matice $L$.
+Pro získání Choleského rozkladu matice $M$, jehož znalost jsme výše předpokládali, můžeme použít stejný postup. Rekurzivním použitím této metody dostáváme soustavu lineárních algebraických rovnic pro výpočet $i$-tého řádku matice $L$, kde $l_{i,j}$ značí $(i,j)$-tý prvek matice $L$.
 \begin{gather*}
 \begin{pmatrix}
   l_{1,1} &  & 0 \\
@@ -534,7 +604,7 @@ Pro získání Choleského rozkladu matice $M$, jehož znalost jsme výše před
 \end{gather*}
 
 \paragraph{Sloupcové schéma}
-Jedná se o obdobný postup jako v řádkovém schématu, pouze napočítáváme prvky matice $L$ po sloupcích. Vzorce, které nám pro výpočet prvků matice $L$ vznikou jsou pro $j = 1,2,\ldots, N$ a pro $i = j+1,j+2,\ldots,N$ následující:
+Jedná se o obdobný postup jako v řádkovém schématu, pouze napočítáváme prvky matice $L$ po sloupcích. Vzorce, které nám pro výpočet prvků matice $L$ vzniknou jsou pro $j = 1,2,\ldots, N$ a pro $i = j+1,j+2,\ldots,N$ následující:
 \begin{align*}
   l_{j,j} &= \left(a_{j,j} - \sum_{k=1}^{j-1}{l_{j,k}^2}\right)^\frac12 \\
   l_{i,j} &= \left(a_{i,j} - \sum_{k=1}^{j-1}{l_{i,k}l_{j,k}}\right)/l_{j,j}.
@@ -589,7 +659,7 @@ Dělení grafu lze využít jako nástroj pro paralelizaci problémů, které lz
 
 Jak bylo zmíněno, při dělení grafu podle klasické definice bereme ohled pouze na dvě kritéria: na velikost separátoru a vyváženost jednotlivých částí rozdělení. V případě, že dělení grafu využíváme jako součást komplexnějšího algoritmu, například pro paralelizaci nějaké maticové úlohy, nemusí být rozdělení vytvořené s ohledem na tato kritéria optimální. V takovém případě je nutné brát ohled na to, jaké operace budeme na výsledných podgrafech provádět a v závislosti na tom specifikovat nová kritéria. Pro dělení grafu s ohledem na více než dvě základní kritéria popsaná výše existují dva základní přístupy. Můžeme hledat rozdělení grafu optimalizující všechna kritéria zároveň (apriorní přístup), nebo můžeme graf rozdělit pomocí některého ze základních algoritmů pro dělení grafu a poté vzniklé rozdělení vylepšit tak, abychom optimalizovali vyváženost operací (aposteriorní přístup).
 
-V této práci se zaměříme na situaci, kdy je dělení grafů použito jako nástroj pro vyvažování počtu operací na jednotlivých oblastech při paralelizaci Choleského rozkladu. Požadujeme tedy, aby počet operací potřebný pro Choleského rozklad na jednotlivých oblastech byl v optimálním případě stejný a zároveň co nejmenší. Zřejmě nám takto vzniká kritérium, které není zahrnuto v kritériích podle klasické definice - ta totiž neberou v potaz hustotu hran v podgrafech vzniklých dělením původního grafu, neboli v řeči matic počet nenulových prvků matic sousednosti jednotlivých podgrafů. Počet operací potřebných pro vypočítání rozkladu na jednotlivých oblastech může být kvůli tomu výrazně odlišný. Námi navržený algoritmus bude využívat aposteriorního přístupu, nejprve tedy nalezneme suboptimální řešení vzhledem k základním kritériím a poté budeme hledat vhodé očíslování vrcholů daných podgrafů a přesouvat vrcholy mezi jednotlivými částmi rozdělení s cílem vylepšit jej vzhledem k Choleského rozkladu.
+V této práci se zaměříme na situaci, kdy je dělení grafů použito jako nástroj pro vyvažování počtu operací na jednotlivých oblastech při paralelizaci Choleského rozkladu. Požadujeme tedy, aby počet operací potřebný pro Choleského rozklad na jednotlivých oblastech byl v optimálním případě stejný a zároveň co nejmenší. Zřejmě nám takto vzniká kritérium, které není zahrnuto v kritériích podle klasické definice - ta totiž neberou v potaz hustotu hran v podgrafech vzniklých dělením původního grafu, neboli v řeči matic počet nenulových prvků matic sousednosti jednotlivých podgrafů. Počet operací potřebných pro vypočítání rozkladu na jednotlivých oblastech může být kvůli tomu výrazně odlišný. Námi navržený algoritmus bude využívat aposteriorního přístupu, nejprve tedy nalezneme suboptimální řešení vzhledem k základním kritériím a poté budeme hledat vhodné očíslování vrcholů daných podgrafů a přesouvat vrcholy mezi jednotlivými částmi rozdělení s cílem vylepšit jej vzhledem k Choleského rozkladu.
 
 Mějme graf $G$ a jeho rozdělení na podgrafy $G_1, \ldots, G_k$ s maticemi sousednosti $A_{G_1}, \ldots, A_{G_k}$. Provedeme Choleského rozklad matic $A_{G_1}$, $A_{G_2}$, označme
 \[
@@ -961,6 +1031,9 @@ Pro úspěšné slinkování a zkompilování
 
 
 \newpage
+
+\TODO{udelat poradek v citacich}
+
 \bibliographystyle{plain}
 \bibliography{diplomka}
 

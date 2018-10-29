@@ -98,8 +98,6 @@ Proces vytváření faktorgrafu $G / \mathcal{P}$ z grafu $G$ je znázorněn na 
   \captionof{figure}{Proces vytváření faktorgrafu \label{faktorgrafImg}}
 }
 
-\TODO{potrebuju ctvercovou sit? Kdyz budu delat ND, tak jo}
-
 \section{Strom}
 
 Nyní zaveďme základní pojmy týkající speciální třídy grafů nazývané stromy \cite{koub:11}
@@ -178,15 +176,20 @@ Pro reprezentaci ne nutně čtvercové matice $A$ o rozměrech $m\times n$ můž
   Graf $G=(V,E)$ nazveme bipartitním, pokud existuje rozklad množiny $V$ na podmnožiny $R$, $B$ takové, že ${R \choose 2} \cap E = {B \choose 2} \cap E = \emptyset$.
 \end{definition}
 
-Jinými slovy se jedná o graf, který lze rozdělit na dvě části tak, že v žádné z částí není ani jedna hrana. Takovýto bipartitní graf se standardně značí $G=(R,B,E)$ a pokud za jeho pomoci chceme reprezentovat matici $A$, pokládáme $|R|=m$, $|B|=n$ a $E = \left\{(v_i,v_j) \ | \ v_i \in R, v_j \in B, a_{ij} \neq 0 \right\}$.
+Jinými slovy se jedná o graf, který lze rozdělit na dvě části tak, že v žádné z částí není ani jedna hrana. Takovýto bipartitní graf se standardně značí $G=(R,B,E)$ a pokud za jeho pomoci chceme reprezentovat matici $A$, pokládáme $|R|=m$, $|B|=n$ a $E = \left\{(v_i,v_j) \ | \ v_i \in R, v_j \in B, a_{ij} \neq 0 \right\}$. Příklad reprezentace struktury matice pomocí bipartitního grafu je znázorněn na obrázku \ref{bipartMat}
 
-\TODO{Příklad = obrázek}
+\bigskip
+{
+  \centering
+  \includegraphics[width=0.8\textwidth]{pictures/bipart_grmat.pdf}
+  \captionof{figure}{Reprezentace struktury matice pomocí bipartitního grafu \label{bipartMat}}
+}
 
 %----------------------------------------------------------------------
 
 \chapter{Dělení grafů}
 
-V této kapitole formálně popíšeme problém dělení grafu na $k$ podgrafů a definujeme pojmy s ním spojené. Vzhledem k tomu, že v naší implementaci používáme pro dělení grafů profesionální softwarovou knihovnu METIS \cite{kary:13}, zaměříme se nejprve na schéma víceúrovňového dělení grafu jakožto algoritmus používaný při profesionálních implementacích dělení grafů. Dále se budeme věnovat některým technikám, které tvoří součást víceúrovňového dělení grafů, konkrétně spektrálnímu dělení grafu a vylepšovacímu algoritmu podle Kernighana a Lina \cite{keli:70}. \TODO{Doresit ND}Na závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jakožto konkrétní příklad víceúrovňového algoritmu pro dělení grafů \TODO{zdroj}.
+V této kapitole formálně popíšeme problém dělení grafu na $k$ podgrafů a definujeme pojmy s ním spojené. Vzhledem k tomu, že v naší implementaci používáme pro dělení grafů profesionální softwarovou knihovnu METIS \cite{kary:13}, zaměříme se nejprve na schéma víceúrovňového dělení grafu jakožto algoritmus používaný při profesionálních implementacích dělení grafů. Dále se budeme věnovat některým technikám, které tvoří součást víceúrovňového dělení grafů, konkrétně spektrálnímu dělení grafu a vylepšovacímu algoritmu podle Kernighana a Lina \cite{keli:70}. Na závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jakožto konkrétní příklad víceúrovňového algoritmu pro dělení grafů.
 
 Dělení grafů na $k$ podgrafů je praktický problém s bohatým teoretickým zázemím a mnoha aplikacemi. Může nám pomoci při řešení parciálních diferenciálních rovnic na moderních počítačových architekturách \cite{posl:90} a nezanedbatelnou roli hraje také při výrobě mikroprocesorů metodou VLSI nebo při řešení velkých systémů lineárních rovnic \cite{keli:70, pis:84}. Často dochází k omezení se na dělení grafu na dva podgrafy, v této práce se však pokusíme prozkoumat i dělení grafu na více částí.
 
@@ -661,9 +664,9 @@ Jak bylo zmíněno, při dělení grafu podle klasické definice bereme ohled po
 
 V této práci se zaměříme na situaci, kdy je dělení grafů použito jako nástroj pro vyvažování počtu operací na jednotlivých oblastech při paralelizaci Choleského rozkladu. Požadujeme tedy, aby počet operací potřebný pro Choleského rozklad na jednotlivých oblastech byl v optimálním případě stejný a zároveň co nejmenší. Zřejmě nám takto vzniká kritérium, které není zahrnuto v kritériích podle klasické definice - ta totiž neberou v potaz hustotu hran v podgrafech vzniklých dělením původního grafu, neboli v řeči matic počet nenulových prvků matic sousednosti jednotlivých podgrafů. Počet operací potřebných pro vypočítání rozkladu na jednotlivých oblastech může být kvůli tomu výrazně odlišný. Námi navržený algoritmus bude využívat aposteriorního přístupu, nejprve tedy nalezneme suboptimální řešení vzhledem k základním kritériím a poté budeme hledat vhodné očíslování vrcholů daných podgrafů a přesouvat vrcholy mezi jednotlivými částmi rozdělení s cílem vylepšit jej vzhledem k Choleského rozkladu.
 
-Mějme graf $G$ a jeho rozdělení na podgrafy $G_1, \ldots, G_k$ s maticemi sousednosti $A_{G_1}, \ldots, A_{G_k}$. Provedeme Choleského rozklad matic $A_{G_1}$, $A_{G_2}$, označme
+Mějme graf $G$ a jeho rozdělení na podgrafy $G_1, \ldots, G_k$ s maticemi sousednosti $A_{G_1}, \ldots, A_{G_k}$. Provedeme Choleského rozklad matic $A_{G_1}, \ldots, A_{G_k}$, označme
 \[
-  A_{G_i} = L_{G_i}L_{G_i}^T \ {\rm pro} \ i = 1,2.
+  A_{G_i} = L_{G_i}L_{G_i}^T \ {\rm pro} \ i \in \{1,\ldots,k\}.
 \]
 Pokud existují $i,j \in \{1,\ldots,k \}$ tak, že matice $L_{G_i}^T$ a $L_{G_j}^T$ budou mít výrazně různý počet nenulových prvků, je zřejmé, že toto rozdělení grafu $G$ je nevhodné pro napočítávání Choleského rozkladu na oblastech vzhledem k vyváženosti na počet operací. Někdy pro vyvážení rozdělení za účelem Choleského rozkladu na oblastech stačí vhodně přečíslovat vrcholy podgrafů $G_1, \ldots, G_k$ a tím změnit matice sousednosti odpovídající jednotlivým podgrafům.
 
@@ -716,21 +719,21 @@ Soustavu $L^Tx=y$ poté vyřešíme obdobně.
 
 Jak vidíme, vyvstávají nám při dělení grafu s cílem vypočítávat Choleského rozklad na oblastech dvě základní otázky:
 \begin{enumerate}
-  \item Jak najít očíslování grafu takové, aby Choleského rozklad na jednotlivých podgrafech byl vyvážený?
-  \item Jak určit počet nenulových prvků v Choleského rozkladu matice se strukturou matice sousednosti jednotlivých podgrafů?
+  \item Jak najít očíslování podgrafů vzniklých dělením původního grafu takové, aby k vypočítání Choleského rozkladu na jednotlivých oblastech bylo potřeba co nejméně operací?
+  \item Jak určit počet nenulových prvků v Choleského faktoru matice bez toho, abychom Choleského rozklad vypočítali?
 \end{enumerate}
-Způsob hledání odpovědí na tyto dvě otázky popíšeme v následujících dvou oddílech.
+Způsob hledání odpovědí na tyto dvě otázky popíšeme v následujících dvou podkapitolách.
 
 \section{Algoritmy pro očíslování vrcholů grafu}
 \label{Numbering}
-V tomto oddíle popíšeme základní algoritmy pro očíslování vrcholů grafu. Zřejmě platí, že přečíslování vrcholů grafu odpovídá permutaci řádků a sloupů v jeho matici sousednosti. Hlavní motivací, proč je pro nás číslování vrcholů grafu důležité, tedy je, že permutací řádků matice můžeme výrazně redukovat počet operací potřebných pro její Choleského rozklad.
+V této podkapitole popíšeme základní algoritmy pro očíslování vrcholů grafu. Zřejmě platí, že přečíslování vrcholů grafu odpovídá permutaci řádků a sloupů v jeho matici sousednosti. Hlavní motivací, proč je pro nás číslování vrcholů grafu důležité, tedy je, že permutací řádků matice můžeme výrazně redukovat počet operací potřebných pro její Choleského rozklad.
 
 Na závěr kapitoly se zmíníme o topologickém číslování vrcholů stromu, které pro nás bude potřebné při popisu eliminačních stromů v kapitole \ref{eltreeChapter}.
 
 \subsection{Číslování vrcholů grafu v závislosti na vzdálenosti od separátoru}
 \label{sepDistOrdering}
 
-V této podkapitole popíšeme nejjednodušší metodu číslování vrcholů podgrafu, který vznikl rozdělením původního grafu na $n$ částí.
+V tomto oddíle popíšeme nejjednodušší metodu číslování vrcholů podgrafu, který vznikl rozdělením původního grafu na $n$ částí.
 Tuto metodu lze používat samostatně, ale vzhledem k její povaze ji lze využít i pro vylepšení ostatních metod očíslování grafu,
 například ji lze kombinovat s metodou minimálního stupně.
 
@@ -751,11 +754,11 @@ Z algoritmu je vidět, že výsledné očíslování vrcholů grafu nemusí být
 Metoda minimálního stupně je jednoduchým algoritmem pro nalezení očíslování grafu. Algoritmus pro hledání očíslování grafu pomocí této metody je následující:
 
 \begin{enumerate}
-  \item Mějme graf $G=(V,E)$ a položme $j:=1$.
+  \item Mějme graf $G=(V,E)$ a položme $\texttt{j := 1}$.
   \item \label{mindegloop}
-      Nalezneme neočíslovaný vrchol $v$ grafu $G$ s nejmenším stupněm a přiřadíme mu číslo $j$.
-  \item Přidáme hrany mezi vrcholy z $\mathrm{adj}_G(v)$ tak, aby $\mathrm{adj}_G(v)$ byla klika v grafu $G$.
-  \item Pokud nejsou všechny vrcholy očíslované, zvětšíme $j$ o $1$ a vrátíme se na krok \ref{mindegloop}.
+      Nalezneme neočíslovaný vrchol $v$ grafu $G$ s nejmenším stupněm a přiřadíme mu číslo $\texttt{j}$.
+  \item Přidáme hrany mezi vrcholy z $\mathrm{adj}_G(v)$ tak, aby $G(\mathrm{adj}_G(v))$ byla klika v grafu $G$.
+  \item Pokud nejsou všechny vrcholy očíslované, položíme $\texttt{j := j + 1}$ a vrátíme se na krok \ref{mindegloop}.
 \end{enumerate}
 
 Očíslování vrcholů grafu G pomocí tohoto algoritmu není jednoznačné, protože vrcholů s minimálním stupněm může být více.
@@ -763,9 +766,9 @@ Očíslování vrcholů grafu G pomocí tohoto algoritmu není jednoznačné, pr
 \subsection{Smíšené číslování}
 Vzhledem k povaze číslování popsaných v oddílech \ref{MDordering} a \ref{sepDistOrdering} můžeme tyto algoritmy zkombinovat. V tomto oddíle popisujeme dvě možnosti přístupu k tomuto problému.
 
-Pokud máme rozdělení $G_1, \ldots, G_k$ grafu $G$ s vrcholovým separátorem $G_S$, můžeme pro očíslování části $G_i$ použít číslování vrcholů pomocí metody minimálního stupně, kde při výběru vrcholu ve \ref{mindegloop}. kroku přidáme kritérium vzdálenosti od separátoru popsané v \ref{sepDistOrdering}. Nejprve tedy nalezneme množinu všech vrcholů grafu $G$, které mají minimální stupeň a poté mezi nimi zvolíme ten, který má nejmenší stupeň.
+Pokud máme rozdělení $G_1, \ldots, G_k$ grafu $G$ s vrcholovým separátorem $G_S$, můžeme pro očíslování části $G_i$ použít číslování vrcholů pomocí metody minimálního stupně, kde při výběru vrcholu ve \ref{mindegloop}. kroku algoritmu popsaného v \ref{MDordering} přidáme kritérium vzdálenosti od separátoru popsané v \ref{sepDistOrdering}. Nejprve tedy nalezneme množinu všech vrcholů grafu $G$, které mají minimální stupeň a poté z nich zvolíme ten, který je nejdál od vrcholového separátoru.
 
-\TODO{smíšené s různými koef.}
+Druhou možností, jak je výše zmíněná očíslování možné kombinovat je použít jejich konvexní kombinaci. Tímto způsobem nemusíme kombinovat pouze očíslování popsaná v oddílech \ref{MDordering} a \ref{sepDistOrdering}, ale můžeme jej použít na libovolná očíslování. Mějme mno6inu vrcholů $V$, $|V|=n$ a dvě různá očíslování $\varphi,\psi :V \rightarrow \{1,\ldots,n\}$. Nechť dále $\alpha \in [0,1]$. Napočítáme pro každý vrchol $v$ hodnotu výrazu $\varphi(v) + (1-\alpha)\psi(v)$. Smíšené očíslování vytvoříme tak, že vrcholy seřadíme podle této hodnoty od nejmenší po největší. Ač by se mohlo zdát, že tento postup nám nemůže přinést nic nového, nemusí to být pravidlem. \TODO{citovat Sloane, Jeniffer Scott} 
 
 \subsection{Topologické číslování vrcholů stromu}
 Topologické číslování vrcholů stromu je intuitivní způsob pro očíslování vrcholů grafu, který je stromem.
@@ -794,8 +797,7 @@ Proto pro matici $A_T$ můžeme definovat funkci $\texttt{PARENT}:\{1,\ldots,n\}
 \end{align*}
 Zřejmě ve stromu přidruženém k matici $A_T$ platí, že předchůdcem vrcholu $x_j$ je vrchol $x_{\texttt{PARENT}[j]}$.
 
-Většinou však nepracujeme s maticemi, jejichž přidružený graf by byl stromem. Zobecněme tedy výše popsanou konstrukci pro libovolnou řídkou, ireducibilní, pozitivně definitní, symetrickou matici $A$ o rozměrech $n \times n$. Předpokládejme, že známe Choleského rozklad této matice, tj. $A = LL^T$. \textbf{Maticí se zaplněním} nazveme matici $F$ definovanou jako $F = L + L^T$. Dále zavedeme matice $L_t$ a $F_t$ následovně: $L_t$ je matice vzniklá z $L$ tím, že v každém sloupci vynulujeme všechny prvky pod diagonálou
-kromě prvku s nejnižším řádkovým indexem a $F_t := L_t + L_t^T$.
+Většinou však nepracujeme s maticemi, jejichž přidružený graf by byl stromem. Zobecněme tedy výše popsanou konstrukci pro libovolnou řídkou, ireducibilní, pozitivně definitní, symetrickou matici $A$ o rozměrech $n \times n$. Předpokládejme, že známe Choleského rozklad této matice, tj. $A = LL^T$. \textbf{Maticí se zaplněním} nazveme matici $F$ definovanou jako $F = L + L^T$. Dále zavedeme matice $L_t$ a $F_t$ následovně: $L_t$ je matice vzniklá z $L$ tím, že v každém sloupci vynulujeme všechny prvky pod diagonálou kromě prvku s nejnižším řádkovým indexem a $F_t := L_t + L_t^T$.
 
 Z definice $F_t$ vidíme, že se jedná o matici, jejíž přidružený graf $G(F_t)$ je strom. Díky tomu můžeme vyslovit následující definici.
 
@@ -804,11 +806,10 @@ Z definice $F_t$ vidíme, že se jedná o matici, jejíž přidružený graf $G(
     Podstrom eliminačního stromu $T(A)$ s kořenem $x_j$ značíme $T[x_j]$. Množinu vrcholů tohoto stromu značíme taktéž $T[x_j]$.
 \end{definition}
 
-Díky této definici můžeme definici funkce $\texttt{PARENT}$ přirozeně rozšířit na matici $A$ následovně:
+Díky této definici můžeme funkci $\texttt{PARENT}$ přirozeně rozšířit na matici $A$ následovně:
 \[
-    \texttt{PARENT}[j] := \min \left\{ i > j \ | \ l_{i,j} \neq 0\right\},
+    \texttt{PARENT}[j] := \min \left\{ i > j \ | \ [L]_{i,j} \neq 0\right\},
 \]
-kde $l_{i,j}$ označuje $i,j$-tý prvek matice $L$.
 
 \begin{observation}
 Přímo z definice plyne, že $T(A)$ a $T(F)$ jsou identické.
@@ -821,7 +822,7 @@ Pokud $x_i$ je vlastním předchůdcem $x_j$ v eliminačním stromu, pak $i > j$
 \begin{proposition}
   \label{ColDepProposition}
   Nechť $A$ je řídká, ireducibilní, pozitivně definitní, symetrická matice o rozměrech $n \times n$ s Choleského rozkladem $LL^T$ a nechť $i,j \in \left\{1,\ldots,n \right\}$, $i > j$. Pak numerické hodnoty sloupce $L_{\bullet i}$ závisí na sloupci $L_{\bullet j}$ právě tehdy,
-  když $l_{i,j} \neq 0$.
+  když $[L]_{i,j} \neq 0$.
 \end{proposition}
 \begin{proof}
   Tvrzení plyne přímo ze vzorců pro výpočet Choleského rozkladu pomocí sloupcového algoritmu popsaného v kapitole \ref{CholeskyChapter}
@@ -829,16 +830,17 @@ Pokud $x_i$ je vlastním předchůdcem $x_j$ v eliminačním stromu, pak $i > j$
 
 Přímým důsledkem tvrzení \ref{ColDepProposition} je, že graf $G(F)$ zachycuje informace o závislostech mezi jednotlivými sloupci při výpočtu Choleského rozkladu. 
 
-\subsection{Eliminační stromy a Choleského rozklad}
+\subsection{Využití a konstrukce eliminačních stromů}
+
 Z definice eliminačních stromů je zřejmé, že budou obsahovat velké množství informací o rozkladu matice a procesu jeho vytváření. Například v \cite{schr:82} byly popsány vlastnosti eliminačních stromů vzhledem ke Gaussově eliminaci. My však budeme eliminační stromy využívat jako nástroj pro výpočet počtu nenulových prvků v Choleského faktoru matice \cite{liu:90}. Uveďme větu, která dává do souvislosti nenulové prvky v Choleského faktoru a strukturu eliminačního stromu \cite{liu:86}.
 
 \begin{theorem}
-  Nechť $A$ je řídká, ireducibilní, pozitivně definitní, symetrická matice o rozměrech $n \times n$ s Choleského rozkladem $LL^T$ a nechť $i,j \in \left\{1,\ldots,n \right\}$. Pak $[L]_{ij} \neq 0$ právě tehdy, když vrchol $v_j$ je v eliminačním stromě následníkem vrcholu $v_k$ takového, že $[A]_{ij} \neq 0$.
+  Nechť $A$ je řídká, ireducibilní, pozitivně definitní, symetrická matice o rozměrech $n \times n$ s Choleského rozkladem $LL^T$ a nechť $i,j \in \left\{1,\ldots,n \right\}$. Pak $[L]_{i,j} \neq 0$ právě tehdy, když vrchol $v_j$ je v eliminačním stromě následníkem vrcholu $v_k$ takového, že $[A]_{i,j} \neq 0$.
 \end{theorem}
 
 Tato věta nám dává návod, jak vypočítat počet nenulových prvků v Choleského faktoru. Uveďme algoritmus popsaný v \cite{liu:90}, který nám dává návod, jak napočítat počty nenulových prvků v jednotlivých řádcích a sloupcích Choleského faktoru. Obdobný algoritmus s důrazem na implementaci na multiprocesorech můžeme nalézt v \cite{zmgi:88}. Námi popsaný algoritmus je poměrně jednoduchý, efektivnější ale složitější algoritmus pro výpočet počtu nenulových prvků můžeme najít v \cite{gil:94}. Dále v \cite{basm:87} můžeme najít postup, jakým napočítávat počet nenulových prvků ve faktoru a strukturu eliminačního stromu současně.
 
-V uvedeném algoritmu \ref{nonzerosAlgorithm} je použit pracovní vektor \Marker, který složí k označování vrcholů eliminačního stromu, které byly v dané iteraci již uvažovány - indexování vrcholů eliminačního stromu uvažujeme tak, že odpovídá vstupní matici. Eliminační strom je popsán pomocí vektoru $\texttt{PARENT}$, který byl zmíněn výše.
+V uvedeném algoritmu \ref{nonzerosAlgorithm} je použit pracovní vektor \Marker, který složí k označování vrcholů eliminačního stromu, které byly v dané iteraci již uvažovány - indexování vrcholů eliminačního stromu uvažujeme tak, aby odpovídalo vstupní matici. Eliminační strom je popsán pomocí vektoru $\texttt{PARENT}$, který byl zmíněn výše.
 
 \begin{figure}[ht]
   \centering
@@ -874,9 +876,9 @@ V uvedeném algoritmu \ref{nonzerosAlgorithm} je použit pracovní vektor \Marke
 
 Algoritmus \ref{nonzerosAlgorithm} nám dává návod jak vypočítat počet prvků v jednotlivých řádcích a sloupcích matice. Pokud nás zajímá pouze počet nenulových prvků v celé matici, můžeme počítat pouze počet prvků v řádcích, resp. sloupcích.
 
-Tento algoritmus nám dává odpověď na to, jak zjistit počet nenulových prvků v matici $L$ z eliminačního stromu matice $A$. Pokud bychom eliminační strom vytvářeli přímo z definice, museli bychom vypočítat Choleského rozklad. Proto potřebujeme algoritmus, který nám sestrojí Eliminační strom - tedy vektor $\texttt{PARENT}$ - bez toho.
+Díky algoritmu \ref{nonzerosAlgorithm} dostáváme odpověď na otázku, jak zjistit počet nenulových prvků v matici $L$ z eliminačního stromu matice $A$. Pokud bychom eliminační strom vytvářeli přímo z definice, museli bychom vypočítat Choleského rozklad. Proto potřebujeme algoritmus, který nám sestrojí Eliminační strom - tedy vektor $\texttt{PARENT}$ - bez toho.
 
-Uveďme základní algoritmus pro sestrojení eliminačního stromu matice bez výpočtu jejího Choleského rozkladu. Dále popišme jeho vylepšení, které budeme používat v implementaci. Oba algoritmy jsou převzaté z \cite{liu:86}. 
+Uveďme základní algoritmus pro sestrojení eliminačního stromu matice bez výpočtu jejího Choleského rozkladu (Algoritmus \ref{eltree1Algorithm}). Dále popišme jeho vylepšení (Algoritmus \ref{eltree2Algorithm}), v němž pro zrychlení algoritmu \ref{eltree1Algorithm} používáme pomocný vektor $\texttt{ANCESTOR}$, který nám zkrátí procházení stromu směrem od listů ke kořeni. V tomto pomocném vektoru je pro každý vrchol zaznamenáván jeho poslední zpracovaný předek. Oba algoritmy jsou převzaté z \cite{liu:86}. 
 
 \begin{figure}[ht]
   \centering
@@ -904,8 +906,6 @@ Uveďme základní algoritmus pro sestrojení eliminačního stromu matice bez v
   \end{minipage}
   \captionof{algocf}{Základní algoritmus pro hledání eliminačního stromu (\cite{liu:86}, upraveno) \label{eltree1Algorithm}}
 \end{figure}
-
-Pro zrychlení tohoto algoritmu použijeme pomocný vektor $\texttt{ANCESTOR}$, který nám zkrátí procházení stromu směrem ke kořeni díky tomu, že v něm bude pro každý vrchol zaznamenáván poslední zpracovaný předek daného vrcholu. Algoritmus pak bude vypadat následovně:
 
 \begin{figure}[ht]
   \centering
@@ -940,7 +940,7 @@ Pro zrychlení tohoto algoritmu použijeme pomocný vektor $\texttt{ANCESTOR}$, 
 \end{figure}
 
 
-Algoritmus \ref{eltree2Algorithm} má složitost $O(|E|\log_2 n)$ \TODO{slozitost+citace viz liu:86}. Existuje ještě efektivnější verze tohoto algoritmu, kterou můžeme nalézt v \TODO{ cite Tarjan Data structures and network algorithms}.
+Složitost algoritmu \ref{eltree2Algorithm} lze zeshora odhadnout jako $O(|E|\log_2 n)$ \cite{tar:75}. Existuje ještě efektivnější verze tohoto algoritmu, kterou můžeme nalézt v \cite{tar:83}.
 
 Algoritmy uvedené v této kapitole jsou popsány tak, aby byly dostatečně názorné. Ve skutečnosti pro řídké matice uložené v CSR formátu (viz \ref{matrixProgReprez}) neprocházíme všechny prvky dané matice, ale pouze nenulové prvky uložené ve struktuře.
 
@@ -1030,11 +1030,11 @@ Pro úspěšné slinkování a zkompilování
 \TODO{motivace: nelineární problém viz Tumovy stranky}
 
 
+%----------------------------------------------------------------------
 \newpage
-
-\TODO{udelat poradek v citacich}
-
 \bibliographystyle{plain}
 \bibliography{diplomka}
+
+\TODO{udelat poradek v citacich}
 
 \end{document} 

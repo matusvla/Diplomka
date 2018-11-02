@@ -67,6 +67,10 @@
 ! -- permutations from original to ordered matrix and back, describes position in new matrix, old matrix
       integer, allocatable, dimension(:) :: ordperm, invordperm
       type(intRaggedArr) :: ordpermp, invordpermp
+! -- description of elimination tree
+      integer, allocatable, dimension(:) :: parent, ancstr, colcnt, marker
+! -- fill in Cholesky factor of matrix
+      integer, allocatable, dimension(:) :: cholFill
 ! -- command line arguments
       character*(matrixtype_max_len) matrixtype
       character*(matrixpath_max_len) :: matrixpath
@@ -83,7 +87,6 @@
       integer :: ierr, info, statio      
       integer :: chsize ! size of the fill      
       integer, allocatable, dimension(:) :: wn01, wn02 !auxiliary vectors
-      integer, allocatable, dimension(:) :: colcnt !TODO understand                       
       ! -- conversions of numbers to strings
       integer :: ndigits      
       !number of parts as string, use partsch(1:ndigits)
@@ -105,9 +108,9 @@
 !	  
      parts = 2
      TESTswitch = .true.
-     matrixtype = 'P' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 4
+     testGraphNumber = 5
      nfull = 5
 !
 ! -- matrix loading
@@ -167,13 +170,25 @@
 !
       call createSubgraphs(ia, ja, aa, n, part, parts, iap, jap, aap, np, nvs, perm, invperm, ierr)
 !
-! -- Find best ordering of vertices
-!     TODO order vertices in all parts      
+! -- Find best ordering of vertices   
 !            
 
-      write(*,'(30I3)') part
       call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
       call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+      
+      allocate(cholFill(parts), stat=ierr)
+      do i = 1, parts
+        allocate(parent(np(i)), ancstr(np(i)), colcnt(np(i)), marker(np(i) + 1), stat=ierr)
+        call eltree2(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, parent, ancstr)
+        call colcnts(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, colcnt, parent, marker)
+        ! allocate(parent(n), ancstr(n), colcnt(n), marker(n + 1), stat=ierr)
+        ! call eltree2(n, ia, ja, parent, ancstr)
+        ! call colcnts(n, ia, ja, colcnt, parent, marker)
+        cholFill(i) = SUM(colcnt)
+        deallocate(parent, ancstr, colcnt, marker)
+      end do
+      write(*,'(30I3)') cholFill
+      deallocate(cholFill)
       
       ! do i = 1, parts + 1
       !   ! call orderByDistance(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &

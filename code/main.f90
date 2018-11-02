@@ -7,7 +7,7 @@
       program main
       use mydepend
       use mydepend90
-      use myroutines90      
+      use myroutines90          
       use gvroutines 
       use auxroutines 
       use testing
@@ -66,6 +66,7 @@
       type(intRaggedArr) :: invperm      
 ! -- permutations from original to ordered matrix and back, describes position in new matrix, old matrix
       integer, allocatable, dimension(:) :: ordperm, invordperm
+      type(intRaggedArr) :: ordpermp, invordpermp
 ! -- command line arguments
       character*(matrixtype_max_len) matrixtype
       character*(matrixpath_max_len) :: matrixpath
@@ -74,12 +75,11 @@
       double precision, allocatable, dimension(:) :: aaNoLoops
       integer, dimension(0:40) :: metisoptions 
       integer :: metisobjval    
-      integer :: metis_call_status  
-      
+      integer :: metis_call_status       
       integer :: sepsize
 ! -- miscelaneous 
       integer :: nfull ! one dimension of matrix, "nfull = sqrt(n)"
-      integer :: m
+      integer :: m, i
       integer :: ierr, info, statio      
       integer :: chsize ! size of the fill      
       integer, allocatable, dimension(:) :: wn01, wn02 !auxiliary vectors
@@ -170,41 +170,42 @@
 ! -- Find best ordering of vertices
 !     TODO order vertices in all parts      
 !            
-      write(*,'(50I3)') iap%vectors(1)%elements
-      write(*,'(50I3)') jap%vectors(1)%elements
-      write(*,'(50I3)') part
+
+      write(*,'(30I3)') part
+      call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
+      call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+      
+      ! do i = 1, parts + 1
+      !   ! call orderByDistance(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+      !   !   logical2intArr(nvs%vectors(i)%elements) + 1, 1, & 
+      !   !   ordperm%vectors(i)%elements, invordperm%vectors(i)%elements, ierr)  
+      !   call orderByMD(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+      !      ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)   
+      !   write(*,*) invordpermp%vectors(i)%elements
+      ! end do
 
 
-      call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
+ 
+      !TODO deallocate deallocate(ordperm,invordperm)   
 
-        write(*,'(50I3)') ordperm    
-        deallocate(ordperm,invordperm)    
-
-      call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-         ordperm, invordperm, ierr)
-
-         write(*,'(50I3)') ordperm
-         deallocate(ordperm,invordperm)
+      !    write(*,'(50I3)') ordperm
+      !    deallocate(ordperm,invordperm)
 
       ! call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
       !    logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
 
       !call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
       
-      do m = -5, 105
-        call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-          logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(m,8)/100, ierr)       
+      ! do m = -5, 105
+      !   call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !     logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(m,8)/100, ierr)       
       
-        write(*,'(50I3)') ordperm
-        !write(*,'(50I3)') invordperm
-
-        if(TESTswitch) then        
-          call testUniqueness(ordperm)
-          call testUniqueness(invordperm)
-        end if
-        deallocate(ordperm,invordperm)
-      end do
+      !   if(TESTswitch) then        
+      !     call testUniqueness(ordperm)
+      !     call testUniqueness(invordperm)
+      !   end if
+      !   deallocate(ordperm,invordperm)
+      ! end do
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          

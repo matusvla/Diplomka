@@ -998,7 +998,9 @@
 ! (c) Vladislav Matus
 ! last edit: 07. 10. 2018  
 !
-! Purpose:        
+! Purpose: 
+!   Order vertices in the givven graph by mixed MD and distance ordering
+!   with given weight for each ordering.      
 !   
 ! Input:
 !   ia, ja ... graph in CSR format
@@ -1061,7 +1063,70 @@
       end subroutine orderCoefMixed
         
 !--------------------------------------------------------------------  
+! subroutine partOrdering
+! (c) Vladislav Matus
+! last edit: 02. 11. 2018  
+!
+! Purpose: 
+!   Take ordering of the whole graph and project it on ordering of parts.       
+!   
+! Input:
+!   ordperm, invordperm ... ordering of the original graph
+!   n ... number of vertices of the original graph  
+!   np ... vector of sizes of the submatrices  
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs 
+!   
+! Output:
+!   ordpermp, invordperp ... orderings of the subgraphs
+!   ierr ... error code (0 if succesful, 1 otherwise)   
+!   
+! Allocations:
+!   ordpermp%vectors, ordpermp%vectors%elements(1..parts+1)
+!   invordpermp%vectors, invordpermp%vectors%elements(1..parts+1)
 
+      subroutine partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+        implicit none
+!
+! parameters
+!
+      integer :: n, parts, ierr
+      type(intRaggedArr) :: ordpermp, invordpermp
+      integer, allocatable, dimension(:) :: ordperm, invordperm, part, np 
+!
+! internals
+!              
+      integer :: i, j, ip(parts+1)
+      integer, allocatable, dimension(:) :: auxord
+
+!
+! start of partOrdering
+!	      
+      allocate(ordpermp%vectors(parts+1),stat=ierr)
+      allocate(invordpermp%vectors(parts+1),stat=ierr)
+      do i = 1, parts + 1
+        allocate(ordpermp%vectors(i)%elements(np(i)),stat=ierr)
+        allocate(invordpermp%vectors(i)%elements(np(i)),stat=ierr)
+      end do
+      ip = 1
+      do i = 1, n
+        ordpermp%vectors(part(i))%elements(ip(part(i))) = ordperm(i)
+        invordpermp%vectors(part(i))%elements(ip(part(i))) = invordperm(i)
+        ip(part(i)) = ip(part(i)) + 1
+      end do
+      do i = 1, parts + 1
+        allocate(auxord(np(i)),stat=ierr)
+        call MRGRNK(ordpermp%vectors(i)%elements, auxord) 
+        do j = 1, np(i)
+          ordpermp%vectors(i)%elements(auxord(j)) = j
+        end do
+        deallocate(auxord)
+      end do   
+!
+! end of partOrdering
+!  
+      end subroutine partOrdering
+!--------------------------------------------------------------------          
 
 !
 ! end of module

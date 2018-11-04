@@ -585,7 +585,7 @@
             minimumDegree = ia(i + 1) -ia(i)
             findMinimumDegreeIndex = i
           end if
-        end do        
+        end do   
 
       end function findMinimumDegreeIndex
 
@@ -755,7 +755,7 @@
 !	        
         call remloops(n, ia, ja, iaIn, jaIn, ierr)        
         nIn = n
-        do i = 1, n - 2               
+        do i = 1, n - 2    
           minDegIndex = findMinimumDegreeIndex(iaIn, nIn)
           ordering(i) = minDegIndex
           call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, minDegIndex)
@@ -926,7 +926,7 @@
 !
 ! start of orderByMD
 !	    
-      call minimumOrdering(ia, ja, n, minOrdering)            
+      call minimumOrdering(ia, ja, n, minOrdering)     
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  
@@ -1047,7 +1047,7 @@
 ! -- ordering
 !                          
       call orderByMD(ia, ja, n, permMD, invpermMD, ierr)
-      call orderByDistance(ia, ja, n, part, parts, permDist, invpermDist, ierr)      
+      call orderByDistance(ia, ja, n, part, parts, permDist, invpermDist, ierr)  
       ordering = ((1 - distCoef) * permMD) + (distCoef * permDist)
       deallocate(permMD, invpermMD, permDist, invpermDist) 
 !      
@@ -1127,7 +1127,6 @@
 ! end of partOrdering
 !  
       end subroutine partOrdering
-!--------------------------------------------------------------------          
 
 !--------------------------------------------------------------------  
 ! subroutine applyOrdering
@@ -1135,33 +1134,36 @@
 ! last edit: 04. 11. 2018  
 !
 ! Purpose: 
-!   Reorganise ia, ja to correspond to the order of vertices given       
+!   Reorganise ia, ja and optionally part to correspond to the order of vertices given       
 !   
 ! Input:
 !   ia, ja ... graph in CSR format
-!   n ... number of vertices of the graph  
+!   n ... number of vertices of the graph
+!   part ... optional, partition of the graph
 !   
 ! Output:
 !   ia, ja ... newly ordred graph in CSR format      
 !   ordperm ... desired permutation of vertices
 !   invordperm ... backward permutation of vertices
 !   ierr ... error code (0 if succesful, 1 otherwise)   
+!   part ... optional, partition of the graph
 !   
 ! Allocations: none
 !
 
-      subroutine applyOrdering(ia, ja, n, ordperm, invordperm, ierr)
+      subroutine applyOrdering(ia, ja, n, ordperm, invordperm, ierr, part)
         implicit none
 !
 ! parameters
 !
       integer :: n, ierr
       integer, allocatable, dimension(:) :: ia, ja, ordperm, invordperm
+      integer, allocatable, dimension(:), optional :: part  
 !
 ! internals
 !              
       integer :: i, j, oldIa
-      integer, allocatable, dimension(:) :: iaNew, jaNew
+      integer, allocatable, dimension(:) :: iaNew, jaNew, partNew
 
 !
 ! start of applyOrdering
@@ -1175,12 +1177,20 @@
         iaNew(i + 1) = iaNew(i) + ia(ordperm(i) + 1) - ia(ordperm(i))
         do j = 1, iaNew(i + 1) - iaNew(i)
           jaNew(iaNew(i) + j - 1) = invordperm(ja(ia(ordperm(i)) + j - 1))
-          write(*,'(30I3)') jaNew
         end do
       end do
       ia = iaNew
       ja = jaNew
       deallocate(iaNew, jaNew)
+
+      if(present(part))then
+        allocate(partNew(n), stat=ierr)
+        do i = 1, n
+          partNew(i) = part(ordperm(i))
+        end do
+        part = partNew
+        deallocate(partNew)
+      end if
 !
 ! end of applyOrdering
 !  

@@ -110,7 +110,7 @@
      TESTswitch = .true.
      matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 5
+     testGraphNumber = 1
      nfull = 5
 !
 ! -- matrix loading
@@ -175,7 +175,17 @@
 
       call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
       call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
-      
+      !TODO permute part
+      ! do i = 1, parts
+      write(*,'(30I3)') ordperm
+      write(*,'(30I3)') ia
+      write(*,'(30I3)') ja
+      call applyOrdering(ia, ja, n, ordperm, invordperm, ierr)
+      write(*,'(30I3)') ia
+      write(*,'(30I3)') ja
+      write(*,*) "-------------------------------------"
+      ! end do
+
       allocate(cholFill(parts), stat=ierr)
       do i = 1, parts
         allocate(parent(np(i)), ancstr(np(i)), colcnt(np(i)), marker(np(i) + 1), stat=ierr)

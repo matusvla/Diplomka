@@ -1128,9 +1128,65 @@
       end subroutine partOrdering
 !--------------------------------------------------------------------          
 
+!--------------------------------------------------------------------  
+! subroutine applyOrdering
+! (c) Vladislav Matus
+! last edit: 04. 11. 2018  
+!
+! Purpose: 
+!   Reorganise ia, ja to correspond to the order of vertices given       
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices of the graph  
+!   
+! Output:
+!   ia, ja ... newly ordred graph in CSR format      
+!   ordperm ... desired permutation of vertices
+!   invordperm ... backward permutation of vertices
+!   ierr ... error code (0 if succesful, 1 otherwise)   
+!   
+! Allocations: none
+!
+
+      subroutine applyOrdering(ia, ja, n, ordperm, invordperm, ierr)
+        implicit none
+!
+! parameters
+!
+      integer :: n, ierr
+      integer, allocatable, dimension(:) :: ia, ja, ordperm, invordperm
+!
+! internals
+!              
+      integer :: i, j, oldIa
+      integer, allocatable, dimension(:) :: iaNew, jaNew
+
+!
+! start of applyOrdering
+!	      
+      allocate(iaNew(n+1), jaNew(ia(n+1) - 1), stat=ierr)
+
+      jaNew = 0
+
+      iaNew(1) = 1
+      do i = 1, n
+        iaNew(i + 1) = iaNew(i) + ia(ordperm(i) + 1) - ia(ordperm(i))
+        do j = 1, iaNew(i + 1) - iaNew(i)
+          jaNew(iaNew(i) + j - 1) = invordperm(ja(ia(ordperm(i)) + j - 1))
+          write(*,'(30I3)') jaNew
+        end do
+      end do
+      ia = iaNew
+      ja = jaNew
+      deallocate(iaNew, jaNew)
+!
+! end of applyOrdering
+!  
+      end subroutine applyOrdering
+!--------------------------------------------------------------------    
+
 !
 ! end of module
 !      
       end module myroutines90
-
-

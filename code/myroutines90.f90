@@ -340,6 +340,7 @@
 !   n ... integer, size of graph
 !   ia,ja ... graph in CSR format
 !   coef ... integer, by how much should the numbering of the vertices change
+!   part ... optional, partition of the graph
 ! Allocations: none
 
       subroutine shiftnumbering(coef,n,ia,ja,part)
@@ -576,12 +577,12 @@
       integer function findMinimumDegreeIndex(ia, n)
         implicit none
 
-        integer :: n, ia(n), minimumDegree, i
+        integer :: n, ia(n + 1), minimumDegree, i
 
         minimumDegree = MAX_INT
         do i = 1, n          
-          if (minimumDegree > ia(i+1)-ia(i)) then
-            minimumDegree = ia(i+1)-ia(i)
+          if (minimumDegree > ia(i + 1) - ia(i)) then
+            minimumDegree = ia(i + 1) -ia(i)
             findMinimumDegreeIndex = i
           end if
         end do        
@@ -605,7 +606,7 @@
       subroutine findMinimumDegreeMask(ia, n, resultingMask)
         implicit none
 
-        integer :: n, ia(n), minimumDegree, i
+        integer :: n, ia(n + 1), minimumDegree, i
         logical :: resultingMask(n)
         minimumDegree = MAX_INT
         resultingMask = .false.
@@ -673,7 +674,7 @@
       subroutine vertexToClique(ia, ja, n, iaNew, jaNew, nNew, replaceIndex)
         implicit none
 
-        integer :: n, ia(n), ja(ia(n+1)-1), replaceIndex, ierr
+        integer :: n, ia(n + 1), ja(ia(n+1)-1), replaceIndex, ierr
         integer :: nNew
         integer, allocatable, dimension(:) :: iaNew, jaNew
 
@@ -699,7 +700,7 @@
         do j = 1, n  
           if (j == replaceIndex) cycle                   
           i = i + 1 
-          if (j == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
+          if (nI <= SIZE(neighbours) .and. j == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
             call uniquify([ja(ia(j) : ia(j + 1) - 1), neighbours], uniqueNeighbours, ierr, [j,replaceIndex])
             if(ierr == 0) then              
               iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)            

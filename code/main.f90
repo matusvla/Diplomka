@@ -97,6 +97,7 @@
       logical :: TESTswitch
       integer, allocatable, dimension(:) :: TESTordperm1, TESTordperm2
       integer, allocatable, dimension(:) :: TESTinvordperm1, TESTinvordperm2
+      integer, allocatable, dimension(:) :: TESTia, TESTja, TESTpart
 
 !--------------------------------------------------------------------
 !
@@ -108,7 +109,7 @@
 !	  
      parts = 2
      TESTswitch = .true.
-     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
      testGraphNumber = 1
      nfull = 5
@@ -177,13 +178,7 @@
       call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
       !TODO permute part
       ! do i = 1, parts
-      write(*,'(30I3)') ordperm
-      write(*,'(30I3)') ia
-      write(*,'(30I3)') ja
-      call applyOrdering(ia, ja, n, ordperm, invordperm, ierr)
-      write(*,'(30I3)') ia
-      write(*,'(30I3)') ja
-      write(*,*) "-------------------------------------"
+      call applyOrdering(ia, ja, n, ordperm, invordperm, ierr, part)
       ! end do
 
       allocate(cholFill(parts), stat=ierr)
@@ -197,7 +192,7 @@
         cholFill(i) = SUM(colcnt)
         deallocate(parent, ancstr, colcnt, marker)
       end do
-      write(*,'(30I3)') cholFill
+      ! write(*,'(30I3)') cholFill
       deallocate(cholFill)
       
       ! do i = 1, parts + 1
@@ -236,9 +231,9 @@
 !    TODO miscelaneous error handling          
 !      
       open(unit=graphvizunit, file=graphvizfilename)                  
-      ! call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
-      call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        graphvizunit, ierr)  
+      call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
+      ! call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !  graphvizunit, ierr)  
       close(graphvizunit)  
       
       ! open(unit=15, file="GVgraph1.txt")   
@@ -257,35 +252,68 @@
 ! -- final tests in test mode
 !            
       if(TESTswitch) then
+        write(*,*) "------TEST RESULTS: --------------------------------------------------------------"
         call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
            logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm1, TESTinvordperm1, ierr)
         call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
            logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(1,8), ierr)
         if(ALL(TESTordperm1 == TESTordperm2)) then 
-          write(*,*) "TEST: First final test OK!"
+          write(*,*) "TEST 1: OK"
         else 
-          write(*,*) "TEST: First test failed!"
+          write(*,*) "TEST 1: failed!"
         end if
         if(ALL(TESTinvordperm1 == TESTinvordperm2)) then 
-          write(*,*) "TEST: Second final test OK!"
+          write(*,*) "TEST 2: OK"
         else 
-          write(*,*) "TEST: Second final test failed!"
-        end if        
+          write(*,*) "TEST 2: failed!"
+        end if   
+        deallocate(TESTordperm1, TESTinvordperm1, TESTordperm2, TESTinvordperm2)     
 
         call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-          TESTordperm1, TESTinvordperm1, ierr)
-        call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-          logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(0,8), ierr)    
+        TESTordperm1, TESTinvordperm1, ierr)
+        write(*,*) "-----------------------------------------"
+        call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+        TESTordperm2, TESTinvordperm2, ierr)
+        ! call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+        ! logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(0,8), ierr)    
         if(ALL(TESTordperm1 == TESTordperm2)) then 
-          write(*,*) "TEST: Third final test OK!"
+          write(*,*) "TEST 3: OK"
         else 
-          write(*,*) "TEST: Third final test failed!"
+          write(*,*) "-----------------------------------------"
+          write(*,*) "TEST 3: failed!"
+          write(*,'(50L4)') (TESTordperm1 == TESTordperm2)
+          write(*,*)  
+          write(*,'(50I4)') TESTordperm1 
+          write(*,*)  
+          write(*,'(50I4)') TESTordperm2 
+          write(*,*) "-----------------------------------------"
         end if
         if(ALL(TESTinvordperm1 == TESTinvordperm2)) then 
-          write(*,*) "TEST: Fourth test OK!"
+          write(*,*) "TEST 4: OK"
         else 
-          write(*,*) "TEST: Fourth test failed!"
-        end if         
+          write(*,*) "-----------------------------------------"
+          write(*,*) "TEST 4: failed!"
+          write(*,'(50L4)') (TESTinvordperm1 == TESTinvordperm2)
+          write(*,*)  
+          write(*,'(50I4)') TESTinvordperm1 
+          write(*,*)  
+          write(*,'(50I4)') TESTinvordperm2 
+          write(*,*) "-----------------------------------------"
+        end if
+        deallocate(TESTordperm1, TESTinvordperm1, TESTordperm2, TESTinvordperm2)     
+        
+        allocate(TESTia(n + 1), TESTja(ia(n + 1) - 1), TESTpart(n), stat=ierr)
+        TESTia = ia
+        TESTja = ja
+        TESTpart = part
+        call applyOrdering(TESTia, TESTja, n, ordperm, invordperm, ierr, TESTpart)
+        call applyOrdering(TESTia, TESTja, n, invordperm, ordperm, ierr, TESTpart)
+        if(ALL(TESTia == ia) .and. ALL(TESTja == ja) .and. ALL(TESTpart == part)) then 
+          write(*,*) "TEST 5: OK"
+        else 
+          write(*,*) "TEST 5: failed!"
+        end if
+        deallocate(TESTia, TESTja, TESTpart)
 
       end if
 !

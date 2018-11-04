@@ -1098,7 +1098,7 @@
 ! internals
 !              
       integer :: i, j, ip(parts+1)
-      integer, allocatable, dimension(:) :: auxord
+      integer, allocatable, dimension(:) :: auxord, auxinvord
 
 !
 ! start of partOrdering
@@ -1120,6 +1120,14 @@
         call MRGRNK(ordpermp%vectors(i)%elements, auxord) 
         do j = 1, np(i)
           ordpermp%vectors(i)%elements(auxord(j)) = j
+        end do
+        deallocate(auxord)
+      end do   
+      do i = 1, parts + 1
+        allocate(auxord(np(i)),stat=ierr)
+        call MRGRNK(invordpermp%vectors(i)%elements, auxord) 
+        do j = 1, np(i)
+          invordpermp%vectors(i)%elements(auxord(j)) = j
         end do
         deallocate(auxord)
       end do   

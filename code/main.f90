@@ -176,23 +176,21 @@
 
       call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
       call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
-      !TODO permute part
-      ! do i = 1, parts
-      call applyOrdering(ia, ja, n, ordperm, invordperm, ierr, part)
-      ! end do
+
+      do i = 1, parts
+        call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+          ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)
+      end do
 
       allocate(cholFill(parts), stat=ierr)
       do i = 1, parts
         allocate(parent(np(i)), ancstr(np(i)), colcnt(np(i)), marker(np(i) + 1), stat=ierr)
         call eltree2(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, parent, ancstr)
         call colcnts(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, colcnt, parent, marker)
-        ! allocate(parent(n), ancstr(n), colcnt(n), marker(n + 1), stat=ierr)
-        ! call eltree2(n, ia, ja, parent, ancstr)
-        ! call colcnts(n, ia, ja, colcnt, parent, marker)
         cholFill(i) = SUM(colcnt)
         deallocate(parent, ancstr, colcnt, marker)
       end do
-      ! write(*,'(30I3)') cholFill
+      write(*,'(30I10)') cholFill
       deallocate(cholFill)
       
       ! do i = 1, parts + 1
@@ -242,7 +240,7 @@
       
 !      
 ! -- write out matlab format for displaying this matrix
-!      call ommatl4(n, ia, ja, aa, mformat)
+     call ommatl4(n, ia, ja, aa, mformat)
 
 !      allocate(colcnt(nfull), stat=ierr)
 !      call chfill2(nfull, ia, ja, mformat, colcnt, chsize, info)
@@ -271,11 +269,8 @@
 
         call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
         TESTordperm1, TESTinvordperm1, ierr)
-        write(*,*) "-----------------------------------------"
-        call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        TESTordperm2, TESTinvordperm2, ierr)
-        ! call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        ! logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(0,8), ierr)    
+        call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+        logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(0,8), ierr)    
         if(ALL(TESTordperm1 == TESTordperm2)) then 
           write(*,*) "TEST 3: OK"
         else 

@@ -175,6 +175,9 @@
 !            
 
       call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
+      call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+      call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+
       call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
 
       do i = 1, parts
@@ -199,7 +202,7 @@
       ! do i = 1, parts + 1
       !   ! call orderByDistance(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
       !   !   logical2intArr(nvs%vectors(i)%elements) + 1, 1, & 
-      !   !   ordperm%vectors(i)%elements, invordperm%vectors(i)%elements, ierr)  
+      !   !   ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)  
       !   call orderByMD(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
       !      ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)   
       !   write(*,*) invordpermp%vectors(i)%elements

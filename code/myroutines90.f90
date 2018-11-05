@@ -716,7 +716,7 @@
             jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(j) : ia(j + 1) - 1)
           end if            
         end do          
-        call trimArr(jaNew, iaNew(nNew + 1) - 1)    !TODO rewrite using PACK
+        call trimArr(jaNew, iaNew(nNew + 1) - 1)
         call shiftArr(jaNew,replaceIndex)
       end subroutine vertexToClique
 
@@ -817,9 +817,6 @@
         do i = 1, n - 1     
           allocate(mask(n - i + 1))                   
           call findMinimumDegreeMask(iaIn, nIn, mask)
-          write(*,'(30L3)') mask
-          write(*,'(30I3)') dfs
-          write(*,*) "-----------------"
           ordering(i) = MAXLOC(dfs, 1, mask)
           dfs = [dfs(1 : ordering(i) - 1), dfs(ordering(i) + 1 : n - i + 1)] 
           call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, ordering(i))

@@ -83,7 +83,7 @@
       integer :: sepsize
 ! -- miscelaneous 
       integer :: nfull ! one dimension of matrix, "nfull = sqrt(n)"
-      integer :: m, i
+      integer :: i, j, k, m 
       integer :: ierr, info, statio      
       integer :: chsize ! size of the fill      
       integer, allocatable, dimension(:) :: wn01, wn02 !auxiliary vectors
@@ -111,7 +111,7 @@
      TESTswitch = .true.
      matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 1
+     testGraphNumber = 5
      nfull = 5
 !
 ! -- matrix loading
@@ -187,6 +187,9 @@
         allocate(parent(np(i)), ancstr(np(i)), colcnt(np(i)), marker(np(i) + 1), stat=ierr)
         call eltree2(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, parent, ancstr)
         call colcnts(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, colcnt, parent, marker)
+      !   allocate(parent(n), ancstr(n), colcnt(n), marker(n + 1), stat=ierr)
+      !   call eltree2(n, ia, ja, parent, ancstr)
+      !   call colcnts(n, ia, ja, colcnt, parent, marker)
         cholFill(i) = SUM(colcnt)
         deallocate(parent, ancstr, colcnt, marker)
       end do
@@ -240,7 +243,16 @@
       
 !      
 ! -- write out matlab format for displaying this matrix
-     call ommatl4(n, ia, ja, aa, mformat)
+!      
+      ! aa = 1
+      ! call ommatl4(n, ia, ja, aa, mformat)
+
+      deallocate(aa)
+      k = 2
+      allocate(aa(iap%vectors(k)%elements(np(k)+1)-1))
+      aa = 1
+      call ommatl4(np(k), iap%vectors(k)%elements, jap%vectors(k)%elements, aa, 0)
+
 
 !      allocate(colcnt(nfull), stat=ierr)
 !      call chfill2(nfull, ia, ja, mformat, colcnt, chsize, info)

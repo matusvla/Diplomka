@@ -40,21 +40,21 @@
 
 %----------------------------------------------------------------------
 
-\chapter{Grafy, stromy} \TODO{nejaky hezky obrazky?} 
+\chapter{Grafy, stromy}
 V této kapitole definujeme graf jakožto matematickou strukturu, popíšeme základní pojmy týkající se grafů a nastíníme možné vztahy mezi grafem a maticí. Dále definujeme strom, jakožto speciální případ grafu. Terminologie je převzata z \cite{koub:11}
 
 \section{Základní grafová terminologie}
 
 \begin{definition}
-  Mějme množinu $V$ a množinu $E = \left\{ \left\{ u,v \right\} | u,v \in V \right\}$. Uspořádanou dvojici $G := (V,E)$, nazveme neorientovaný graf. Množinu $V$ nazýváme množinou vrcholů grafu $G$, jejím prvkům říkáme vrcholy, množinu $E$ nazýváme množinou hran grafu $G$, jejím prvkům říkáme hrany. Prvky hrany $e$ označujeme jako vrcholy incidentní hraně $e$ nebo koncové body hrany $e$. Říkáme, že hrana $e = \{v,w\}$ spojuje vrcholy $v$ a $w$.
+  Mějme množinu $V$ a množinu $E = \left\{ \left\{ u,v \right\} | u,v \in V \right\}$. Uspořádanou dvojici $G := (V,E)$, nazveme neorientovaný graf. Množinu $V$ nazýváme množinou vrcholů grafu $G$ a jejím prvkům říkáme vrcholy. Množinu $E$ nazýváme množinou hran grafu $G$, jejím prvkům říkáme hrany. Prvky hrany $e$ označujeme jako vrcholy incidentní hraně $e$ nebo koncové body hrany $e$. Říkáme, že hrana $e = \{v,w\}$ spojuje vrcholy $v$ a $w$.
 \end{definition}
 
-Pokud neuvažujeme hrany jako nejvýše dvouprvkové množiny vrcholů, ale  jako uspořádané dvojice $(u,v)$, nazýváme odpovídající graf \textbf{orientovaný}. Obvykle uvažujeme orientované a neorientované grafy zvlášť, ale je možné uvažovat i jejich kombinaci. Graf, v němž se vyskytují jak orientované tak neorientované hrany, nazýváme \textbf{smíšený}. Řekneme, že neorientovaný graf $G$ je \textbf{úplný}, pokud $\forall u, v \in V$ $\left(\{u,v\} \in E\right)$.
+Pokud neuvažujeme hrany jako nejvýše dvouprvkové množiny vrcholů, ale  jako uspořádané dvojice $(u,v)$, nazýváme odpovídající graf \textbf{orientovaný}. Obvykle uvažujeme orientované a neorientované grafy samostatně, ale je možné uvažovat i jejich kombinaci. Graf, v němž se vyskytují jak orientované tak neorientované hrany, nazýváme \textbf{smíšený}. Řekneme, že neorientovaný graf $G$ je \textbf{úplný}, pokud $\forall u, v \in V$ $\left(\{u,v\} \in E\right)$.
 
 Povšimněme si, že v definici grafu není vyloučen případ, kdy jsou oba koncové body hrany shodné. Hrana je pak jednoprvkovou množinou a nazýváme ji \textbf{smyčkou} v grafu.
 
 \begin{remark}
-  V neorientovaném grafu $G=(V,E)$ platí, že jeho množina hran $E$ je podmnožinou ${V \choose 2} \cup V$, kde $V \choose 2$ značí množinu všech dvouprvkových podmnožin množiny $V$. V orientovaném grafu $H=(W,F)$ je $F$ podmnožinou množiny $W \times W$, tj. všech uspořádaných dvojic vrcholů z $W$.
+  V neorientovaném grafu $G=(V,E)$ platí, že jeho množina hran $E$ je podmnožinou ${V \choose 2} \cup V$, kde $V \choose 2$ značí množinu všech dvouprvkových podmnožin množiny $V$. V orientovaném grafu $H=(W,F)$ je $F$ podmnožinou množiny $W \times W \cup W$, tj. všech uspořádaných dvojic vrcholů z $W$ a orientovaných smyček.
 \end{remark}
 
 \textbf{Stupněm vrcholu} $v \in V$ rozumíme počet vrcholů spojených s vrcholem $v$, značíme $d(v)$. Množinu všech vrcholů, které jsou v grafu $G$ spojeny s vrcholem $v$ značíme $\mathrm{adj}_G(v)$. Pokud je z kontextu jasné o jaký graf se jedná, dolní index vynecháváme.
@@ -222,18 +222,18 @@ Ukazuje se, že rozhodovací problém pro optimální rozdělení grafu je NP-ú
 \section{Obecné schéma víceúrovňového dělení grafů}
 \label{multilevel}
 
-Víceúrovňové dělení grafů slouží k převedení problému dělení grafu s velkým počtem vrcholů na problém dělení grafu s počtem vrcholů výrazně menším. Tím může dojít k výraznému zkrácení času potřebného pro celkovou dobu běhu algoritmu \TODO{zdroj}, proto je tento postup využíván v profesionálních softwarových nástrojích pro dělení grafů \cite{lehe:95, kary:13}. Nejobecnější popis tohoto schématu sestává ze tří základních fází: zhrubovací fáze (coarsening phase), rozdělení vzniklého grafu a projekce tohoto rozdělení zpět na původní graf (refinement phase).
+Víceúrovňové dělení grafů slouží k převedení problému dělení grafu s velkým počtem vrcholů na problém dělení grafu s počtem vrcholů výrazně menším. Tím může dojít k výraznému zkrácení času potřebného pro celkovou dobu běhu algoritmu \TODO{cite kaku}, proto je tento postup využíván v profesionálních softwarových nástrojích pro dělení grafů \cite{lehe:95, kary:13}. Nejobecnější popis tohoto schématu sestává ze tří základních fází: zhrubovací fáze (coarsening phase), rozdělení vzniklého grafu a projekce tohoto rozdělení zpět na původní graf (refinement phase).
 
 \paragraph{Zhrubovací fáze}
 Základní myšlenkou zhrubovací fáze víceúrovňového schématu dělení grafů je vytvořit z původního grafu $G$ graf $G_m$ s menším počtem vrcholů. Jinými slovy jde o konstrukci posloupnosti grafů $(G_i)_0^m$ takové, že $G_0 := G$ a pro každé dva po sobě jdoucí členy této posloupnosti platí, že $G_{i+1}$ je faktorgrafem $G_i$ s menším počtem vrcholů. 
 
-Pro konstrukci posloupnosti $(G_i)_0^m$ existuje několik možných postupů \cite{kaku:98} \TODO{zdroje? kaku je souhrn}. Ve většině schémat pro tvorbu grafu s méně vrcholy jsou podmnožiny množiny vrcholů grafu $G_i$ spojovány v jeden vrchol, čímž vznikne hrubší graf $G_{i+1}$ splňující výše uvedené podmínky kladené na posloupnost $(G_i)_0^m$. Při konstrukci členu $G_{i+1}$ z členu $G_i$ je pro udržení strukturálních informací o původním grafu nutné, abychom použili ohodnocený graf, kde ohodnocení vrcholů a hran při tvorbě faktorgrafu pokládáme pro každý vrchol (resp. hranu) roven součtu vah všech vrcholů (resp. hran) spojením kterých daný vrchol (resp. hrana) vznikl. 
+Pro konstrukci posloupnosti $(G_i)_0^m$ existuje několik možných postupů \cite{kaku:98} \TODO{zdroje? kaku je souhrn - citovat 24, 25, 26 z kaku}. Ve většině schémat pro tvorbu grafu s méně vrcholy jsou podmnožiny množiny vrcholů grafu $G_i$ spojovány v jeden vrchol, čímž vznikne hrubší graf $G_{i+1}$ splňující výše uvedené podmínky kladené na posloupnost $(G_i)_0^m$. Při konstrukci členu $G_{i+1}$ z členu $G_i$ je pro udržení strukturálních informací o původním grafu nutné, abychom použili ohodnocený graf, kde ohodnocení vrcholů a hran při tvorbě faktorgrafu pokládáme pro každý vrchol (resp. hranu) roven součtu vah všech vrcholů (resp. hran) spojením kterých daný vrchol (resp. hrana) vznikl. 
 
 \begin{definition}
   Mějme graf $G = (V, E)$. \textbf{Párováním} grafu $G$ nazveme podmnožinu množiny hran $E$, pro kterou platí, že žádné dvě hrany z této množiny nemají společný koncový bod. \textbf{Maximálním párováním} grafu $G$ nazveme párování grafu $G$ obsahující nejvyšší možný počet hran. \TODO{maximalni parovani pro ohodnocene grafy?}
 \end{definition}
 
-Pro získání hrubšího grafu byly popsány dva hlavní postupy. První z nich je založen na nalezení vhodného párování a následném spojení každé dvojice vrcholů spojených hranou náležící do párování do jednoho \cite{edmo:65,lawl:76}. Aby došlo k rychlému zmenšení počtu vrcholů grafu, je vhodné volit maximální párování \cite{hele:95}. Druhý postup hledání vhodných množin vrcholů pro sloučení je založen na spojování skupin vrcholů, v nichž je vysoká hustota hran \cite{kaku:98} \TODO{konkretni? kaku je souhrn}.
+Pro získání hrubšího grafu byly popsány dva hlavní postupy. První z nich je založen na nalezení vhodného párování a následném spojení každé dvojice vrcholů spojených hranou náležící do párování do jednoho \cite{edmo:65,lawl:76}. Aby došlo k rychlému zmenšení počtu vrcholů grafu, je vhodné volit maximální párování \cite{hele:95}. Druhý postup hledání vhodných množin vrcholů pro sloučení je založen na spojování skupin vrcholů, v nichž je vysoká hustota hran \cite{kaku:98} \TODO{citovat neco z 24, 25, 26 z kaku}.
 
 \paragraph{Dělení získaného grafu}
 V této fázi dochází k rozdělení grafu $H$ libovolným algoritmem pro dělení grafů, například lze použít spektrální dělení popsané níže v kapitole \ref{spektral}. Pomocí tohoto algoritmu získáme rozdělení $P_m$ grafu $G_m$.
@@ -321,7 +321,7 @@ Základní varianta KL algoritmu se skládá ze dvou do sebe vnořených cyklů,
   \item Vyměníme vrcholy $v_1,...,v_N$ s vrcholy $w_1,...,w_N$.
 \end{enumerate}
 
-Nejjednodušším vylepšením tohoto algoritmu je nechat vnější cyklus běžet po pevně stanovený počet iterací i poté, co již nedochází ke zmenšování velikosti hranového separátoru. Můžeme se díky tomu dostat z lokálního minima \TODO{cite}. Nejznámějším praktickým vylepšením algoritmu podle Kernighana a Lina je algoritmus publikovaný v \cite{fima:89}, který optimalizuje rychlost výpočtu a aktualizaci zisku pro jednotlivé vrcholy.
+Nejjednodušším vylepšením tohoto algoritmu je nechat vnější cyklus běžet po pevně stanovený počet iterací i poté, co již nedochází ke zmenšování velikosti hranového separátoru. Můžeme se díky tomu dostat z lokálního minima \TODO{cite základního Kernighana Lina}. Nejznámějším praktickým vylepšením algoritmu podle Kernighana a Lina je algoritmus publikovaný v \cite{fima:89}, který optimalizuje rychlost výpočtu a aktualizaci zisku pro jednotlivé vrcholy.
 
 \section{Metoda vnořených řezů}
 
@@ -385,7 +385,7 @@ Mějme souvislý graf $G=(V,E)$. Algoritmus pro jeho rozdělení využívající
 \begin{enumerate}
   \item Položíme $W=V$ a $N=|V|$.
   \item \label{forloop} Nalezneme souvislou komponentu $G(C)$ grafu $G(W)$.
-  \item Vezmeme libovolný vrchol $v\in C$. Vrchol $v$ je vhodné jej volit tak, aby byl daleko od centra grafu \TODO{dodefinovat centrum!} $G(C)$.
+  \item Vezmeme libovolný vrchol $v\in C$. Vrchol $v$ je vhodné jej volit tak, aby byl daleko od centra grafu \TODO{cite lewis implementation of the Gibbs-Poole-Stockmeyer...} $G(C)$.
   \item Vytvoříme strukturu úrovní $\mathcal{L}=\{L_0, \ldots ,L_l\}$ grafu $G(C)$ vycházející z vrcholu $v$, tj. rozdělíme množinu vrcholů $C$ grafu $G(C)$ na vzájemně disjunktní množiny $L_1, \ldots, L_l$ definované následovně:
       \begin{align*}
         L_0 & := v \\
@@ -408,9 +408,9 @@ Při řešení maticových úloh velkých rozměrů je často výhodné si danou
 
 Rozklady matic můžeme rozdělit na dvě základní skupiny - úplné rozklady a neúplné rozklady. Úplné rozklady dokážou nalézt z teoretického hlediska přesný výsledek v konečně mnoha krocích. Naopak neúplné rozklady jsou iterativními metodami, tj. algoritmy, které získávají v každém svém kroku přesnější aproximaci řešení s použitím výsledku předchozí aproximace a k přesnému výsledku konvergují. Pro získání celkového řešení soustavy je pak třeba je kombinovat s nějakou iterační metodou \cite{temp94}. Vzhledem k našemu cíli zkoumat Choleského rozklad, jakožto zástupce úplných rozkladů, se v dalším textu nebudeme neúplnými rozklady hlouběji zabývat. 
 
-V této práci nás budou zajímat především rozklady, které se týkají řídkých matic, tedy matic, které obsahují velké množství nulových prvků. U takových matic bereme pro zefektivnění výpočtů do úvahy strukturu jejich nenulových prvků. Při výpočtu úplného rozkladu řídké matice může v průběhu rozkladu docházet ke změnám ve struktuře jejích nenulových prvků. Proces výpočtu úplného rozkladu může být pak výpočetně velmi náročný \TODO{cite}.
+V této práci nás budou zajímat především rozklady, které se týkají řídkých matic, tedy matic, které obsahují velké množství nulových prvků. U takových matic bereme pro zefektivnění výpočtů do úvahy strukturu jejich nenulových prvků. Při výpočtu úplného rozkladu řídké matice může v průběhu rozkladu docházet ke změnám ve struktuře jejích nenulových prvků. Proces výpočtu úplného rozkladu může být pak výpočetně velmi náročný \TODO{cite - duff erisman reid - direct...}.
 
-V námi popisovaném základním modelu rozkladů matic se omezíme na úplný rozklad symetrické a pozitivně definitní matice. Nejedná se o samoúčelné omezení, při řešení mnoha praktických úloh se setkáváme právě s maticemi splňujícími tyto podmínky. Navíc se ukazuje, že i pro matice, které nejsou symetrické nebo pozitivně definitní, lze při jejich rozkladech vyjít z tohoto modelu. \TODO{cite}
+V námi popisovaném základním modelu rozkladů matic se omezíme na úplný rozklad symetrické a pozitivně definitní matice. Nejedná se o samoúčelné omezení, při řešení mnoha praktických úloh se setkáváme právě s maticemi splňujícími tyto podmínky. Navíc se ukazuje, že i pro matice, které nejsou symetrické nebo pozitivně definitní, lze při jejich rozkladech vyjít z tohoto modelu. \TODO{cite - 2016 davis}
 
 \section{Úplné rozklady}
 
@@ -768,7 +768,7 @@ Vzhledem k povaze číslování popsaných v oddílech \ref{MDordering} a \ref{s
 
 Pokud máme rozdělení $G_1, \ldots, G_k$ grafu $G$ s vrcholovým separátorem $G_S$, můžeme pro očíslování části $G_i$ použít číslování vrcholů pomocí metody minimálního stupně, kde při výběru vrcholu ve \ref{mindegloop}. kroku algoritmu popsaného v \ref{MDordering} přidáme kritérium vzdálenosti od separátoru popsané v \ref{sepDistOrdering}. Nejprve tedy nalezneme množinu všech vrcholů grafu $G$, které mají minimální stupeň a poté z nich zvolíme ten, který je nejdál od vrcholového separátoru.
 
-Druhou možností, jak je výše zmíněná očíslování možné kombinovat je použít jejich konvexní kombinaci. Tímto způsobem nemusíme kombinovat pouze očíslování popsaná v oddílech \ref{MDordering} a \ref{sepDistOrdering}, ale můžeme jej použít na libovolná očíslování. Mějme mno6inu vrcholů $V$, $|V|=n$ a dvě různá očíslování $\varphi,\psi :V \rightarrow \{1,\ldots,n\}$. Nechť dále $\alpha \in [0,1]$. Napočítáme pro každý vrchol $v$ hodnotu výrazu $\varphi(v) + (1-\alpha)\psi(v)$. Smíšené očíslování vytvoříme tak, že vrcholy seřadíme podle této hodnoty od nejmenší po největší. Ač by se mohlo zdát, že tento postup nám nemůže přinést nic nového, nemusí to být pravidlem. \TODO{citovat Sloane, Jeniffer Scott} 
+Druhou možností, jak je výše zmíněná očíslování možné kombinovat je použít jejich konvexní kombinaci. Tímto způsobem nemusíme kombinovat pouze očíslování popsaná v oddílech \ref{MDordering} a \ref{sepDistOrdering}, ale můžeme jej použít na libovolná očíslování. Mějme mno6inu vrcholů $V$, $|V|=n$ a dvě různá očíslování $\varphi,\psi :V \rightarrow \{1,\ldots,n\}$. Nechť dále $\alpha \in [0,1]$. Napočítáme pro každý vrchol $v$ hodnotu výrazu $\varphi(v) + (1-\alpha)\psi(v)$. Smíšené očíslování vytvoříme tak, že vrcholy seřadíme podle této hodnoty od nejmenší po největší. Ač by se mohlo zdát, že tento postup nám nemůže přinést nic nového, nemusí to být pravidlem. \TODO{citovat Sloan an algorithm for profile and wavefront reduction of sparse materials, Jeniffer Scott} 
 
 \subsection{Topologické číslování vrcholů stromu}
 Topologické číslování vrcholů stromu je intuitivní způsob pro očíslování vrcholů grafu, který je stromem.
@@ -780,7 +780,6 @@ Topologické číslování vrcholů stromu je intuitivní způsob pro očíslov�
 
 \section{Eliminační stromy}
 \label{eltreeChapter}
-\TODO{Udelat poradek s $[A],[L],a,l$}
 
 V této kapitole se budeme zabývat eliminačními stromy a jejich významem pro rozklady řídkých matic \cite{liu:86,liu:90}. Eliminační stromy při rozkladu matic hrají důležitou roli, protože nám dávají informaci o zaplnění v Choleského faktoru matice bez toho, abychom museli počítat jednotlivé numerické hodnoty. Lze tedy díky nim jednoduše porovnávat vhodnost zvoleného uspořádání řádků a sloupců matice pro Choleského rozklad.
 

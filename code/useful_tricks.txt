@@ -19,6 +19,7 @@ git add --patch <filename>
   s split the current hunk into smaller hunks
   e manually edit the current hunk
   ? print hunk help
+git stash list
 
 GraphViz
 taillabel = <<font color="red">tail</font>>

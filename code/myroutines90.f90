@@ -1109,9 +1109,9 @@
       ip = 1
       do i = 1, n
         ordpermp%vectors(part(i))%elements(ip(part(i))) = ordperm(i)
-        invordpermp%vectors(part(i))%elements(ip(part(i))) = invordperm(i)
-        ip(part(i)) = ip(part(i)) + 1
+        ip(part(i)) = ip(part(i)) + 1        
       end do
+
       do i = 1, parts + 1
         allocate(auxord(np(i)),stat=ierr)
         call MRGRNK(ordpermp%vectors(i)%elements, auxord) 
@@ -1121,12 +1121,9 @@
         deallocate(auxord)
       end do   
       do i = 1, parts + 1
-        allocate(auxord(np(i)),stat=ierr)
-        call MRGRNK(invordpermp%vectors(i)%elements, auxord) 
         do j = 1, np(i)
-          invordpermp%vectors(i)%elements(auxord(j)) = j
-        end do
-        deallocate(auxord)
+          invordpermp%vectors(i)%elements(ordpermp%vectors(i)%elements(j)) = j
+        end do  
       end do   
 !
 ! end of partOrdering

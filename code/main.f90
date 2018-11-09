@@ -106,15 +106,16 @@
 !            
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
-!      parts = 2
-!      call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testGraphNumber)
-
      parts = 2
-     TESTswitch = .true.
-     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
-     matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 1
-     nfull = 5
+     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testGraphNumber)
+
+    !  TODO delete
+    !  parts = 2
+    !  TESTswitch = .true.
+    !  matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+    !  matrixpath = "./matrices/bcsstk01.rsa"
+    !  testGraphNumber = 1
+    !  nfull = 5
 
 
 !
@@ -177,12 +178,15 @@
 !
 ! -- Find best ordering of vertices   
 !            
-
+      
       call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
       call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
-      call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+      ! call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
 
       call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+      
+      write(*,'(30I3)') iap%vectors(2)%elements
+      write(*,'(30I3)') jap%vectors(2)%elements
 
       do i = 1, parts
         call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
@@ -328,6 +332,32 @@
           write(*,*) "TEST 5: failed!"
         end if
         deallocate(TESTia, TESTja, TESTpart)
+
+        TESTswitch = .true.
+        do i = 1, n
+          if (invordperm(ordperm(i)) /= i) then
+            TESTswitch = .false.
+          end if
+        end do
+        if(TESTswitch) then 
+          write(*,*) "TEST 6: OK"
+        else 
+          write(*,*) "TEST 6: failed!"
+        end if
+
+        TESTswitch = .true.
+        do i = 1, parts
+          do j = 1, np(i)
+            if (invordpermp%vectors(i)%elements(ordpermp%vectors(i)%elements(j)) /= j) then
+              TESTswitch = .false.
+            end if
+          end do    
+        end do
+        if(TESTswitch) then 
+          write(*,*) "TEST 7: OK"
+        else 
+          write(*,*) "TEST 7: failed!"
+        end if
 
       end if
 !

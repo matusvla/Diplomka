@@ -13,6 +13,7 @@
       use testing
       use raggedmultiarray
       use metis_interface
+      use cmdlineLoader
       
       implicit none
 
@@ -39,7 +40,6 @@
       character(len=*), parameter :: sp = " " ! alias for space    
       integer, parameter :: partsch_max_len = 100 !length of string partsch
       integer, parameter :: matrixpath_max_len = 100 !length of string matrixpath      
-      integer, parameter :: matrixtype_max_len = 100 !length of string matrixpath         
 
 !--------------------------------------------------------------------      
 !      
@@ -72,7 +72,7 @@
 ! -- fill in Cholesky factor of matrix
       integer, allocatable, dimension(:) :: cholFill
 ! -- command line arguments
-      character*(matrixtype_max_len) matrixtype
+      character*(MATRIXTYPE_MAXLEN) matrixtype
       character*(matrixpath_max_len) :: matrixpath
 ! -- work variables for calling METIS  
       integer, allocatable, dimension(:) :: iaNoLoops, jaNoLoops
@@ -107,12 +107,23 @@
 !            
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
+
+
      parts = 2
      TESTswitch = .true.
-     matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     call getCmdlineArgs(matrixtype)
      matrixpath = "./matrices/bcsstk01.rsa"
      testGraphNumber = 5
      nfull = 5
+
+!      parts = 2
+!      TESTswitch = .true.
+!      matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+!      matrixpath = "./matrices/bcsstk01.rsa"
+!      testGraphNumber = 5
+!      nfull = 5
+
+
 !
 ! -- matrix loading
 !    TODO improve matrix loading, now it's just generating matrix using poisson1

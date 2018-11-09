@@ -9,7 +9,7 @@ CFLAGS = -c -O2
 
 OBJECTS= \
 	raggedmultiarray.o mrgrnk.o gvroutines.o auxroutines.o \
-	mydepend.o mydepend90.o myroutines90.o \
+	mydepend.o mydepend90.o myroutines90.o cmdlineloader.o\
 	testing.o svrev.o \
 	metis_interface.o metisinclude.o \
 	  main.o

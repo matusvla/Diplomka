@@ -171,6 +171,9 @@
       metis_call_status=METIS_ComputeVertexSeparator(n, iaNoLoops, jaNoLoops, C_NULL_PTR, metisoptions, sepsize, part)
 
       call shiftnumbering(1, n, iaNoLoops, jaNoLoops, part)  ! transform graph back into Fortran notation (starting from 1)
+      if (sepsize == 0) then
+        stop "Graph created from matrix has more components and it is well partitioned by default."
+      end if
 !
 ! -- Create subgraphs
 !
@@ -184,9 +187,6 @@
       ! call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
 
       call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
-      
-      write(*,'(30I3)') iap%vectors(2)%elements
-      write(*,'(30I3)') jap%vectors(2)%elements
 
       do i = 1, parts
         call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &

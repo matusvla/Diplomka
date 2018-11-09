@@ -1045,7 +1045,7 @@
 !                          
       call orderByMD(ia, ja, n, permMD, invpermMD, ierr)
       call orderByDistance(ia, ja, n, part, parts, permDist, invpermDist, ierr)  
-      ordering = ((1 - distCoef) * permMD) + (distCoef * permDist)
+      ordering = ((1 - distCoef) * permMD) + (distCoef * permDist)     
       deallocate(permMD, invpermMD, permDist, invpermDist) 
 !      
 ! -- fill in invperm and perm using sorted order values

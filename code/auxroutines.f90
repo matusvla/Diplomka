@@ -30,7 +30,6 @@
           j = i
           do while (j > 1 .and. arr(j) < arr(j-1))
             !swap elements
-            !write(*,*) "swapping", arr(j), arr(j-1)
             val = arr(j-1)
             arr(j-1) = arr(j)
             arr(j) = val
@@ -94,7 +93,6 @@
         end do  
 
         if(uniqueL < 1) then
-          write(*,*) "[auxroutines.f90:uniquify] Warning: Nothing to return in uniquify!"
           ierr = 1
           return
         end if

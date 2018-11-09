@@ -340,6 +340,7 @@
 !   n ... integer, size of graph
 !   ia,ja ... graph in CSR format
 !   coef ... integer, by how much should the numbering of the vertices change
+!   part ... optional, partition of the graph
 ! Allocations: none
 
       subroutine shiftnumbering(coef,n,ia,ja,part)
@@ -576,15 +577,15 @@
       integer function findMinimumDegreeIndex(ia, n)
         implicit none
 
-        integer :: n, ia(n), minimumDegree, i
+        integer :: n, ia(n + 1), minimumDegree, i
 
         minimumDegree = MAX_INT
         do i = 1, n          
-          if (minimumDegree > ia(i+1)-ia(i)) then
-            minimumDegree = ia(i+1)-ia(i)
+          if (minimumDegree > ia(i + 1) - ia(i)) then
+            minimumDegree = ia(i + 1) -ia(i)
             findMinimumDegreeIndex = i
           end if
-        end do        
+        end do   
 
       end function findMinimumDegreeIndex
 
@@ -605,7 +606,7 @@
       subroutine findMinimumDegreeMask(ia, n, resultingMask)
         implicit none
 
-        integer :: n, ia(n), minimumDegree, i
+        integer :: n, ia(n + 1), minimumDegree, i
         logical :: resultingMask(n)
         minimumDegree = MAX_INT
         resultingMask = .false.
@@ -673,7 +674,7 @@
       subroutine vertexToClique(ia, ja, n, iaNew, jaNew, nNew, replaceIndex)
         implicit none
 
-        integer :: n, ia(n), ja(ia(n+1)-1), replaceIndex, ierr
+        integer :: n, ia(n + 1), ja(ia(n+1)-1), replaceIndex, ierr
         integer :: nNew
         integer, allocatable, dimension(:) :: iaNew, jaNew
 
@@ -699,7 +700,7 @@
         do j = 1, n  
           if (j == replaceIndex) cycle                   
           i = i + 1 
-          if (j == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
+          if (nI <= SIZE(neighbours) .and. j == neighbours(nI)) then ! if one of the neighbours of replaceIndex     
             call uniquify([ja(ia(j) : ia(j + 1) - 1), neighbours], uniqueNeighbours, ierr, [j,replaceIndex])
             if(ierr == 0) then              
               iaNew(i + 1) = iaNew(i) + SIZE(uniqueNeighbours)            
@@ -715,7 +716,7 @@
             jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(j) : ia(j + 1) - 1)
           end if            
         end do          
-        call trimArr(jaNew, iaNew(nNew + 1) - 1)    !TODO rewrite using PACK
+        call trimArr(jaNew, iaNew(nNew + 1) - 1)
         call shiftArr(jaNew,replaceIndex)
       end subroutine vertexToClique
 
@@ -754,7 +755,7 @@
 !	        
         call remloops(n, ia, ja, iaIn, jaIn, ierr)        
         nIn = n
-        do i = 1, n - 2               
+        do i = 1, n - 2    
           minDegIndex = findMinimumDegreeIndex(iaIn, nIn)
           ordering(i) = minDegIndex
           call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, minDegIndex)
@@ -816,9 +817,6 @@
         do i = 1, n - 1     
           allocate(mask(n - i + 1))                   
           call findMinimumDegreeMask(iaIn, nIn, mask)
-          write(*,'(30L3)') mask
-          write(*,'(30I3)') dfs
-          write(*,*) "-----------------"
           ordering(i) = MAXLOC(dfs, 1, mask)
           dfs = [dfs(1 : ordering(i) - 1), dfs(ordering(i) + 1 : n - i + 1)] 
           call vertexToClique(iaIn, jaIn, nIn, iaOut, jaOut, nOut, ordering(i))
@@ -925,7 +923,7 @@
 !
 ! start of orderByMD
 !	    
-      call minimumOrdering(ia, ja, n, minOrdering)            
+      call minimumOrdering(ia, ja, n, minOrdering)     
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  
@@ -998,7 +996,9 @@
 ! (c) Vladislav Matus
 ! last edit: 07. 10. 2018  
 !
-! Purpose:        
+! Purpose: 
+!   Order vertices in the givven graph by mixed MD and distance ordering
+!   with given weight for each ordering.      
 !   
 ! Input:
 !   ia, ja ... graph in CSR format
@@ -1044,7 +1044,7 @@
 ! -- ordering
 !                          
       call orderByMD(ia, ja, n, permMD, invpermMD, ierr)
-      call orderByDistance(ia, ja, n, part, parts, permDist, invpermDist, ierr)      
+      call orderByDistance(ia, ja, n, part, parts, permDist, invpermDist, ierr)  
       ordering = ((1 - distCoef) * permMD) + (distCoef * permDist)
       deallocate(permMD, invpermMD, permDist, invpermDist) 
 !      
@@ -1061,11 +1061,148 @@
       end subroutine orderCoefMixed
         
 !--------------------------------------------------------------------  
+! subroutine partOrdering
+! (c) Vladislav Matus
+! last edit: 02. 11. 2018  
+!
+! Purpose: 
+!   Take ordering of the whole graph and project it on ordering of parts.       
+!   
+! Input:
+!   ordperm, invordperm ... ordering of the original graph
+!   n ... number of vertices of the original graph  
+!   np ... vector of sizes of the submatrices  
+!   part ... vector of length n containing the partitioning of the graph
+!   parts ... number of subgraphs 
+!   
+! Output:
+!   ordpermp, invordperp ... orderings of the subgraphs
+!   ierr ... error code (0 if succesful, 1 otherwise)   
+!   
+! Allocations:
+!   ordpermp%vectors, ordpermp%vectors%elements(1..parts+1)
+!   invordpermp%vectors, invordpermp%vectors%elements(1..parts+1)
 
+      subroutine partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+        implicit none
+!
+! parameters
+!
+      integer :: n, parts, ierr
+      type(intRaggedArr) :: ordpermp, invordpermp
+      integer, allocatable, dimension(:) :: ordperm, invordperm, part, np 
+!
+! internals
+!              
+      integer :: i, j, ip(parts+1)
+      integer, allocatable, dimension(:) :: auxord, auxinvord
+
+!
+! start of partOrdering
+!	      
+      allocate(ordpermp%vectors(parts+1),stat=ierr)
+      allocate(invordpermp%vectors(parts+1),stat=ierr)
+      do i = 1, parts + 1
+        allocate(ordpermp%vectors(i)%elements(np(i)),stat=ierr)
+        allocate(invordpermp%vectors(i)%elements(np(i)),stat=ierr)
+      end do
+      ip = 1
+      do i = 1, n
+        ordpermp%vectors(part(i))%elements(ip(part(i))) = ordperm(i)
+        invordpermp%vectors(part(i))%elements(ip(part(i))) = invordperm(i)
+        ip(part(i)) = ip(part(i)) + 1
+      end do
+      do i = 1, parts + 1
+        allocate(auxord(np(i)),stat=ierr)
+        call MRGRNK(ordpermp%vectors(i)%elements, auxord) 
+        do j = 1, np(i)
+          ordpermp%vectors(i)%elements(auxord(j)) = j
+        end do
+        deallocate(auxord)
+      end do   
+      do i = 1, parts + 1
+        allocate(auxord(np(i)),stat=ierr)
+        call MRGRNK(invordpermp%vectors(i)%elements, auxord) 
+        do j = 1, np(i)
+          invordpermp%vectors(i)%elements(auxord(j)) = j
+        end do
+        deallocate(auxord)
+      end do   
+!
+! end of partOrdering
+!  
+      end subroutine partOrdering
+
+!--------------------------------------------------------------------  
+! subroutine applyOrdering
+! (c) Vladislav Matus
+! last edit: 04. 11. 2018  
+!
+! Purpose: 
+!   Reorganise ia, ja and optionally part to correspond to the order of vertices given       
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices of the graph
+!   part ... optional, partition of the graph
+!   
+! Output:
+!   ia, ja ... newly ordred graph in CSR format      
+!   ordperm ... desired permutation of vertices
+!   invordperm ... backward permutation of vertices
+!   ierr ... error code (0 if succesful, 1 otherwise)   
+!   part ... optional, partition of the graph
+!   
+! Allocations: none
+!
+
+      subroutine applyOrdering(ia, ja, n, ordperm, invordperm, ierr, part)
+        implicit none
+!
+! parameters
+!
+      integer :: n, ierr
+      integer, allocatable, dimension(:) :: ia, ja, ordperm, invordperm
+      integer, allocatable, dimension(:), optional :: part  
+!
+! internals
+!              
+      integer :: i, j, oldIa
+      integer, allocatable, dimension(:) :: iaNew, jaNew, partNew
+
+!
+! start of applyOrdering
+!	      
+      allocate(iaNew(n+1), jaNew(ia(n+1) - 1), stat=ierr)
+
+      jaNew = 0
+
+      iaNew(1) = 1
+      do i = 1, n
+        iaNew(i + 1) = iaNew(i) + ia(ordperm(i) + 1) - ia(ordperm(i))
+        do j = 1, iaNew(i + 1) - iaNew(i)
+          jaNew(iaNew(i) + j - 1) = invordperm(ja(ia(ordperm(i)) + j - 1))
+        end do
+      end do
+      ia = iaNew
+      ja = jaNew
+      deallocate(iaNew, jaNew)
+
+      if(present(part))then
+        allocate(partNew(n), stat=ierr)
+        do i = 1, n
+          partNew(i) = part(ordperm(i))
+        end do
+        part = partNew
+        deallocate(partNew)
+      end if
+!
+! end of applyOrdering
+!  
+      end subroutine applyOrdering
+!--------------------------------------------------------------------    
 
 !
 ! end of module
 !      
       end module myroutines90
-
-

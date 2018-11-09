@@ -301,5 +301,198 @@
 !
       end
 
+
+* (c) sparslab module name=iwset
+*
+* purpose:
+*   set entries of an integer vector to ialpha.
+*   unrolled code.
+*
+* history:
+*   original version for sparslab - tu - 14/1/1997
+*
+* parameters:
+*
+      subroutine iwset(n,ialpha,ix,incx)
+c
+c globals
+      integer n,ialpha,incx
+      integer ix(*)
+c
+c locals
+      integer i,ind,m,mp1
+c
+c functions
+      intrinsic mod
+c
+c start of iwset
+c
+      if(n.le.0) return
+      if(incx.ne.1) then
+c
+c incx.ne.1
+        ind=1
+        if(incx.lt.0) ind=(-n+1)*incx+1
+        do i=1,n
+          ix(ind)=ialpha
+          ind=ind+incx
+        end do
+        return
+      else
+c
+c incx.eq.1
+        m=mod(n,7)
+        if(m.ne.0) then
+          do i=1,m
+            ix(i)=ialpha
+          end do
+          if(n.lt.7) return
+        end if
+        mp1=m+1
+        do i=mp1,n,7
+          ix(i)=ialpha
+          ix(i+1)=ialpha
+          ix(i+2)=ialpha
+          ix(i+3)=ialpha
+          ix(i+4)=ialpha
+          ix(i+5)=ialpha
+          ix(i+6)=ialpha
+        end do
+        return
+      end if
+c
+c end of iwset
+c
+      return
+c
+      end
+
+
+! (c) sparslab module name=colcnts
+!
+! purpose:
+!   compute column counts of the factor.
+!   simple routine with complexity linear in nnz(L).
+!
+! history:
+!   original version for sparslab - tu - 25/2/1998
+!
+! parameters:
+!  ii  n  matrix dimension.
+!  oi  ia(n+1)/ja(ia(n+1)-1)  input cs matrix structure.
+!  io  colcnt(n)  output column counts.
+!  io  parent(n)  matrix elimination tree.
+!  ia  marker(n)  an auxiliary vector.
+!
+      subroutine colcnts(n,ia,ja,colcnt,parent,marker)
+!
+! parameters
+!
+      integer n,ia(n+1),ja(*)
+      integer colcnt(n),marker(n+1),parent(n)
+!
+! internals
+!
+      integer i,j,k,k2,k3,jstrt,jstop
+!
+! start of colcnts
+!
+      call iwset(n,0,colcnt,1)
+!
+      do i=1,n
+        marker(i)=i
+        jstrt=ia(i)
+        jstop=ia(i+1)-1
+!
+!    -- traverse subtree rooted in i
+!
+        do j=jstrt,jstop
+          k=ja(j)
+          if(k.lt.i) then
+            k2=k
+!
+! -- -- traverse the unique path towards the root
+!
+            k3=marker(k2)
+            do while (k3.ne.i) 
+              colcnt(k2)=colcnt(k2)+1
+              marker(k2)=i
+              k2=parent(k2)
+              k3=marker(k2)
+            end do
+          end if
+        end do
+      end do
+!
+      return
+!
+! end of colcnts
+!
+      end subroutine colcnts
+
+
+! (c) sparslab module name=rowcnts
+!
+! purpose:
+!   compute column counts of the factor.
+!   simple routine with complexity linear in nnz(L).
+!
+! history:
+!   original version for sparslab - tu - 25/2/1998
+!
+! parameters:
+!  ii  n  matrix dimension.
+!  oi  ia(n+1)/ja(ia(n+1)-1)  input cs matrix structure.
+!  io  rowcnt(n)  output column counts.
+!  io  parent(n)  matrix elimination tree.
+!  ia  marker(n)  an auxiliary vector.
+!
+      subroutine rowcnts(n,ia,ja,rowcnt,parent,marker)
+!
+! parameters
+!
+      integer n,ia(n+1),ja(*)
+      integer rowcnt(n),marker(n+1),parent(n)
+!
+! internals
+!
+      integer i,j,k,k2,k3,jstrt,jstop
+!
+! start of rowcnts
+!
+      call iwset(n,0,rowcnt,1)
+!
+      do i=1,n
+        marker(i)=i
+        jstrt=ia(i)
+        jstop=ia(i+1)-1
+!
+!    -- traverse subtree rooted in i
+!
+        do j=jstrt,jstop
+          k=ja(j)
+          if(k.lt.i) then
+            k2=k
+!
+! -- -- traverse the unique path towards the root
+!
+            k3=marker(k2)
+            do while (k3.ne.i) 
+              rowcnt(i)=rowcnt(i)+1
+              marker(k2)=i
+              k2=parent(k2)
+              k3=marker(k2)
+            end do
+          end if
+        end do
+      end do
+!
+      return
+!
+! end of rowcnts
+!
+      end subroutine rowcnts
+
+
       end module mydepend
 

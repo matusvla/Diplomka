@@ -7,7 +7,7 @@
       program main
       use mydepend
       use mydepend90
-      use myroutines90      
+      use myroutines90          
       use gvroutines 
       use auxroutines 
       use testing
@@ -66,6 +66,11 @@
       type(intRaggedArr) :: invperm      
 ! -- permutations from original to ordered matrix and back, describes position in new matrix, old matrix
       integer, allocatable, dimension(:) :: ordperm, invordperm
+      type(intRaggedArr) :: ordpermp, invordpermp
+! -- description of elimination tree
+      integer, allocatable, dimension(:) :: parent, ancstr, colcnt, marker
+! -- fill in Cholesky factor of matrix
+      integer, allocatable, dimension(:) :: cholFill
 ! -- command line arguments
       character*(matrixtype_max_len) matrixtype
       character*(matrixpath_max_len) :: matrixpath
@@ -74,16 +79,14 @@
       double precision, allocatable, dimension(:) :: aaNoLoops
       integer, dimension(0:40) :: metisoptions 
       integer :: metisobjval    
-      integer :: metis_call_status  
-      
+      integer :: metis_call_status       
       integer :: sepsize
 ! -- miscelaneous 
       integer :: nfull ! one dimension of matrix, "nfull = sqrt(n)"
-      integer :: m
+      integer :: i, j, k, m 
       integer :: ierr, info, statio      
       integer :: chsize ! size of the fill      
       integer, allocatable, dimension(:) :: wn01, wn02 !auxiliary vectors
-      integer, allocatable, dimension(:) :: colcnt !TODO understand                       
       ! -- conversions of numbers to strings
       integer :: ndigits      
       !number of parts as string, use partsch(1:ndigits)
@@ -94,6 +97,7 @@
       logical :: TESTswitch
       integer, allocatable, dimension(:) :: TESTordperm1, TESTordperm2
       integer, allocatable, dimension(:) :: TESTinvordperm1, TESTinvordperm2
+      integer, allocatable, dimension(:) :: TESTia, TESTja, TESTpart
 
 !--------------------------------------------------------------------
 !
@@ -105,9 +109,9 @@
 !	  
      parts = 2
      TESTswitch = .true.
-     matrixtype = 'P' !possible values: T ... Test, P ... Poisson, RSA ... from file     
+     matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 4
+     testGraphNumber = 5
      nfull = 5
 !
 ! -- matrix loading
@@ -167,52 +171,73 @@
 !
       call createSubgraphs(ia, ja, aa, n, part, parts, iap, jap, aap, np, nvs, perm, invperm, ierr)
 !
-! -- Find best ordering of vertices
-!     TODO order vertices in all parts      
+! -- Find best ordering of vertices   
 !            
-      write(*,'(50I3)') iap%vectors(1)%elements
-      write(*,'(50I3)') jap%vectors(1)%elements
-      write(*,'(50I3)') part
+
+      call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
+      call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+      call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+
+      call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+
+      do i = 1, parts
+        call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+          ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)
+      end do
+
+      allocate(cholFill(parts), stat=ierr)
+      do i = 1, parts
+        allocate(parent(np(i)), ancstr(np(i)), colcnt(np(i)), marker(np(i) + 1), stat=ierr)
+        call eltree2(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, parent, ancstr)
+        call colcnts(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, colcnt, parent, marker)
+      !   allocate(parent(n), ancstr(n), colcnt(n), marker(n + 1), stat=ierr)
+      !   call eltree2(n, ia, ja, parent, ancstr)
+      !   call colcnts(n, ia, ja, colcnt, parent, marker)
+        cholFill(i) = SUM(colcnt)
+        deallocate(parent, ancstr, colcnt, marker)
+      end do
+      write(*,'(30I10)') cholFill
+      deallocate(cholFill)
+      
+      ! do i = 1, parts + 1
+      !   ! call orderByDistance(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+      !   !   logical2intArr(nvs%vectors(i)%elements) + 1, 1, & 
+      !   !   ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)  
+      !   call orderByMD(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+      !      ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)   
+      !   write(*,*) invordpermp%vectors(i)%elements
+      ! end do
 
 
-      call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
+ 
+      !TODO deallocate deallocate(ordperm,invordperm)   
 
-        write(*,'(50I3)') ordperm    
-        deallocate(ordperm,invordperm)    
-
-      call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-         ordperm, invordperm, ierr)
-
-         write(*,'(50I3)') ordperm
-         deallocate(ordperm,invordperm)
+      !    write(*,'(50I3)') ordperm
+      !    deallocate(ordperm,invordperm)
 
       ! call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
       !    logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
 
       !call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
       
-      do m = -5, 105
-        call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-          logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(m,8)/100, ierr)       
+      ! do m = -5, 105
+      !   call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !     logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(m,8)/100, ierr)       
       
-        write(*,'(50I3)') ordperm
-        !write(*,'(50I3)') invordperm
-
-        if(TESTswitch) then        
-          call testUniqueness(ordperm)
-          call testUniqueness(invordperm)
-        end if
-        deallocate(ordperm,invordperm)
-      end do
+      !   if(TESTswitch) then        
+      !     call testUniqueness(ordperm)
+      !     call testUniqueness(invordperm)
+      !   end if
+      !   deallocate(ordperm,invordperm)
+      ! end do
 !
 ! -- Write out partitioned graph in Graphviz format
 !    TODO miscelaneous error handling          
 !      
       open(unit=graphvizunit, file=graphvizfilename)                  
-      ! call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
-      call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-        graphvizunit, ierr)  
+      call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
+      ! call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      !  graphvizunit, ierr)  
       close(graphvizunit)  
       
       ! open(unit=15, file="GVgraph1.txt")   
@@ -221,7 +246,16 @@
       
 !      
 ! -- write out matlab format for displaying this matrix
-!      call ommatl4(n, ia, ja, aa, mformat)
+!      
+      ! aa = 1
+      ! call ommatl4(n, ia, ja, aa, mformat)
+
+      deallocate(aa)
+      k = 2
+      allocate(aa(iap%vectors(k)%elements(np(k)+1)-1))
+      aa = 1
+      call ommatl4(np(k), iap%vectors(k)%elements, jap%vectors(k)%elements, aa, 0)
+
 
 !      allocate(colcnt(nfull), stat=ierr)
 !      call chfill2(nfull, ia, ja, mformat, colcnt, chsize, info)
@@ -231,35 +265,65 @@
 ! -- final tests in test mode
 !            
       if(TESTswitch) then
+        write(*,*) "------TEST RESULTS: --------------------------------------------------------------"
         call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
            logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm1, TESTinvordperm1, ierr)
         call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
            logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(1,8), ierr)
         if(ALL(TESTordperm1 == TESTordperm2)) then 
-          write(*,*) "TEST: First final test OK!"
+          write(*,*) "TEST 1: OK"
         else 
-          write(*,*) "TEST: First test failed!"
+          write(*,*) "TEST 1: failed!"
         end if
         if(ALL(TESTinvordperm1 == TESTinvordperm2)) then 
-          write(*,*) "TEST: Second final test OK!"
+          write(*,*) "TEST 2: OK"
         else 
-          write(*,*) "TEST: Second final test failed!"
-        end if        
+          write(*,*) "TEST 2: failed!"
+        end if   
+        deallocate(TESTordperm1, TESTinvordperm1, TESTordperm2, TESTinvordperm2)     
 
         call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-          TESTordperm1, TESTinvordperm1, ierr)
+        TESTordperm1, TESTinvordperm1, ierr)
         call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-          logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(0,8), ierr)    
+        logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(0,8), ierr)    
         if(ALL(TESTordperm1 == TESTordperm2)) then 
-          write(*,*) "TEST: Third final test OK!"
+          write(*,*) "TEST 3: OK"
         else 
-          write(*,*) "TEST: Third final test failed!"
+          write(*,*) "-----------------------------------------"
+          write(*,*) "TEST 3: failed!"
+          write(*,'(50L4)') (TESTordperm1 == TESTordperm2)
+          write(*,*)  
+          write(*,'(50I4)') TESTordperm1 
+          write(*,*)  
+          write(*,'(50I4)') TESTordperm2 
+          write(*,*) "-----------------------------------------"
         end if
         if(ALL(TESTinvordperm1 == TESTinvordperm2)) then 
-          write(*,*) "TEST: Fourth test OK!"
+          write(*,*) "TEST 4: OK"
         else 
-          write(*,*) "TEST: Fourth test failed!"
-        end if         
+          write(*,*) "-----------------------------------------"
+          write(*,*) "TEST 4: failed!"
+          write(*,'(50L4)') (TESTinvordperm1 == TESTinvordperm2)
+          write(*,*)  
+          write(*,'(50I4)') TESTinvordperm1 
+          write(*,*)  
+          write(*,'(50I4)') TESTinvordperm2 
+          write(*,*) "-----------------------------------------"
+        end if
+        deallocate(TESTordperm1, TESTinvordperm1, TESTordperm2, TESTinvordperm2)     
+        
+        allocate(TESTia(n + 1), TESTja(ia(n + 1) - 1), TESTpart(n), stat=ierr)
+        TESTia = ia
+        TESTja = ja
+        TESTpart = part
+        call applyOrdering(TESTia, TESTja, n, ordperm, invordperm, ierr, TESTpart)
+        call applyOrdering(TESTia, TESTja, n, invordperm, ordperm, ierr, TESTpart)
+        if(ALL(TESTia == ia) .and. ALL(TESTja == ja) .and. ALL(TESTpart == part)) then 
+          write(*,*) "TEST 5: OK"
+        else 
+          write(*,*) "TEST 5: failed!"
+        end if
+        deallocate(TESTia, TESTja, TESTpart)
 
       end if
 !

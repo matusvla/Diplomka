@@ -239,4 +239,63 @@
 
 
 !
+! (c) sparslab module name=eltree2
+!
+! purpose:
+!   construct an elimination tree / forest.
+!   no permutations.
+!
+! history:
+!   original version for sparslab - tu - 16/01/04.
+!
+! parameters:
+!
+  subroutine eltree2(n,ia,ja,parent,ancstr)
+!
+! parameters
+!
+      implicit none
+      integer n
+      integer parent(*),ia(*),ja(*),ancstr(*)
+!
+! internals
+!
+      integer i,jj,k,k3,jstrt,jstop
+!
+!  -- start of eltree2
+!
+      do i=1,n
+        parent(i)=0
+        ancstr(i)=0
+      end do
+!
+      do i=1,n
+        jstrt=ia(i)
+        jstop=ia(i+1)-1
+        do jj=jstrt,jstop
+          k=ja(jj)
+          if(k.lt.i) then
+            k3=ancstr(k)
+            do while (k3.gt.0.and.k3.ne.i)
+! 300        if(k3.gt.0.and.k3.ne.i) then
+              ancstr(k)=i
+              k=k3
+              k3=ancstr(k)
+!              go to 300
+!            end if
+            end do
+            if(k3.eq.0) then
+              parent(k)=i
+              ancstr(k)=i
+            end if
+          end if
+        end do
+      end do
+!
+      return
+!
+!  -- end of eltree2
+!
+      end subroutine eltree2
+!     
       end module mydepend90

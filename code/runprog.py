@@ -7,4 +7,6 @@ from subprocess import call
 scriptdirpath = os.path.dirname(os.path.realpath(__file__))
 os.chdir(scriptdirpath)
 call(["make"]) #TODO delete
-call(["./prog","-mt","RSA","-o","./matrices/bcsstk03.rsa","-t"])
+for matrix in os.listdir("matrices"):
+  print("Processing "+matrix)
+  call(["./prog","-mt","RSA","-o","./matrices/"+matrix])

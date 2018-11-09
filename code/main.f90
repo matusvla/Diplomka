@@ -39,7 +39,6 @@
 ! -- miscelaneous      
       character(len=*), parameter :: sp = " " ! alias for space    
       integer, parameter :: partsch_max_len = 100 !length of string partsch
-      integer, parameter :: matrixpath_max_len = 100 !length of string matrixpath      
 
 !--------------------------------------------------------------------      
 !      
@@ -72,8 +71,8 @@
 ! -- fill in Cholesky factor of matrix
       integer, allocatable, dimension(:) :: cholFill
 ! -- command line arguments
-      character*(MATRIXTYPE_MAXLEN) matrixtype
-      character*(matrixpath_max_len) :: matrixpath
+      character*(CMDARG_MAXLEN) :: matrixtype
+      character*(CMDARG_MAXLEN) :: matrixpath
 ! -- work variables for calling METIS  
       integer, allocatable, dimension(:) :: iaNoLoops, jaNoLoops
       double precision, allocatable, dimension(:) :: aaNoLoops
@@ -107,21 +106,15 @@
 !            
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
-
+!      parts = 2
+!      call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testGraphNumber)
 
      parts = 2
      TESTswitch = .true.
-     call getCmdlineArgs(matrixtype)
+     matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
      matrixpath = "./matrices/bcsstk01.rsa"
-     testGraphNumber = 5
+     testGraphNumber = 1
      nfull = 5
-
-!      parts = 2
-!      TESTswitch = .true.
-!      matrixtype = 'RSA' !possible values: T ... Test, P ... Poisson, RSA ... from file     
-!      matrixpath = "./matrices/bcsstk01.rsa"
-!      testGraphNumber = 5
-!      nfull = 5
 
 
 !
@@ -200,14 +193,14 @@
       do i = 1, parts
         allocate(parent(np(i)), ancstr(np(i)), colcnt(np(i)), marker(np(i) + 1), stat=ierr)
         call eltree2(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, parent, ancstr)
-        call colcnts(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, colcnt, parent, marker)
+        call colcnts(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, colcnt, parent, marker)      
       !   allocate(parent(n), ancstr(n), colcnt(n), marker(n + 1), stat=ierr)
       !   call eltree2(n, ia, ja, parent, ancstr)
       !   call colcnts(n, ia, ja, colcnt, parent, marker)
         cholFill(i) = SUM(colcnt)
         deallocate(parent, ancstr, colcnt, marker)
       end do
-      write(*,'(30I10)') cholFill
+      write(*,*) "Nonzeros in L:", cholFill
       deallocate(cholFill)
       
       ! do i = 1, parts + 1

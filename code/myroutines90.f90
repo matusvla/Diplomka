@@ -559,7 +559,7 @@
         if (testVertexNo /= n) then
           ierr = 1
           write(*,*) "[myroutines90.f90:countDistance] Warning: Partition not continuous", &
-            "and therefore not all vertices counted!"
+            " and therefore not all counted!"
         end if
         countDistance = maxDepth  
 !
@@ -1214,8 +1214,73 @@
 ! end of applyOrdering
 !  
       end subroutine applyOrdering
-!--------------------------------------------------------------------    
-
+!--------------------------------------------------------------------   
+! function countComponents
+! (c) Vladislav Matus
+! last edit: 10. 11. 2018  
+!
+! Purpose: 
+!   Count number of components in graph
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices of the graph
+!   
+! Returns:
+!   integer :: number of components
+!   
+! Allocations: none
+!
+      
+      integer function countComponents(ia, ja, n)
+      implicit none
+!
+! parameters
+!
+        integer :: n
+        integer, allocatable, dimension(:) :: ia, ja
+!
+! internals
+!    
+        integer :: i, j, oldLayerSize, currentLayerSize, nTouched = 0
+        integer :: oldLayer(n), currentLayer(n), vertexNo
+        logical :: marker(n), isOrdered(n)
+!
+! start of countComponents
+!	 
+        countComponents = 0
+        isOrdered = .false.
+        do while (.not. ALL(isOrdered))
+          countComponents = countComponents + 1
+          currentLayerSize = 1
+          do i = 1, n
+            if (.not. isOrdered(i)) then
+                currentLayer(1) = i
+                isOrdered(i) = .true.
+                exit
+            endif
+          end do
+          do while (currentLayerSize /= 0)
+            oldLayer = currentLayer
+            oldLayerSize = currentLayerSize
+            currentLayerSize = 0
+            do i = 1, oldLayerSize
+              vertexNo = oldLayer(i)
+              do j = ia(vertexNo), ia(vertexNo + 1) - 1
+                if (.not. isOrdered(ja(j))) then                
+                  isOrdered(ja(j)) = .true.
+                  currentLayerSize = currentLayerSize + 1
+                  currentLayer(currentLayerSize) = ja(j)                
+                end if
+              end do
+            end do 
+          end do 
+        end do
+!
+! end of countComponents
+!	 
+      end function countComponents
+      
 !
 ! end of module
 !      

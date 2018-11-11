@@ -68,6 +68,7 @@
               call get_command_argument(i + 1, value)
               matrixtype = TRIM(ADJUSTL(value))
               if(matrixtype(1:1) == "P") then
+                matrixpath = matrixtype
                 read(matrixtype(2:),*,iostat=stat) nfull
                 if ( stat /= 0 .or. nfull < 1) then
                   write(*,*) 'Invalid or unspecified number for matrix type "P"' 
@@ -75,6 +76,7 @@
                 endif
                 matrixtype = "P"
               else if(matrixtype(1:1) == "T") then
+                matrixpath = matrixtype
                 read(matrixtype(2:),*,iostat=stat) testGraphNumber
                 if ( stat /= 0 .or. testGraphNumber < 1) then
                   write(*,*) 'Invalid or unspecified number for matrix type "T"' 

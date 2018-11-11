@@ -686,7 +686,7 @@
 ! -- allocations
         vertexDegree = ia(replaceIndex + 1) - ia(replaceIndex)
         nNew = n - 1
-        jaNewSize = ia(n + 1) - 1 - vertexDegree + (vertexDegree * (vertexDegree + 1))/ 2
+        jaNewSize = ia(n + 1) - 1 - 2 * vertexDegree + vertexDegree * vertexDegree
         allocate(iaNew(nNew + 1), jaNew(jaNewSize))
         jaNew = 0
         iaNew = 0
@@ -715,8 +715,8 @@
             iaNew(i + 1) = iaNew(i) + iaDiff
             jaNew(iaNew(i) : iaNew(i + 1) - 1) = ja(ia(j) : ia(j + 1) - 1)
           end if            
-        end do          
-        call trimArr(jaNew, iaNew(nNew + 1) - 1)
+        end do      
+        call trimArr(jaNew, iaNew(nNew + 1) - 1, ierr)
         call shiftArr(jaNew,replaceIndex)
       end subroutine vertexToClique
 

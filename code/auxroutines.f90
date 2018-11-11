@@ -133,7 +133,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine trimArr
 ! (c) Vladislav Matus
-! last edit: 21. 09. 2018  
+! last edit: 10. 11. 2018  
 !      
 ! Purpose:
 !   Remove 
@@ -144,12 +144,14 @@
 !   arr ... resulting subarray
 ! Allocations: none
 !--------------------------------------------------------------------          
-      subroutine trimArr(arr, endIndex)
+      subroutine trimArr(arr, endIndex, ierr)
         implicit none
         integer, allocatable, dimension(:) :: arr, newArr
-        integer :: endIndex
+        integer :: endIndex, ierr
+        ierr = 0
         if(endIndex > SIZE(arr)) then
-          write(*,*) "[auxroutines.f90:trimArr] Warning: endIndex > SIZE(arr), not trimmed"
+          write(*,*) "[auxroutines.f90:trimArr] Warning: endIndex > SIZE(arr), not trimmed", endIndex, SIZE(arr)
+          ierr = 1
           return 
         end if
         allocate(newArr(endIndex))

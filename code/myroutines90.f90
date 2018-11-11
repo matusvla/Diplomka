@@ -117,7 +117,7 @@
 
 ! subroutine createSubgraphs
 ! (c) Vladislav Matus
-! last edit: 22. 09. 2018
+! last edit: 10. 11. 2018
 ! TODO error handling      
 ! TODO fill ierr  
 !
@@ -199,9 +199,7 @@
       !allocate ip
       allocate(ip(parts+1),stat=ierr)      
       ! fill ip with ones
-      do i = 1, parts + 1
-        ip(i) = 1
-      end do      
+      ip = 1    
       allocate(invperm%vectors(parts+1),stat=ierr)
       do i = 1, parts + 1        
         allocate(invperm%vectors(i)%elements(np(i)), stat=ierr)        
@@ -237,7 +235,7 @@
         iap%vectors(i)%elements(1) = 1
         nextToVertSep%vectors(i)%elements = .false.
       end do
-      ! fill ip with twosm jp with ones
+      ! fill ip with twos jp with ones
       do i = 1, parts + 1
         ip(i) = 2
         jp(i) = 1
@@ -482,7 +480,7 @@
 !-------------------------------------------------------------------- 
 ! function countDistance
 ! (c) Vladislav Matus
-! last edit: 22. 09. 2018  
+! last edit: 10. 11. 2018  
 !
 ! Purpose:
 !   create ordering of subgraphs according to distance from vertex separator
@@ -496,13 +494,14 @@
 !   
 ! Output:
 !   distFromSep ... int vector of length n which contains distances of vertices from separator
+!   ierr ... returns 1 if graph is disconnected and therefore has vertices numbered -1, returns 0 otherwise
 !   
 ! Allocations:  distFromSep
 ! 
 ! Returns: length of the longest path      
 
 
-      integer function countDistance(ia, ja, n, part, parts, distFromSep)
+      integer function countDistance(ia, ja, n, part, parts, distFromSep, ierr)
         implicit none
 !
 ! parameters
@@ -512,7 +511,7 @@
 !
 ! internals
 !             
-        integer :: i, j, maxDepth, vertexNo
+        integer :: i, j, maxDepth, vertexNo, testVertexNo = 0
         integer :: currentLayer(n), currentLayerSize = 0
         integer :: oldLayer(n), oldLayerSize = 0
         logical :: isOrdered(n)        
@@ -521,13 +520,14 @@
 !	    
 ! -- initialize currentLayer, currentLayerSize with separator
 !    and fill isOrdered and distFromSep accordingly        
-!          
+!       
+        ierr = 0
         do i = 1, n          
           if (part(i) == parts + 1) then
             isOrdered(i) = .true.
             distFromSep(i) = 0
             currentLayerSize = currentLayerSize + 1
-            currentLayer(currentLayerSize) = i            
+            currentLayer(currentLayerSize) = i
           else
             isOrdered(i) = .false.
           end if
@@ -535,8 +535,9 @@
 !
 ! -- count distance from separator for all the vertices
 !                       
-        maxDepth = -1        
-
+        maxDepth = -1     
+        testVertexNo = currentLayerSize
+        
         do while (currentLayerSize /= 0)
           maxDepth = maxDepth + 1
           oldLayer = currentLayer
@@ -552,8 +553,14 @@
                 currentLayer(currentLayerSize) = ja(j)                
               end if
             end do
-          end do         
-        end do  
+          end do 
+          testVertexNo = testVertexNo + currentLayerSize
+        end do 
+        if (testVertexNo /= n) then
+          ierr = 1
+          write(*,*) "[myroutines90.f90:countDistance] Warning: Partition not continuous", &
+            "and therefore not all vertices counted!"
+        end if
         countDistance = maxDepth  
 !
 ! end of countDistance
@@ -811,7 +818,7 @@
 ! start of mixedOrdering
 !	        
         call remloops(n, ia, ja, iaIn, jaIn, ierr)
-        aux = countDistance(ia, ja, n, part, parts, distFromSep)
+        aux = countDistance(ia, ja, n, part, parts, distFromSep, ierr)
         dfs = distFromSep
         nIn = n
         do i = 1, n - 1     
@@ -874,7 +881,7 @@
 !
 ! start of orderByDistance
 !	    
-      maxDepth = countDistance(ia, ja, n, part, parts, distFromSep)
+      maxDepth = countDistance(ia, ja, n, part, parts, distFromSep, ierr)
       distFromSep = maxDepth - distFromSep
 !      
 ! -- fill in invperm and perm using sorted order values
@@ -1133,18 +1140,20 @@
 !--------------------------------------------------------------------  
 ! subroutine applyOrdering
 ! (c) Vladislav Matus
-! last edit: 04. 11. 2018  
+! last edit: 10. 11. 2018  
 !
 ! Purpose: 
-!   Reorganise ia, ja and optionally part to correspond to the order of vertices given       
+!   Reorganise ia, ja and optionally part to correspond to the order of vertices given
 !   
 ! Input:
 !   ia, ja ... graph in CSR format
 !   n ... number of vertices of the graph
+!   nvs ... logical vector containing .true. for vertices next to separator      
 !   part ... optional, partition of the graph
 !   
 ! Output:
-!   ia, ja ... newly ordred graph in CSR format      
+!   ia, ja ... newly ordred graph in CSR format    
+!   nvs ... newly ordered nvs        
 !   ordperm ... desired permutation of vertices
 !   invordperm ... backward permutation of vertices
 !   ierr ... error code (0 if succesful, 1 otherwise)   
@@ -1153,24 +1162,26 @@
 ! Allocations: none
 !
 
-      subroutine applyOrdering(ia, ja, n, ordperm, invordperm, ierr, part)
+      subroutine applyOrdering(ia, ja, n, nvs, ordperm, invordperm, ierr, part)
         implicit none
 !
 ! parameters
 !
       integer :: n, ierr
       integer, allocatable, dimension(:) :: ia, ja, ordperm, invordperm
+      logical, allocatable, dimension(:) :: nvs
       integer, allocatable, dimension(:), optional :: part  
 !
 ! internals
 !              
       integer :: i, j, oldIa
       integer, allocatable, dimension(:) :: iaNew, jaNew, partNew
+      logical, allocatable, dimension(:) :: nvsNew
 
 !
 ! start of applyOrdering
 !	      
-      allocate(iaNew(n+1), jaNew(ia(n+1) - 1), stat=ierr)
+      allocate(iaNew(n+1), jaNew(ia(n+1) - 1), nvsNew(n), stat=ierr)
 
       jaNew = 0
 
@@ -1184,6 +1195,12 @@
       ia = iaNew
       ja = jaNew
       deallocate(iaNew, jaNew)
+
+      do i = 1, n
+        nvsNew(i) = nvs(ordperm(i))
+      end do
+      nvs = nvsNew
+      deallocate(nvsNew)
 
       if(present(part))then
         allocate(partNew(n), stat=ierr)

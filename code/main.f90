@@ -97,6 +97,7 @@
       integer, allocatable, dimension(:) :: TESTordperm1, TESTordperm2
       integer, allocatable, dimension(:) :: TESTinvordperm1, TESTinvordperm2
       integer, allocatable, dimension(:) :: TESTia, TESTja, TESTpart
+      logical, allocatable, dimension(:) :: TESTnvs
 
 !--------------------------------------------------------------------
 !
@@ -190,7 +191,8 @@
 
       do i = 1, parts
         call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
-          ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)
+          nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
+          invordpermp%vectors(i)%elements, ierr)
       end do
 
       allocate(cholFill(parts), stat=ierr)
@@ -204,7 +206,7 @@
         cholFill(i) = SUM(colcnt)
         deallocate(parent, ancstr, colcnt, marker)
       end do
-      write(*,*) "Nonzeros in L:", cholFill
+      write(*,*) matrixpath(1:30), cholFill
       deallocate(cholFill)
       
       ! do i = 1, parts + 1
@@ -323,15 +325,17 @@
         allocate(TESTia(n + 1), TESTja(ia(n + 1) - 1), TESTpart(n), stat=ierr)
         TESTia = ia
         TESTja = ja
+        allocate(TESTnvs(n),stat=ierr)
+        TESTnvs = .true.
         TESTpart = part
-        call applyOrdering(TESTia, TESTja, n, ordperm, invordperm, ierr, TESTpart)
-        call applyOrdering(TESTia, TESTja, n, invordperm, ordperm, ierr, TESTpart)
-        if(ALL(TESTia == ia) .and. ALL(TESTja == ja) .and. ALL(TESTpart == part)) then 
+        call applyOrdering(TESTia, TESTja, n, TESTnvs, ordperm, invordperm, ierr, TESTpart)
+        call applyOrdering(TESTia, TESTja, n, TESTnvs, invordperm, ordperm, ierr, TESTpart)
+        if(ALL(TESTia == ia) .and. ALL(TESTja == ja) .and. ALL(TESTpart == part) .and. ALL(TESTpart == part)) then 
           write(*,*) "TEST 5: OK"
         else 
           write(*,*) "TEST 5: failed!"
         end if
-        deallocate(TESTia, TESTja, TESTpart)
+        deallocate(TESTia, TESTja, TESTpart, TESTnvs)
 
         TESTswitch = .true.
         do i = 1, n
@@ -358,6 +362,18 @@
         else 
           write(*,*) "TEST 7: failed!"
         end if
+
+        j = 0
+        do i = 1, parts + 1
+          j = j + np(i)
+        end do
+        if(j == n) then 
+          write(*,*) "TEST 8: OK"
+        else 
+          write(*,*) "TEST 8: failed!"
+        end if
+
+
 
       end if
 !

@@ -195,7 +195,7 @@
 ! subroutine gvColorEdgeSep
 ! (c) Vladislav Matus
 ! last edit: 19. 09. 2018
-! Interface for using graphvizcr for drawing a graph with every part in different color    
+! Interface for using graphvizcr for drawing a graph with edges between parts in red
 !--------------------------------------------------------------------         
   subroutine gvColorEdgeSep (ia, ja, n, part, unitn, ierr)
     implicit none
@@ -214,10 +214,10 @@
 
 end subroutine gvColorEdgeSep      
 !--------------------------------------------------------------------       
-! subroutine gvColorEdgeSep
+! subroutine gvSetLabels
 ! (c) Vladislav Matus
 ! last edit: 19. 09. 2018
-! Interface for using graphvizcr for drawing a graph with every part in different color    
+! Interface for using graphvizcr for drawing a graph with different labels     
 !--------------------------------------------------------------------         
 subroutine gvSetLabels (ia, ja, n, labels, unitn, ierr)
   implicit none

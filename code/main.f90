@@ -158,6 +158,7 @@
           stop 'Unrecognised matrix format!'
       end select   
 
+      write(*,*) matrixpath
       
 !
 ! -- calling Graph partitioner METIS embeded into program
@@ -173,8 +174,10 @@
 
       call shiftnumbering(1, n, iaNoLoops, jaNoLoops, part)  ! transform graph back into Fortran notation (starting from 1)
       if (sepsize == 0) then
-        stop "Graph created from matrix has more components and it is well partitioned by default."
+        write(*,*) "Graph created from matrix has more components and it is well partitioned by default."
+        stop 
       end if
+      write(*,*) "sepsize",sepsize
 !
 ! -- Create subgraphs
 !

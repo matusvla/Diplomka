@@ -301,6 +301,112 @@
 !
       end
 
+      
+! (c) sparslab module name=symtr6
+!
+! purpose :
+!  symmetrize a matrix in the css format.
+!
+! history:
+!   original version for sparslab - tu - 24/8/1997
+!
+! parameters:
+!   ii  n dimension of the uncompressed matrix.
+!   ii  ncompr dimension of the compressed matrix.
+!   ou  ia(n+1)/ja(ia(n+1)-1)/a(ia(n+1)-1)
+!         matrix in compressed sparse format.
+!         on output it is symmetrized.
+!   ia  pd(n)  an auxiliary vector used to store pointers
+!         to diagonal elements.
+!   ia  wn01(n+1)  an auxiliary vector.
+!
+      subroutine symtr6(n,ia,ja,pd,wn01)
+!
+! parameters
+!
+      integer n
+      integer ia(*),pd(*),ja(*),wn01(*)
+!
+! internals
+!
+      integer i,j,k,ind,istrt,istop,jstrt,jstop
+!
+! start of symtr6
+!
+!  -- put (upper) triangular information to an auxiliary array.
+!
+      jstop=ia(1)
+      do i=1,n
+        jstrt=jstop
+        jstop=ia(i+1)
+        wn01(i)=jstop-jstrt
+      end do
+!
+!  -- add (lower) information of the transposed triangle
+!  -- to the auxiliary array.
+!
+      jstop=ia(1)-1
+      do i=1,n
+        jstrt=jstop+2
+        jstop=ia(i+1)-1
+        do j=jstrt,jstop
+          k=ja(j)
+          wn01(k)=wn01(k)+1
+        end do
+      end do
+!
+!  -- get pointers of the wide structure
+!  -- wn01(i) points at the end of the row i
+!
+      do i=2,n
+        wn01(i)=wn01(i)+wn01(i-1)
+      end do
+!
+!  -- shift the (upper) triangular rows
+!  -- set pointers to diagonal elements
+!
+      pd(1)=1
+      jstop=ia(n+1)
+      do i=n,1,-1
+        ind=wn01(i)
+        pd(i+1)=ind+1
+        jstrt=jstop-1
+        jstop=ia(i)
+        do j=jstrt,jstop,-1
+          ja(ind)=ja(j)
+          ind=ind-1
+        end do
+      end do
+!
+!  -- form the transposed (lower) triangular part
+!
+      istop=ia(1)
+      do i=1,n
+        istrt=istop
+        istop=ia(i+1)
+        jstop=wn01(i)
+        jstrt=jstop+istrt-istop+2
+        do j=jstrt,jstop
+          k=ja(j)
+          ind=pd(k)
+          ja(ind)=i
+          pd(k)=ind+1
+        end do
+      end do
+!
+!  -- get new pointers
+!
+      do i=1,n
+        ia(i+1)=wn01(i)+1
+      end do
+!
+      return
+!
+! end of symtr6
+!
+      end
+
+
 
 * (c) sparslab module name=iwset
 *

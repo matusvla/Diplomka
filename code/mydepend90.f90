@@ -235,6 +235,87 @@
 ! end of imhb2
 !
       end subroutine imhb2
+      
+      
+! (c) sparslab module name=imhb3
+!
+! purpose:
+!  read a sparse matrix in harwell-boeing format.
+!
+! history:
+!   original version for sparslab - tu - 09/04/2001.
+!
+      subroutine imhb3(iunit,m,n,mformat,ia,ja,info)
+!
+! parameters
+!
+      integer iunit,n,m,mformat,info
+      integer, allocatable, dimension(:) :: ia,ja
+!
+! internals
+!
+      character title*72,key*8,mxtype*3
+      character ptrfmt*16,indfmt*16,valfmt*20,rhsfmt*20,rhstyp*3
+      integer totcrd,ptrcrd,indcrd,valcrd,rhscrd
+      integer neltvl,nrhs,nja,njas
+      integer i,ierr
+!
+! read header
+!
+! -- read matrix dimensions m,n
+! -- read also nja/nz but do not use it now
+!
+      read(iunit,1000)title,key,totcrd,ptrcrd,indcrd,valcrd,rhscrd, &
+        mxtype,m,n,nja,neltvl,ptrfmt,indfmt,valfmt,rhsfmt
+      if(mxtype(2:2).eq.'S'.or.mxtype(2:2).eq.'s') then
+        mformat=111
+      else
+        mformat=12
+      end if
+!
+!  -- read number of right-hand sides
+!
+      if(rhscrd.gt.0) read(iunit,1001) rhstyp,nrhs
+!
+!  -- read pointers
+!
+      allocate(ia(max(m,n)+1),stat=ierr)
+      if(ierr.ne.0) go to 400
+      read(iunit,ptrfmt) (ia(i),i=1,n+1)
+      if(nja.ne.ia(n+1)-1) then
+        stop ' internal error in harwell-boeing matrix'
+      end if
+!
+!  -- read indices, values and close the matrix unit
+!
+      njas=nja
+      if(mformat.eq.111) then
+        njas=2*nja-n
+      end if
+      allocate(ja(njas+n),stat=ierr)
+      if(ierr.ne.0) go to 400
+      read(iunit,indfmt) (ja(i),i=1,nja)
+!
+!  -- close the matrix unit
+!
+      close(iunit)
+!
+!  -- return
+!
+      return
+!
+! -- formats
+!
+ 1000 format(a72,a8 / 5i14 / a3, 11x, 4i14 / 2a16, 2a20)
+ 1001 format (a3,11x,2i14)
+!
+  400 continue
+      info=8
+      return
+!
+! end of imhb3
+!
+      end subroutine imhb3
 
 
 

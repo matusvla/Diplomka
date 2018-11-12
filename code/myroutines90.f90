@@ -117,7 +117,7 @@
 
 ! subroutine createSubgraphs
 ! (c) Vladislav Matus
-! last edit: 10. 11. 2018
+! last edit: 12. 11. 2018
 ! TODO error handling      
 ! TODO fill ierr  
 !
@@ -145,20 +145,20 @@
 !   aap%vectors, aap%vectors%elements(1..parts+1),
 !   np, perm, invperm%vectors, invperm%vectors%elements(1..parts+1) 
 
-      subroutine createSubgraphs(ia, ja, aa, n, part, parts, iap, jap, aap, np, &
-        nextToVertSep, perm, invperm, ierr)
+      subroutine createSubgraphs(ia, ja, n, part, parts, iap, jap, np, &
+        nextToVertSep, perm, invperm, ierr, aa, aap)
         implicit none
 !
 ! parameters
 !
       integer :: n, ierr, parts
       integer :: ia(n+1),ja(ia(n+1)-1),part(n)
-      double precision :: aa(ia(n+1)-1)
       type(intRaggedArr) :: iap,jap
-      type(dpRaggedArr) :: aap
       type(logicalRaggedArr) :: nextToVertSep
       type(intRaggedArr) :: invperm
       integer, allocatable, dimension(:) :: np, perm
+      type(dpRaggedArr), optional :: aap
+      double precision, optional :: aa(ia(n+1)-1)
 !
 ! internals
 !              
@@ -216,13 +216,17 @@
       ! allocate the first dimension of the multiarrays to number of partitions + 1
       allocate(iap%vectors(parts+1),stat=ierr)
       allocate(jap%vectors(parts+1),stat=ierr)
-      allocate(aap%vectors(parts+1),stat=ierr)      
+      if(present(aap)) then
+        allocate(aap%vectors(parts+1),stat=ierr)      
+      end if
       allocate(nextToVertSep%vectors(parts + 1),stat=ierr)      
       ! allocate the second dimension of the multiarrays ia, ja, aa, invperm
       do i = 1, parts + 1
         allocate(iap%vectors(i)%elements(np(i)+1), stat=ierr)        
         allocate(jap%vectors(i)%elements(nep(i)), stat=ierr)
-        allocate(aap%vectors(i)%elements(nep(i)), stat=ierr)
+        if(present(aap)) then
+          allocate(aap%vectors(i)%elements(nep(i)), stat=ierr)
+        end if
         allocate(nextToVertSep%vectors(i)%elements(np(i)), stat=ierr)                
       end do      
 !
@@ -250,7 +254,9 @@
             iap%vectors(part(i))%elements(ip(part(i))) = iap%vectors(part(i))%elements(ip(part(i))) + 1
             !write neighbour into jap and aap            
             jap%vectors(part(i))%elements(jp(part(i))) = perm(ja(j))            
-            aap%vectors(part(i))%elements(jp(part(i))) = aa(j)            
+            if(present(aap)) then
+              aap%vectors(part(i))%elements(jp(part(i))) = aa(j)            
+            end if
             jp(part(i)) = jp(part(i)) + 1
           end if          
         end do
@@ -278,7 +284,7 @@
 
 ! subroutine subgraphCleanup
 ! (c) Vladislav Matus
-! last edit: 22. 09. 2018  
+! last edit: 12. 11. 2018  
 !
 ! Purpose:
 !   This routine deallocates all allocated fields after using routine createSubgraphs
@@ -289,17 +295,17 @@
 !   ierr ... error code (0 if succesful, # of fails otherwise)  
 ! Allocations: none
 
-      subroutine subgraphCleanup(iap, jap, aap, np, nvs, perm, invperm, parts, ierr)
+      subroutine subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr, aap)
         implicit none
 !
 ! parameters
 !
       integer :: parts,ierr            
       type(intRaggedArr) :: iap,jap
-      type(dpRaggedArr) :: aap
       type(intRaggedArr) :: invperm
       type(logicalRaggedArr) :: nvs
       integer, allocatable, dimension(:) :: np,perm
+      type(dpRaggedArr), optional :: aap
 !
 ! internals
 !              
@@ -312,13 +318,19 @@
       ierr = 0
       do i = 1, parts + 1
         deallocate(iap%vectors(i)%elements, jap%vectors(i)%elements, & 
-          aap%vectors(i)%elements, invperm%vectors(i)%elements, &
-          nvs%vectors(i)%elements, stat=iierr)
+          invperm%vectors(i)%elements, nvs%vectors(i)%elements, stat=iierr)
         ierr = ierr + iierr
+        if(present(aap)) then
+          deallocate(aap%vectors(i)%elements, stat=iierr)
+          ierr = ierr + iierr
+        end if
       end do
-      deallocate(iap%vectors, jap%vectors, aap%vectors, nvs%vectors, &
+      deallocate(iap%vectors, jap%vectors, nvs%vectors, &
         invperm%vectors, perm, np, stat=iierr)
       ierr = ierr + iierr
+      if(present(aap)) then
+        deallocate(aap%vectors)
+      end if
 !
 ! end of subgraphCleanup
 !  

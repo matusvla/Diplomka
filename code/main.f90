@@ -124,19 +124,12 @@
           if(statio .ne. 0) then
             stop 'specified matrix file cannot be opened.'
           end if   
-          !allocate ia, ja, aa
-          call imhb2(infileunit, m, n, mformat, ia, ja, aa, info) ! read a matrix in a RB format
+          !allocate ia, ja
+          call imhb3(infileunit, m, n, mformat, ia, ja, info) ! read a matrix in a RB format
           allocate(wn01(n+1), wn02(n+1), stat=ierr)
-          
-          !TODO konzultace, symtr7 nedela to, co bych cekal
-          !write(*,*) ia
-          !write(*,*) ja
-          call symtr7(n, ia, ja, aa, wn01, wn02)
+
+          call symtr6(n, ia, ja, wn01, wn02)
           deallocate(wn01, wn02, stat=ierr)
-          !write(*,*) "symtr"
-          !write(*,*) ia
-          !write(*,*) ja
-          !end konzultace          
           
         case ('P')
           !allocate ia, ja, aa
@@ -159,7 +152,7 @@
 !    TODO miscelaneous error handling    
 !     
     
-      call remloops(n, ia, ja, iaNoLoops, jaNoLoops, ierr, aa, aaNoLoops)
+      call remloops(n, ia, ja, iaNoLoops, jaNoLoops, ierr)
       allocate(part(n), stat=ierr)      
       metis_call_status=METIS_SetDefaultOptions(metisoptions)
       call shiftnumbering(-1, n, iaNoLoops, jaNoLoops)  ! transform graph into C++ notation (starting from 0)    
@@ -175,7 +168,7 @@
 !
 ! -- Create subgraphs
 !
-      call createSubgraphs(ia, ja, aa, n, part, parts, iap, jap, aap, np, nvs, perm, invperm, ierr)
+      call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
 !
 ! -- Find best ordering of vertices   
 !            
@@ -259,11 +252,11 @@
       ! aa = 1
       ! call ommatl4(n, ia, ja, aa, mformat)
 
-      deallocate(aa)
       k = 1
       allocate(aa(iap%vectors(k)%elements(np(k)+1)-1))
       aa = 1
       call ommatl4(np(k), iap%vectors(k)%elements, jap%vectors(k)%elements, aa, 0)
+      deallocate(aa)
 
 
 !      allocate(colcnt(nfull), stat=ierr)
@@ -367,9 +360,8 @@
 !
       deallocate(ia, stat=ierr)
       deallocate(ja, stat=ierr)
-      deallocate(aa, stat=ierr)
       deallocate(part, stat=ierr)	  
-      call subgraphCleanup(iap, jap, aap, np, nvs, perm, invperm, parts, ierr)
+      call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
 !
 !--------------------------------------------------------------------          
 !

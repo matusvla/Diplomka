@@ -133,7 +133,7 @@
           
         case ('P')
           !allocate ia, ja, aa
-          call poisson1(nfull, n, ia, ja, aa, info)
+          call poisson1(nfull, n, ia, ja, info)
           mformat = 11  
 
         case ('T')

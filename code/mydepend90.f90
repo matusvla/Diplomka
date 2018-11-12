@@ -12,21 +12,23 @@
 !
 ! history:
 !   original version for sparslab - tu - 2015/09/01.
+!   edited by Vladislav Matus - 2018/12/11
 !
-      subroutine poisson1(nx,n,ia,ja,aa,info)
+      subroutine poisson1(nx,n,ia,ja,info,aaIn)
 !
 ! parameters
 !
       implicit none
       integer nx,n,info
       integer, allocatable, dimension(:) :: ia,ja
-      double precision, allocatable, dimension(:) :: aa
+      double precision, allocatable, dimension(:), optional :: aaIn
 !
 ! internals
 !
       integer nja,ierr
       double precision one,four
       parameter(one=1.0d0,four=4.0d0)
+      double precision, allocatable, dimension(:):: aa
 !
 ! start of poisson1
 !
@@ -39,6 +41,11 @@
       call grid5pt(nx,n,ia,ja)
       call val5pt(n,ia,ja,aa,nx,nx,nx, &
         four,-one,four,four,0,one)
+      if(present(aaIn)) then
+        allocate(aaIn(nja),stat=ierr)
+        aaIn = aa
+      end if
+      deallocate(aa)
 !
 !  -- return
 !
@@ -47,9 +54,6 @@
 ! end of poisson1
 !
       end subroutine poisson1
-
-
-
 
 
 ! (c) sparslab module name=ommatl4

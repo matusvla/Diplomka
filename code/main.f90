@@ -138,7 +138,7 @@
 
         case ('T')
             write(*,*) "Running in test mode"
-            call loadTestGraph(ia, ja, aa, n, testGraphNumber)
+            call loadTestGraph(ia, ja, n, testGraphNumber)
 
         case default
           stop 'Unrecognised matrix format!'
@@ -164,7 +164,7 @@
         write(*,*) "Graph created from matrix has more components and it is well partitioned by default."
         stop 
       end if
-      write(*,*) "Separator size",sepsize
+      write(*,*) "Separator size:",sepsize
 !
 ! -- Create subgraphs
 !

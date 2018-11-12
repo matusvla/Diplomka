@@ -25,8 +25,14 @@ except OSError:
 #     child = Popen(command, shell=True, stdout=PIPE)
 #     print(child.communicate()[0] + DELIMITER)
 
-for matrix in range(3, 50):
-    print("Processing P" + str(matrix))
-    command = "./prog -mt P"+str(matrix)+" >> progoutput.txt"
+# for matrix in range(3, 50):
+#     print("Processing P" + str(matrix))
+#     command = "./prog -mt P"+str(matrix)+" >> progoutput.txt"
+#     child = Popen(command, shell=True, stdout=PIPE)
+#     print(child.communicate()[0] + DELIMITER)
+
+for matrix in range(1, 8):
+    print("Processing T" + str(matrix))
+    command = "./prog -mt T"+str(matrix)+" >> progoutput.txt"
     child = Popen(command, shell=True, stdout=PIPE)
     print(child.communicate()[0] + DELIMITER)

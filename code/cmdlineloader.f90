@@ -90,7 +90,6 @@
                   stop
                 endif
                 matrixtype = "T"
-                testSwitch = .true.
               end if
               i = i + 1
             case("-ot")

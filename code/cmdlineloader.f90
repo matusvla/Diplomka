@@ -96,11 +96,12 @@
               call get_command_argument(i + 1, value)
               orderingType = TRIM(ADJUSTL(value))
               if ( orderingType /= "MD" .and. orderingType /= "DIST" .and. orderingType(1:3) /= "MIX") then
-                write(*,*) "Invalid ordering type ", TRIM(ADJUSTL(orderingType)), " was reset to no ordering"
+                write(*,*) "Warning: Invalid ordering type '", &
+                  TRIM(ADJUSTL(orderingType)), "' was reset to no ordering!"
                 orderingType = "no"
-              else if (orderingType(1:3) == "MIX") then                
+              else if (orderingType(1:3) == "MIX") then  
                 read(orderingType(4:),*,iostat=stat) mixedCoef
-                if(stat > 0) then
+                if(stat /= 0) then
                   write(*,*) "Invalid ordering type '", TRIM(ADJUSTL(orderingType)), "' was reset to no ordering"
                   orderingType = "no"
                 end if

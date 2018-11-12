@@ -114,7 +114,7 @@
 
 !
 ! -- matrix loading
-!    TODO psa format, externalizovat
+!    TODO externalizovat
 !      
       info = 0
   !loading of the matrix in RB format      
@@ -172,19 +172,31 @@
 !
 ! -- Find best ordering of vertices   
 !            
-      
-      call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
-      ! call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
-      ! call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
-      ! call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, REAL(0.5,8)/100, ierr)
+    
+      if(TRIM(ADJUSTL(orderingType)) /= 'no') then
+        select case(TRIM(ADJUSTL(orderingType)))
+          case ('MD')
+            call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
+            write(*,*) "Ordering graph using MD ordering."
+          case ('DIST')
+            call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
+            write(*,*) "Ordering graph by distance from separator."
+          case ('MIX')
+            call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+            write(*,*) "Ordering graph using mixed ordering"
+          case default
+            call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, mixedCoef, ierr)
+            write(*,*) "Ordering graph by mixed ordering with coeficients."
+          end select
 
-      call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+        call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
 
-      do i = 1, parts
-        call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
-          nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
-          invordpermp%vectors(i)%elements, ierr)
-      end do
+        do i = 1, parts
+          call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+            nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
+            invordpermp%vectors(i)%elements, ierr)
+        end do
+      end if
 
       allocate(cholFill(parts), stat=ierr)
       do i = 1, parts
@@ -199,67 +211,26 @@
       end do
       write(*,*) "Nonzeros in L", cholFill
       deallocate(cholFill)
-      
-      ! do i = 1, parts + 1
-      !   ! call orderByDistance(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
-      !   !   logical2intArr(nvs%vectors(i)%elements) + 1, 1, & 
-      !   !   ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)  
-      !   call orderByMD(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
-      !      ordpermp%vectors(i)%elements, invordpermp%vectors(i)%elements, ierr)   
-      !   write(*,*) invordpermp%vectors(i)%elements
-      ! end do
 
-
- 
-      !TODO deallocate deallocate(ordperm,invordperm)   
-
-      !    write(*,'(50I3)') ordperm
-      !    deallocate(ordperm,invordperm)
-
-      ! call orderMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-      !    logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, ierr)      
-
-      !call orderMixed(ia, ja, n, [1,1,1,2], 1, ordperm, invordperm, ierr)      
-      
-      ! do m = -5, 105
-      !   call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-      !     logical2intArr(nvs%vectors(1)%elements) + 1, 1, ordperm, invordperm, REAL(m,8)/100, ierr)       
-      
-      !   if(TESTswitch) then        
-      !     call testUniqueness(ordperm)
-      !     call testUniqueness(invordperm)
-      !   end if
-      !   deallocate(ordperm,invordperm)
-      ! end do
 !
-! -- Write out partitioned graph in Graphviz format
-!    TODO miscelaneous error handling          
+! -- Write out partitioned graph in Graphviz format        
 !      
       open(unit=graphvizunit, file=graphvizfilename)                  
       call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
       ! call  gvSetLabels (ia, ja, n, ordperm, graphvizunit, ierr)  
       ! call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
       !  graphvizunit, ierr)  
-      close(graphvizunit)  
-      
-      ! open(unit=15, file="GVgraph1.txt")   
-      ! call graphvizcr(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), part, 15, ierr, .true., .false., .false.,)
-      ! close(15)  
+      close(graphvizunit)   
       
 !      
 ! -- write out matlab format for displaying this matrix
 !      
       ! call ommatl4(n, ia, ja, aa, mformat)
-
       k = 1
       allocate(aa(iap%vectors(k)%elements(np(k)+1)-1))
       aa = 1
       call ommatl4(np(k), iap%vectors(k)%elements, jap%vectors(k)%elements, aa, 0)
       deallocate(aa)
-
-
-!      allocate(colcnt(nfull), stat=ierr)
-!      call chfill2(nfull, ia, ja, mformat, colcnt, chsize, info)
 
 
 !
@@ -357,9 +328,8 @@
 !
 ! -- deallocate all allocated fields
 !
-      deallocate(ia, stat=ierr)
-      deallocate(ja, stat=ierr)
-      deallocate(part, stat=ierr)	  
+      !TODO check deallocations
+      deallocate(ia, ja, part, ordperm, invordperm, stat=ierr)
       call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
 !
 !--------------------------------------------------------------------          

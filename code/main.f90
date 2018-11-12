@@ -186,21 +186,18 @@
 ! -- Find best ordering of vertices   
 !            
       
-      ! call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
-      ! write(*,'(100I3)') ordperm
-      ! write(*,'(100I3)') invordperm
-      ! write(*,'(100I3)') 
-      ! ! call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
-      ! ! call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
-      ! ! call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, REAL(0.5,8)/100, ierr)
+      call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
+      ! call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
+      ! call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+      ! call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, REAL(0.5,8)/100, ierr)
 
-      ! call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+      call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
 
-      ! do i = 1, parts
-      !   call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
-      !     nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
-      !     invordpermp%vectors(i)%elements, ierr)
-      ! end do
+      do i = 1, parts
+        call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+          nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
+          invordpermp%vectors(i)%elements, ierr)
+      end do
 
       allocate(cholFill(parts), stat=ierr)
       do i = 1, parts

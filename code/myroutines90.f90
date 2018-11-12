@@ -796,7 +796,7 @@
 !   parts ... number of subgraphs        
 !   
 ! Output:
-!   ordering ... the final ordering of the graph             
+!   ordering ... the final ordering of the indices of the input graph             
 !   
 ! Allocations:  none
 
@@ -845,7 +845,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine orderByDistance
 ! (c) Vladislav Matus
-! last edit: 07. 10. 2018  
+! last edit: 12. 10. 2018  
 !
 ! Purpose:
 !   Computes the permutation of vertices in graph to be ordered.
@@ -882,12 +882,11 @@
 ! start of orderByDistance
 !	    
       maxDepth = countDistance(ia, ja, n, part, parts, distFromSep, ierr)
-      distFromSep = maxDepth - distFromSep
 !      
 ! -- fill in invperm and perm using sorted order values
 !                  
       allocate(perm(n), invperm(n), stat=ierr)
-      call MRGRNK (distFromSep, perm);
+      call MRGRNK ((maxDepth - distFromSep), perm);
       do i = 1, n
         invperm(perm(i)) = i
       end do  
@@ -899,7 +898,7 @@
 !-------------------------------------------------------------------- 
 ! subroutine orderByMD
 ! (c) Vladislav Matus
-! last edit: 07. 10. 2018  
+! last edit: 12. 11. 2018  
 !
 ! Purpose:
 !   Computes the permutation of vertices in graph to be ordered using MD algorithm
@@ -926,19 +925,18 @@
 !
 ! internals
 !              
-      integer :: i, minOrdering(n)      
+      integer :: i   
 !
 ! start of orderByMD
 !	    
-      call minimumOrdering(ia, ja, n, minOrdering)     
-!      
-! -- fill in invperm and perm using sorted order values
-!                  
       allocate(perm(n), invperm(n), stat=ierr)
-      call MRGRNK (minOrdering, perm);
+      call minimumOrdering(ia, ja, n, perm)     
+!      
+! -- fill in perm using obtained invperm
+!                        
       do i = 1, n
         invperm(perm(i)) = i
-      end do      
+      end do    
 !
 ! end of orderByMD
 !  
@@ -947,12 +945,12 @@
 !-------------------------------------------------------------------- 
 ! subroutine orderMixed
 ! (c) Vladislav Matus
-! last edit: 07. 10. 2018  
+! last edit: 12. 11. 2018  
 !
 ! Purpose:
 !   Computes the permutation of vertices in graph to be ordered
 !   Using enhanced MD algorithm, i. e. the vertex with minimal degree
-!   is chosen and if there ar more vertices with the same minimal degree,
+!   is chosen and if there are more vertices with the same minimal degree,
 !   the one the furthest from the separator is chosen            
 !   
 ! Input:
@@ -983,15 +981,14 @@
 !
 ! start of orderMixed
 !	    
-      call mixedOrdering(ia, ja, n, part, parts, ordering)
+      allocate(perm(n), invperm(n), stat=ierr)
+      call mixedOrdering(ia, ja, n, part, parts, perm)      
 !      
 ! -- fill in invperm and perm using sorted order values
-!                  
-      allocate(perm(n), invperm(n), stat=ierr)
-      call MRGRNK (ordering, perm);
+!                        
       do i = 1, n
         invperm(perm(i)) = i
-      end do        
+      end do       
 !
 ! end of orderMixed
 !  
@@ -1106,30 +1103,34 @@
 
 !
 ! start of partOrdering
-!	      
+!	    
+
+      ! allocations  
       allocate(ordpermp%vectors(parts+1),stat=ierr)
       allocate(invordpermp%vectors(parts+1),stat=ierr)
       do i = 1, parts + 1
         allocate(ordpermp%vectors(i)%elements(np(i)),stat=ierr)
         allocate(invordpermp%vectors(i)%elements(np(i)),stat=ierr)
       end do
+
+      ! code
       ip = 1
       do i = 1, n
-        ordpermp%vectors(part(i))%elements(ip(part(i))) = ordperm(i)
+        invordpermp%vectors(part(i))%elements(ip(part(i))) = invordperm(i)
         ip(part(i)) = ip(part(i)) + 1        
       end do
 
       do i = 1, parts + 1
         allocate(auxord(np(i)),stat=ierr)
-        call MRGRNK(ordpermp%vectors(i)%elements, auxord) 
+        call MRGRNK(invordpermp%vectors(i)%elements, auxord) 
         do j = 1, np(i)
-          ordpermp%vectors(i)%elements(auxord(j)) = j
+          invordpermp%vectors(i)%elements(auxord(j)) = j
         end do
         deallocate(auxord)
       end do   
       do i = 1, parts + 1
         do j = 1, np(i)
-          invordpermp%vectors(i)%elements(ordpermp%vectors(i)%elements(j)) = j
+          ordpermp%vectors(i)%elements(invordpermp%vectors(i)%elements(j)) = j
         end do  
       end do   
 !

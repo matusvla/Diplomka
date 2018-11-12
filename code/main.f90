@@ -186,17 +186,21 @@
 ! -- Find best ordering of vertices   
 !            
       
-      call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
-      call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
-      ! call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+      ! call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
+      ! write(*,'(100I3)') ordperm
+      ! write(*,'(100I3)') invordperm
+      ! write(*,'(100I3)') 
+      ! ! call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
+      ! ! call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+      ! ! call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, REAL(0.5,8)/100, ierr)
 
-      call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+      ! call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
 
-      do i = 1, parts
-        call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
-          nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
-          invordpermp%vectors(i)%elements, ierr)
-      end do
+      ! do i = 1, parts
+      !   call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+      !     nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
+      !     invordpermp%vectors(i)%elements, ierr)
+      ! end do
 
       allocate(cholFill(parts), stat=ierr)
       do i = 1, parts
@@ -249,6 +253,7 @@
 !      
       open(unit=graphvizunit, file=graphvizfilename)                  
       call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
+      ! call  gvSetLabels (ia, ja, n, ordperm, graphvizunit, ierr)  
       ! call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
       !  graphvizunit, ierr)  
       close(graphvizunit)  
@@ -264,7 +269,7 @@
       ! call ommatl4(n, ia, ja, aa, mformat)
 
       deallocate(aa)
-      k = 2
+      k = 1
       allocate(aa(iap%vectors(k)%elements(np(k)+1)-1))
       aa = 1
       call ommatl4(np(k), iap%vectors(k)%elements, jap%vectors(k)%elements, aa, 0)
@@ -302,28 +307,14 @@
         if(ALL(TESTordperm1 == TESTordperm2)) then 
           write(*,*) "TEST 3: OK"
         else 
-          write(*,*) "-----------------------------------------"
           write(*,*) "TEST 3: failed!"
-          write(*,'(50L4)') (TESTordperm1 == TESTordperm2)
-          write(*,*)  
-          write(*,'(50I4)') TESTordperm1 
-          write(*,*)  
-          write(*,'(50I4)') TESTordperm2 
-          write(*,*) "-----------------------------------------"
         end if
         if(ALL(TESTinvordperm1 == TESTinvordperm2)) then 
           write(*,*) "TEST 4: OK"
         else 
-          write(*,*) "-----------------------------------------"
           write(*,*) "TEST 4: failed!"
-          write(*,'(50L4)') (TESTinvordperm1 == TESTinvordperm2)
-          write(*,*)  
-          write(*,'(50I4)') TESTinvordperm1 
-          write(*,*)  
-          write(*,'(50I4)') TESTinvordperm2 
-          write(*,*) "-----------------------------------------"
         end if
-        deallocate(TESTordperm1, TESTinvordperm1, TESTordperm2, TESTinvordperm2)     
+        deallocate(TESTordperm2, TESTinvordperm2)     
         
         allocate(TESTia(n + 1), TESTja(ia(n + 1) - 1), TESTpart(n), stat=ierr)
         TESTia = ia
@@ -331,8 +322,8 @@
         allocate(TESTnvs(n),stat=ierr)
         TESTnvs = .true.
         TESTpart = part
-        call applyOrdering(TESTia, TESTja, n, TESTnvs, ordperm, invordperm, ierr, TESTpart)
-        call applyOrdering(TESTia, TESTja, n, TESTnvs, invordperm, ordperm, ierr, TESTpart)
+        call applyOrdering(TESTia, TESTja, n, TESTnvs, TESTordperm1, TESTinvordperm1, ierr, TESTpart)
+        call applyOrdering(TESTia, TESTja, n, TESTnvs, TESTinvordperm1, TESTordperm1, ierr, TESTpart)
         if(ALL(TESTia == ia) .and. ALL(TESTja == ja) .and. ALL(TESTpart == part) .and. ALL(TESTpart == part)) then 
           write(*,*) "TEST 5: OK"
         else 
@@ -342,7 +333,7 @@
 
         TESTswitch = .true.
         do i = 1, n
-          if (invordperm(ordperm(i)) /= i) then
+          if (TESTinvordperm1(TESTordperm1(i)) /= i) then
             TESTswitch = .false.
           end if
         end do
@@ -365,6 +356,7 @@
         else 
           write(*,*) "TEST 7: failed!"
         end if
+        deallocate(TESTordperm1, TESTinvordperm1)
 
         j = 0
         do i = 1, parts + 1

@@ -99,7 +99,7 @@
                 write(*,*) "Warning: Invalid ordering type '", &
                   TRIM(ADJUSTL(orderingType)), "' was reset to no ordering!"
                 orderingType = "no"
-              else if (orderingType(1:3) == "MIX") then  
+              else if (orderingType(1:3) == "MIX" .and. orderingType /= 'MIX') then 
                 read(orderingType(4:),*,iostat=stat) mixedCoef
                 if(stat /= 0) then
                   write(*,*) "Invalid ordering type '", TRIM(ADJUSTL(orderingType)), "' was reset to no ordering"

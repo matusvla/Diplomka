@@ -132,7 +132,7 @@
           deallocate(wn01, wn02, stat=ierr)
           
         case ('P')
-          !allocate ia, ja, aa
+          !allocate ia, ja
           call poisson1(nfull, n, ia, ja, info)
           mformat = 11  
 
@@ -249,7 +249,6 @@
 !      
 ! -- write out matlab format for displaying this matrix
 !      
-      ! aa = 1
       ! call ommatl4(n, ia, ja, aa, mformat)
 
       k = 1

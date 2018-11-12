@@ -73,6 +73,8 @@
 ! -- command line arguments
       character*(CMDARG_MAXLEN) :: matrixtype
       character*(CMDARG_MAXLEN) :: matrixpath
+      character*(ORDERINGTYPE_MAXLEN) :: orderingType
+      double precision :: mixedCoef
 ! -- work variables for calling METIS  
       integer, allocatable, dimension(:) :: iaNoLoops, jaNoLoops
       double precision, allocatable, dimension(:) :: aaNoLoops
@@ -108,20 +110,11 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testGraphNumber)
-
-    !  TODO delete
-    !  parts = 2
-    !  TESTswitch = .true.
-    !  matrixtype = 'T' !possible values: T ... Test, P ... Poisson, RSA ... from file     
-    !  matrixpath = "./matrices/bcsstk01.rsa"
-    !  testGraphNumber = 1
-    !  nfull = 5
-
+     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testGraphNumber, orderingType, mixedCoef)
 
 !
 ! -- matrix loading
-!    TODO improve matrix loading, now it's just generating matrix using poisson1
+!    TODO psa format, externalizovat
 !      
       info = 0
   !loading of the matrix in RB format      
@@ -158,7 +151,8 @@
           stop 'Unrecognised matrix format!'
       end select   
 
-      write(*,*) matrixpath
+      write(*,*) "----------------------------------------------------------------"
+      write(*,*) TRIM(ADJUSTL(matrixpath)), ": "
       
 !
 ! -- calling Graph partitioner METIS embeded into program
@@ -177,7 +171,7 @@
         write(*,*) "Graph created from matrix has more components and it is well partitioned by default."
         stop 
       end if
-      write(*,*) "sepsize",sepsize
+      write(*,*) "Separator size",sepsize
 !
 ! -- Create subgraphs
 !
@@ -210,7 +204,7 @@
         cholFill(i) = SUM(colcnt)
         deallocate(parent, ancstr, colcnt, marker)
       end do
-      write(*,*) matrixpath(1:30), cholFill
+      write(*,*) "Nonzeros in L", cholFill
       deallocate(cholFill)
       
       ! do i = 1, parts + 1

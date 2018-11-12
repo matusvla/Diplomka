@@ -1,16 +1,17 @@
 ! module cmdlineloader
 ! (c) Vladislav Matus
-! last edit: 09. 11. 2018      
+! last edit: 11. 11. 2018      
 
       module cmdlineloader
         implicit none        
-        integer, parameter :: CMDARG_MAXLEN = 100 !length of string matrixpath         
+        integer, parameter :: CMDARG_MAXLEN = 100 
+        integer, parameter :: ORDERINGTYPE_MAXLEN = 10
       contains
 
 !--------------------------------------------------------------------  
 ! subroutine getCmdlineArgs
 ! (c) Vladislav Matus
-! last edit: 09. 11. 2018  
+! last edit: 11. 11. 2018  
 !
 ! Purpose: 
 !   Load command line arguments       
@@ -25,7 +26,8 @@
 ! Allocations: none
 !
 
-      subroutine getCmdlineArgs(matrixpath, matrixtype, nfull, testSwitch, testGraphNumber)
+      subroutine getCmdlineArgs(matrixpath, matrixtype, nfull, testSwitch, &
+        testGraphNumber, orderingType, mixedCoef)
         implicit none
 !
 ! parameters
@@ -33,11 +35,13 @@
       logical :: testSwitch
       integer :: nfull, stat, testGraphNumber
       character*(CMDARG_MAXLEN) :: value
+      character*(CMDARG_MAXLEN) :: matrixpath, matrixtype
+      character*(ORDERINGTYPE_MAXLEN) :: orderingType
+      double precision :: mixedCoef
 !
 ! internals
 !      
       integer :: i, n        
-      character*(CMDARG_MAXLEN) :: matrixpath, matrixtype
 !
 ! start of getCmdlineArgs
 !	      
@@ -46,6 +50,8 @@
       nfull = 5
       testSwitch = .false.
       testGraphNumber = 1
+      orderingType = "no"
+      mixedCoef = 0.0
       !Loop over the arguments
       n = command_argument_count()
       if (n > 0) then
@@ -57,6 +63,7 @@
               write(*,*) "Vladislav Matus's diploma thesis, 2018"
               write(*,*) "  -o [path] path to matrix file which should be opened. works only with RSA matrix type"
               write(*,*) "  -mt [matrixtype] for choosing type of matrix. Allowed types: RSA, P[number], T"
+              write(*,*) "  -ot [type] ordering type, default is no ordering."
               write(*,*) "  -t for running development tests"
               write(*,*) "  -h for help"
               stop
@@ -84,6 +91,20 @@
                 endif
                 matrixtype = "T"
                 testSwitch = .true.
+              end if
+              i = i + 1
+            case("-ot")
+              call get_command_argument(i + 1, value)
+              orderingType = TRIM(ADJUSTL(value))
+              if ( orderingType /= "MD" .and. orderingType /= "DIST" .and. orderingType(1:3) /= "MIX") then
+                write(*,*) "Invalid ordering type ", TRIM(ADJUSTL(orderingType)), " was reset to no ordering"
+                orderingType = "no"
+              else if (orderingType(1:3) == "MIX") then                
+                read(orderingType(4:),*,iostat=stat) mixedCoef
+                if(stat > 0) then
+                  write(*,*) "Invalid ordering type '", TRIM(ADJUSTL(orderingType)), "' was reset to no ordering"
+                  orderingType = "no"
+                end if
               end if
               i = i + 1
             case("-t")

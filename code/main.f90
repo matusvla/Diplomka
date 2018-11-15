@@ -35,7 +35,7 @@
       integer, parameter :: METIS_OPTION_NUMBERING = 17
       integer, parameter :: metisncon = 1      
 ! -- constants for Graphviz file
-      character(len=*), parameter :: graphvizfilename = "GVgraph.txt"  
+      character(len=*), parameter :: graphvizfilename = "GVgraph"  
 ! -- miscelaneous      
       character(len=*), parameter :: sp = " " ! alias for space    
       integer, parameter :: partsch_max_len = 100 !length of string partsch

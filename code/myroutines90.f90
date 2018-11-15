@@ -1293,6 +1293,93 @@
 ! end of countComponents
 !	 
       end function countComponents
+
+!--------------------------------------------------------------------   
+! subroutine moveVertSep
+! (c) Vladislav Matus
+! last edit: 15. 11. 2018  
+!
+! Purpose: 
+!   Replaces vertex separator S by subset of adj(S) 
+!   which lays in part 'direction'
+!   
+! Input:
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices of the graph
+!   part ... partition of the graph
+!   parts ... number of parts in partition
+!   direction ... index of part where vertex separator should be moving
+!   
+! Output:
+!   part ... new partition of the graph
+!   sepsize ... number of vertices of the graph
+!   
+! Allocations: none
+!
+  
+      subroutine moveVertSep(ia, ja, n, part, parts, direction, sepsize)
+        implicit none
+!
+! parameters
+!
+        integer, allocatable, dimension(:) :: ia, ja
+        integer, allocatable, dimension(:) :: part  
+        integer :: direction, parts, n, sepsize
+!
+! internals
+!    
+        integer :: i, j, p, np(parts), newPart(n)
+        logical :: isConnected(parts + 1)
+!
+! start of moveVertSep
+!	 
+        sepsize = 0
+        newPart = part
+        do i = 1, n
+          np = 0
+          if (part(i) == parts + 1) then
+            do j = ia(i), ia(i + 1) - 1
+              if (newPart(ja(j)) /= parts + 1) then
+                np(newPart(ja(j))) = np(newPart(ja(j))) + 1
+              end if
+              if (part(ja(j)) == direction .and. newPart(ja(j)) /= parts + 1) then
+                newPart(ja(j)) = parts + 1
+                sepsize = sepsize + 1
+              end if
+            end do
+            np(direction) = -1
+            if (COUNT(np > 0) == 1) then
+              newPart(i) = MAXLOC(np,1)
+            else
+              newPart(i) = parts + 1
+              sepsize = sepsize + 1
+            end if
+          end if
+        end do
+        part = newPart
+        ! prune separator
+        do i = 1, n
+          isConnected = .false.
+          if (part(i) == parts + 1) then
+            isConnected(parts + 1) = .true.
+            p = direction
+            do j = ia(i), ia(i + 1) - 1
+              isConnected(part(ja(j))) = .true.
+              if(part(ja(j)) /= parts + 1) then
+                p = part(ja(j))
+              end if
+            end do
+            if (COUNT(isConnected) < 3) then
+              part(i) = p
+              sepsize = sepsize - 1
+            end if
+          end if
+        end do
+!
+! end of moveVertSep
+!	 
+      end subroutine moveVertSep
+
       
 !
 ! end of module

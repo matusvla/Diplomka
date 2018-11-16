@@ -60,8 +60,4 @@
         end if
       end subroutine testUniqueness
 !-------------------------------------------------------------------- 
-      subroutine runTestSuite() 
-
-      end subroutine runTestSuite   
-!-------------------------------------------------------------------- 
     end module testing

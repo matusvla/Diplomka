@@ -42,7 +42,6 @@
 ! -- multidimensional ragged arrays corresponding to partitions 
 !    containing matrices in CSR format
       type(intRaggedArr) :: iap, jap
-      type(dpRaggedArr) :: aap
       type(logicalRaggedArr) :: nvs
       ! Corresponding permutations from original to partitioned and back
       integer, allocatable, dimension(:) :: np, perm
@@ -69,6 +68,7 @@
       integer :: chsize ! size of the fill      
 ! -- for testing purposes only
       logical :: TESTswitch
+      integer :: TESTno = 1
       integer, allocatable, dimension(:) :: TESTordperm1, TESTordperm2
       integer, allocatable, dimension(:) :: TESTinvordperm1, TESTinvordperm2
       integer, allocatable, dimension(:) :: TESTia, TESTja, TESTpart
@@ -87,6 +87,7 @@
 ! -- Matrix loading
 !      
       call loadMatrix(ia, ja, n, matrixtype, matrixpath, nfull, testMatrixNumber)
+      write(*,*) matrixpath
 !
 ! -- Calling Graph partitioner METIS 
 !     
@@ -100,12 +101,12 @@
 
 
         ! TODO delete
-        open(unit=GRAPHVIZ_UNIT, file=GRAPHVIZ_FILENAME)                  
-        call  gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)
-        close(GRAPHVIZ_UNIT)   
-        write(unit=chari,fmt=*) i
-        write(*,*) "dot -Tpdf GVgraph -o ./temp/"//TRIM(ADJUSTL(chari))//".pdf"
-        CALL EXECUTE_COMMAND_LINE("dot -Tpdf GVgraph -o './temp/"//TRIM(ADJUSTL(chari))//".pdf'")
+        ! open(unit=GRAPHVIZ_UNIT, file=GRAPHVIZ_FILENAME)                  
+        ! call  gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)
+        ! close(GRAPHVIZ_UNIT)   
+        ! write(unit=chari,fmt=*) i
+        ! write(*,*) "dot -Tpdf GVgraph -o ./temp/"//TRIM(ADJUSTL(chari))//".pdf"
+        ! CALL EXECUTE_COMMAND_LINE("dot -Tpdf GVgraph -o './temp/"//TRIM(ADJUSTL(chari))//".pdf'")
 
  
         ! -- Find ordering of vertices of the original graph              
@@ -179,28 +180,80 @@
 !
 ! -- Final deallocations
 !
-      deallocate(ia, ja, part, ordperm, invordperm, stat=ierr)
+     ! deallocate(ia, ja, part, ordperm, invordperm, stat=ierr) TODO uncomment
 
-  
 !
 ! -- final tests in test mode
 !            
       if(TESTswitch) then
         write(*,*) "------TEST RESULTS: --------------------------------------------------------------"
+        call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
+        
+        if(SUM(np) == n) then
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
+        else
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
+        end if
+        TESTno = TESTno + 1
+
+        TESTswitch = .true.
+        do i = 1, parts + 1
+          TESTswitch = TESTswitch .and. COUNT(part == i) == np(i)
+        end do
+        if(TESTswitch) then 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
+        else 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
+        end if
+        TESTno = TESTno + 1
+
+        TESTswitch = .true.
+        do i = 1, parts + 1
+          k = 1
+          do j = 1, np(i) + 1
+            TESTswitch = TESTswitch .and. (iap%vectors(i)%elements(j) >= k)
+            k = iap%vectors(i)%elements(j)
+          end do
+        end do
+        if(TESTswitch) then 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
+        else 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
+        end if
+        TESTno = TESTno + 1
+
+        TESTswitch = .true.
+        do i = 1, parts + 1
+          do j = 1, iap%vectors(i)%elements(np(i) + 1) - 1
+            TESTswitch = TESTswitch .and. (jap%vectors(i)%elements(j) > 0)
+            TESTswitch = TESTswitch .and. (jap%vectors(i)%elements(j) <= np(i))
+          end do
+        end do
+        if(TESTswitch) then 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
+        else 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
+        end if
+        TESTno = TESTno + 1
+
+
         call orderByDistance(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
            logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm1, TESTinvordperm1, ierr)
         call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
            logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(1,8), ierr)
         if(ALL(TESTordperm1 == TESTordperm2)) then 
-          write(*,*) "TEST 1: OK"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
         else 
-          write(*,*) "TEST 1: failed!"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
         end if
+        TESTno = TESTno + 1
+
         if(ALL(TESTinvordperm1 == TESTinvordperm2)) then 
-          write(*,*) "TEST 2: OK"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
         else 
-          write(*,*) "TEST 2: failed!"
-        end if   
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
+        end if
+        TESTno = TESTno + 1   
         deallocate(TESTordperm1, TESTinvordperm1, TESTordperm2, TESTinvordperm2)     
 
         call orderByMD(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
@@ -208,16 +261,18 @@
         call orderCoefMixed(iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
         logical2intArr(nvs%vectors(1)%elements) + 1, 1, TESTordperm2, TESTinvordperm2, REAL(0,8), ierr)    
         if(ALL(TESTordperm1 == TESTordperm2)) then 
-          write(*,*) "TEST 3: OK"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
         else 
-          write(*,*) "TEST 3: failed!"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
         end if
+        TESTno = TESTno + 1
         if(ALL(TESTinvordperm1 == TESTinvordperm2)) then 
-          write(*,*) "TEST 4: OK"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
         else 
-          write(*,*) "TEST 4: failed!"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
         end if
-        deallocate(TESTordperm2, TESTinvordperm2)     
+        TESTno = TESTno + 1
+        deallocate(TESTordperm1, TESTinvordperm1, TESTordperm2, TESTinvordperm2)     
         
         allocate(TESTia(n + 1), TESTja(ia(n + 1) - 1), TESTpart(n), stat=ierr)
         TESTia = ia
@@ -225,13 +280,15 @@
         allocate(TESTnvs(n),stat=ierr)
         TESTnvs = .true.
         TESTpart = part
+        call orderByMD(ia, ja, n, TESTordperm1, TESTinvordperm1, ierr)
         call applyOrdering(TESTia, TESTja, n, TESTnvs, TESTordperm1, TESTinvordperm1, ierr, TESTpart)
         call applyOrdering(TESTia, TESTja, n, TESTnvs, TESTinvordperm1, TESTordperm1, ierr, TESTpart)
         if(ALL(TESTia == ia) .and. ALL(TESTja == ja) .and. ALL(TESTpart == part) .and. ALL(TESTpart == part)) then 
-          write(*,*) "TEST 5: OK"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
         else 
-          write(*,*) "TEST 5: failed!"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
         end if
+        TESTno = TESTno + 1
         deallocate(TESTia, TESTja, TESTpart, TESTnvs)
 
         TESTswitch = .true.
@@ -241,24 +298,25 @@
           end if
         end do
         if(TESTswitch) then 
-          write(*,*) "TEST 6: OK"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
         else 
-          write(*,*) "TEST 6: failed!"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
         end if
+        TESTno = TESTno + 1
 
         TESTswitch = .true.
-        do i = 1, parts
-          do j = 1, np(i)
-            if (invordpermp%vectors(i)%elements(ordpermp%vectors(i)%elements(j)) /= j) then
-              TESTswitch = .false.
-            end if
-          end do    
+        do i = 1, n
+          if (TESTordperm1(TESTinvordperm1(i)) /= i) then
+            TESTswitch = .false.
+          end if
         end do
         if(TESTswitch) then 
-          write(*,*) "TEST 7: OK"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
         else 
-          write(*,*) "TEST 7: failed!"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
         end if
+        TESTno = TESTno + 1
+
         deallocate(TESTordperm1, TESTinvordperm1)
 
         j = 0
@@ -266,10 +324,11 @@
           j = j + np(i)
         end do
         if(j == n) then 
-          write(*,*) "TEST 8: OK"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
         else 
-          write(*,*) "TEST 8: failed!"
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
         end if
+        TESTno = TESTno + 1
       
         ! TODO test separator moving
 

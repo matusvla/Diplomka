@@ -65,12 +65,12 @@
           select case(TRIM(ADJUSTL(value)))
             case("-h","-help")
               write(*,*) "Vladislav Matus's diploma thesis, 2018"
-              write(*,*) "  -o [path] path to matrix file which should be opened. works only with RSA matrix type"
-              write(*,*) "  -mt [matrixtype] for choosing type of matrix. Allowed types: RSA, P[number], T"
-              write(*,*) "  -ot [type] ordering type, default is no ordering."
-              write(*,*) "  -mvs [number] how many time vertex separator should be moved to try to improve the partition"
-              write(*,*) "  -t for running development tests"
-              write(*,*) "  -h for help"
+              write(*,*) "  -o [path] path to matrix file which should be processed. Works only with 'RSA' matrix type."
+              write(*,*) "  -mt [matrixtype] for choosing type of matrix. Allowed types: 'RSA', 'P[number]', 'T[number]'."
+              write(*,*) "  -ot [type] ordering type, default is no ordering. Allowed types 'MD', 'DIST', 'MIX', 'MIX[number]'."
+              write(*,*) "  -mvs [number] how many times vertex separator should be moved to try to improve the partition."
+              write(*,*) "  -t for running development tests."
+              write(*,*) "  -h for help."
               stop
             case("-o")
               call get_command_argument(i + 1, value)
@@ -129,6 +129,9 @@
           end select
           i = i + 1
         end do
+      else
+        write(*,*) "ERROR: no matrix specified, use -h for help"
+        stop
       end if
 !
 ! end of getCmdlineArgs

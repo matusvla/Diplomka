@@ -5,6 +5,8 @@
       module testing
         use auxroutines
         implicit none
+        private  
+        public :: loadTestGraph
       contains
 !--------------------------------------------------------------------           
       subroutine loadTestGraph(ia, ja, n, graphID)
@@ -50,8 +52,8 @@
         select case (graphID)
           case (4)
             part = [1, 1, 1, 2, 1, 1, 1]
-          case default !the same as case 1
-            stop "[testing.f90:loadTestPart] ERROR: Unknown graphID"
+          case default
+            stop "[testing.f90:loadTestPart] ERROR: Unsupported graph index"
         end select
       end subroutine loadTestPart
 !--------------------------------------------------------------------                         

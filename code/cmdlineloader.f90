@@ -48,6 +48,7 @@
 ! start of getCmdlineArgs
 !	      
       !Set defaults
+      matrixpath = ""
       matrixtype = "RSA"
       nfull = 5
       testSwitch = .false.

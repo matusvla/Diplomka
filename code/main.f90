@@ -1,21 +1,21 @@
 ! program main
 ! (c) Vladislav Matus
-! last edit: 22. 09. 2018
+! last edit: 16. 11. 2018
 ! TODO: file manipulation error handling
 ! TODO: check all ierr  
       
       program main
-      use mydepend
-      use mydepend90
-      use myroutines90          
-      use gvroutines 
-      use auxroutines 
-      use testing
-      use raggedmultiarray
-      use metis_interface
-      use cmdlineLoader
-      
-      implicit none
+        use mydepend
+        use mydepend90
+        use myroutines90          
+        use gvroutines 
+        use auxroutines 
+        use testing
+        use raggedmultiarray
+        use metis_interface
+        use cmdlineloader
+        use matrixloader  
+        implicit none
 
 !--------------------------------------------------------------------
 ! 
@@ -26,7 +26,6 @@
       integer, parameter :: metunit = 1  
       integer, parameter :: graphvizunit = 2      
       integer, parameter :: metpartunit = 3
-	integer, parameter :: infileunit = 4	  
 ! -- constants for calling METIS
       character(len=*), parameter :: metpath = "./METIS/metis.exe"
       character(len=*), parameter :: metfilename = "metgraph"               
@@ -86,15 +85,13 @@
       integer :: sepsize
 ! -- miscelaneous 
       integer :: nfull ! one dimension of matrix, "nfull = sqrt(n)"
-      integer :: i, j, k, m 
-      integer :: ierr, info, statio      
+      integer :: i, j, k
+      integer :: ierr      
       integer :: chsize ! size of the fill      
-      integer, allocatable, dimension(:) :: wn01, wn02 !auxiliary vectors
       ! -- conversions of numbers to strings
       integer :: ndigits      
       !number of parts as string, use partsch(1:ndigits)
       character*(partsch_max_len) :: partsch       
-      integer :: mformat ! matrix format for loading             
       integer :: testGraphNumber ! which matrix should be loaded in test mode
 ! -- for testing purposes only
       logical :: TESTswitch
@@ -117,39 +114,14 @@
 
 !
 ! -- matrix loading
-!    TODO externalizovat
 !      
-      info = 0
-  !loading of the matrix in RB format      
-      select case (TRIM(matrixtype))
-        case ('RSA')
-          open(unit=infileunit, file=matrixpath, action='read', iostat=statio)        
-          if(statio .ne. 0) then
-            stop 'specified matrix file cannot be opened.'
-          end if   
-          !allocate ia, ja
-          call imhb3(infileunit, m, n, mformat, ia, ja, info) ! read a matrix in a RB format
-          allocate(wn01(n+1), wn02(n+1), stat=ierr)
+      call loadMatrix(ia, ja, n, matrixtype, matrixpath, nfull, testGraphNumber)
 
-          call symtr6(n, ia, ja, wn01, wn02)
-          deallocate(wn01, wn02, stat=ierr)
-          
-        case ('P')
-          !allocate ia, ja
-          call poisson1(nfull, n, ia, ja, info)
-          mformat = 11  
-
-        case ('T')
-            write(*,*) "Running in test mode"
-            call loadTestGraph(ia, ja, n, testGraphNumber)
-
-        case default
-          stop 'Unrecognised matrix format!'
-      end select   
-
-      write(*,*) "----------------------------------------------------------------"
       write(*,*) TRIM(ADJUSTL(matrixpath)), ": "
-      
+      write(*,*) ia
+      write(*,*) ja
+      write(*,*) n
+      stop
 !
 ! -- Calling Graph partitioner METIS embeded into program 
 !     

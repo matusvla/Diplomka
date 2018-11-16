@@ -13,7 +13,6 @@
       contains
 
 !--------------------------------------------------------------------           
-
 ! subroutine metcr
 ! (c) Vladislav Matus
 ! last edit: 22. 7. 2018

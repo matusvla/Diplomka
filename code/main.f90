@@ -76,6 +76,7 @@
       character*(CMDARG_MAXLEN) :: matrixpath
       character*(ORDERINGTYPE_MAXLEN) :: orderingType
       double precision :: mixedCoef
+      integer :: vsMoves
 ! -- work variables for calling METIS  
       integer, allocatable, dimension(:) :: iaNoLoops, jaNoLoops
       double precision, allocatable, dimension(:) :: aaNoLoops
@@ -101,6 +102,7 @@
       integer, allocatable, dimension(:) :: TESTinvordperm1, TESTinvordperm2
       integer, allocatable, dimension(:) :: TESTia, TESTja, TESTpart
       logical, allocatable, dimension(:) :: TESTnvs
+      character(len=99) :: chari
 
 !--------------------------------------------------------------------
 !
@@ -111,7 +113,7 @@
 ! -- TODO load command line arguments, at the moment hardcoded:
 !	  
      parts = 2
-     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testGraphNumber, orderingType, mixedCoef)
+     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testGraphNumber, orderingType, mixedCoef, vsMoves)
 
 !
 ! -- matrix loading
@@ -176,10 +178,20 @@
 !
 ! -- The main program
 !
-      do i = 1, vsMoves
+      do i = 0, vsMoves
         ! -- Create subgraphs
         call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
 
+
+        ! TODO delete
+        open(unit=graphvizunit, file=graphvizfilename)                  
+        call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)
+        close(graphvizunit)   
+        write(unit=chari,fmt=*) i
+        write(*,*) "dot -Tpdf GVgraph -o ./temp/"//TRIM(ADJUSTL(chari))//".pdf"
+        CALL EXECUTE_COMMAND_LINE("dot -Tpdf GVgraph -o './temp/"//TRIM(ADJUSTL(chari))//".pdf'")
+
+ 
         ! -- Find ordering of vertices of the original graph              
         if(TRIM(ADJUSTL(orderingType)) /= 'no') then
           select case(TRIM(ADJUSTL(orderingType)))
@@ -198,10 +210,10 @@
             end select
           ! -- Apply ordering
           call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
-          do i = 1, parts
-            call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
-              nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
-              invordpermp%vectors(i)%elements, ierr)
+          do j = 1, parts
+            call applyOrdering(iap%vectors(j)%elements, jap%vectors(j)%elements, np(j), &
+              nvs%vectors(j)%elements, ordpermp%vectors(j)%elements, &
+              invordpermp%vectors(j)%elements, ierr)
           end do
           call deallocRaggedArr(ordpermp, parts + 1, ierr)
           call deallocRaggedArr(invordpermp, parts + 1, ierr)
@@ -209,20 +221,21 @@
 
         ! -- Count nonzeros in Cholesky factor
         allocate(cholFill(parts), stat=ierr)
-        do i = 1, parts
-          allocate(parent(np(i)), ancstr(np(i)), colcnt(np(i)), marker(np(i) + 1), stat=ierr)
-          call eltree2(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, parent, ancstr)
-          call colcnts(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, colcnt, parent, marker)
-          cholFill(i) = SUM(colcnt)
+        do j = 1, parts
+          allocate(parent(np(j)), ancstr(np(j)), colcnt(np(j)), marker(np(j) + 1), stat=ierr)
+          call eltree2(np(j), iap%vectors(j)%elements, jap%vectors(j)%elements, parent, ancstr)
+          call colcnts(np(j), iap%vectors(j)%elements, jap%vectors(j)%elements, colcnt, parent, marker)
+          cholFill(j) = SUM(colcnt)
           deallocate(parent, ancstr, colcnt, marker)
         end do
         write(*,*) "Nonzeros in L", cholFill
 
         ! -- Move vertex separator to balace nonzeros in Cholesky factor
-        call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFIll,1), sepsize)
+        if (i < vsMoves) then
+          call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFill,1), sepsize)
+        end if
+        ! -- Deallocate all fields
         deallocate(cholFill)
-        
-        ! -- Deallocate all fields allocated by createSubgraphs
         call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
       end do
 
@@ -334,6 +347,8 @@
         else 
           write(*,*) "TEST 8: failed!"
         end if
+      
+        ! TODO test separator moving
 
 
 

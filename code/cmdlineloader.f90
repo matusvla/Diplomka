@@ -6,12 +6,13 @@
         implicit none        
         integer, parameter :: CMDARG_MAXLEN = 100 
         integer, parameter :: ORDERINGTYPE_MAXLEN = 10
+        integer, parameter :: MVS_MAX = 20
       contains
 
 !--------------------------------------------------------------------  
 ! subroutine getCmdlineArgs
 ! (c) Vladislav Matus
-! last edit: 11. 11. 2018  
+! last edit: 16. 11. 2018  
 !
 ! Purpose: 
 !   Load command line arguments       
@@ -27,13 +28,13 @@
 !
 
       subroutine getCmdlineArgs(matrixpath, matrixtype, nfull, testSwitch, &
-        testGraphNumber, orderingType, mixedCoef)
+        testGraphNumber, orderingType, mixedCoef, vsMoves)
         implicit none
 !
 ! parameters
 !
       logical :: testSwitch
-      integer :: nfull, stat, testGraphNumber
+      integer :: nfull, stat, testGraphNumber, vsMoves
       character*(CMDARG_MAXLEN) :: value
       character*(CMDARG_MAXLEN) :: matrixpath, matrixtype
       character*(ORDERINGTYPE_MAXLEN) :: orderingType
@@ -41,7 +42,8 @@
 !
 ! internals
 !      
-      integer :: i, n        
+      integer :: i, n    
+      character(len=200) :: mvsch    
 !
 ! start of getCmdlineArgs
 !	      
@@ -52,6 +54,7 @@
       testGraphNumber = 1
       orderingType = "no"
       mixedCoef = 0.0
+      vsMoves = 0
       !Loop over the arguments
       n = command_argument_count()
       if (n > 0) then
@@ -64,6 +67,7 @@
               write(*,*) "  -o [path] path to matrix file which should be opened. works only with RSA matrix type"
               write(*,*) "  -mt [matrixtype] for choosing type of matrix. Allowed types: RSA, P[number], T"
               write(*,*) "  -ot [type] ordering type, default is no ordering."
+              write(*,*) "  -mvs [number] how many time vertex separator should be moved to try to improve the partition"
               write(*,*) "  -t for running development tests"
               write(*,*) "  -h for help"
               stop
@@ -105,6 +109,15 @@
                   write(*,*) "Invalid ordering type '", TRIM(ADJUSTL(orderingType)), "' was reset to no ordering"
                   orderingType = "no"
                 end if
+              end if
+              i = i + 1
+            case("-mvs")
+              call get_command_argument(i + 1, value)
+              read(value, *, iostat=stat) vsMoves 
+              if (stat /= 0 .or. vsMoves < 0 .or. vsMoves > MVS_MAX) then
+                write(unit=mvsch,fmt=*) MVS_MAX
+                write(*,*) "Error: Invalid value was provided for -mvs argument. Minimum is 0, maximum is "//TRIM(ADJUSTL(mvsch))
+                stop
               end if
               i = i + 1
             case("-t")

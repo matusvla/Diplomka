@@ -176,7 +176,7 @@
 !
 ! -- The main program
 !
-      do j = 1, 5
+      do i = 1, vsMoves
         ! -- Create subgraphs
         call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
 

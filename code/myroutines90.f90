@@ -430,6 +430,8 @@
 !    and fill isOrdered and distFromSep accordingly        
 !       
         ierr = 0
+        distFromSep = n
+
         do i = 1, n          
           if (part(i) == parts + 1) then
             isOrdered(i) = .true.

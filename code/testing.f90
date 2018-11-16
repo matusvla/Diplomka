@@ -44,18 +44,6 @@
             ja = [2, 3, 5, 1, 4, 1, 5, 2, 5, 1, 3, 4]    
         end select
       end subroutine loadTestGraph
-!--------------------------------------------------------------------        
-      subroutine loadTestPart(part, graphID)
-        implicit none
-        integer :: graphID
-        integer, allocatable, dimension(:) :: part        
-        select case (graphID)
-          case (4)
-            part = [1, 1, 1, 2, 1, 1, 1]
-          case default
-            stop "[testing.f90:loadTestPart] ERROR: Unsupported graph index"
-        end select
-      end subroutine loadTestPart
 !--------------------------------------------------------------------                         
       subroutine testUniqueness(arr)
         implicit none        
@@ -71,5 +59,6 @@
           stop "aborting"
         end if
       end subroutine testUniqueness
-!--------------------------------------------------------------------                         
+!-------------------------------------------------------------------- 
+      subroutine runTestSuite()                        
     end module testing

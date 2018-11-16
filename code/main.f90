@@ -12,32 +12,20 @@
         use auxroutines 
         use testing
         use raggedmultiarray
-        use metis_interface
         use cmdlineloader
         use matrixloader  
+        use metiscaller
         implicit none
 
 !--------------------------------------------------------------------
-! 
-! constants
-      
+!        
+! constants  
 !     
 ! -- unit numbers for file handling            
-      integer, parameter :: metunit = 1  
       integer, parameter :: graphvizunit = 2      
-      integer, parameter :: metpartunit = 3
-! -- constants for calling METIS
-      character(len=*), parameter :: metpath = "./METIS/metis.exe"
-      character(len=*), parameter :: metfilename = "metgraph"               
-      character(len=*), parameter :: metarguments = ">nul 2>&1"
-      
-      integer, parameter :: METIS_OPTION_NUMBERING = 17
-      integer, parameter :: METIS_OK = 1
-      integer, parameter :: metisncon = 1      
 ! -- constants for Graphviz file
       character(len=*), parameter :: graphvizfilename = "GVgraph"  
 ! -- miscelaneous      
-      character(len=*), parameter :: sp = " " ! alias for space    
       integer, parameter :: partsch_max_len = 100 !length of string partsch
 
 !--------------------------------------------------------------------      
@@ -77,16 +65,13 @@
       double precision :: mixedCoef
       integer :: vsMoves
 ! -- work variables for calling METIS  
-      integer, allocatable, dimension(:) :: iaNoLoops, jaNoLoops
-      double precision, allocatable, dimension(:) :: aaNoLoops
-      integer, dimension(0:40) :: metisoptions 
       integer :: metisobjval    
       integer :: metis_call_status       
       integer :: sepsize
 ! -- miscelaneous 
       integer :: nfull ! one dimension of matrix, "nfull = sqrt(n)"
       integer :: i, j, k
-      integer :: ierr      
+      integer :: ierr, metisierr ! error codes      
       integer :: chsize ! size of the fill      
       ! -- conversions of numbers to strings
       integer :: ndigits      
@@ -105,50 +90,20 @@
 !
 ! program start
 !
-! -- various initializations
-!            
-! -- TODO load command line arguments, at the moment hardcoded:
+! -- Command line arguments parsing
 !	  
      parts = 2
      call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testGraphNumber, orderingType, mixedCoef, vsMoves)
-
 !
-! -- matrix loading
+! -- Matrix loading
 !      
       call loadMatrix(ia, ja, n, matrixtype, matrixpath, nfull, testGraphNumber)
-
-      write(*,*) TRIM(ADJUSTL(matrixpath)), ": "
-      write(*,*) ia
-      write(*,*) ja
-      write(*,*) n
-      stop
 !
-! -- Calling Graph partitioner METIS embeded into program 
+! -- Calling Graph partitioner METIS 
 !     
-      ! -- Preparation of fields for METIS
-      call remloops(n, ia, ja, iaNoLoops, jaNoLoops, ierr)
-      allocate(part(n), stat=ierr)      
-      metis_call_status=METIS_SetDefaultOptions(metisoptions)
-      ! -- Transform graph into C++ notation (starting from 0)    
-      call shiftnumbering(-1, n, iaNoLoops, jaNoLoops)  
-      ! -- Call METIS           
-      metis_call_status = METIS_ComputeVertexSeparator(n, iaNoLoops, jaNoLoops, C_NULL_PTR, metisoptions, sepsize, part)
-      if(metis_call_status /= METIS_OK) then
-        write(*,*) "ERROR: METIS graph partitioner failed!"
-        stop
-      end if
-      deallocate(iaNoLoops, jaNoLoops)
-      ! -- Transform graph partition into Fortran notation (starting from 1)
-      part = part + 1
-      ! -- Check for nonempty separator
-      if (sepsize == 0) then
-        write(*,*) "Graph created from matrix has more components and it is well partitioned by default."
-        stop 
-      end if
-      write(*,*) "Separator size:", sepsize
-
+      call metisCall(ia, ja, n, part, sepsize, metisierr)
 !
-! -- The main program
+! -- The main loop
 !
       do i = 0, vsMoves
         ! -- Create subgraphs
@@ -178,7 +133,7 @@
               write(*,*) "Ordering graph using mixed ordering"
             case default
               call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, mixedCoef, ierr)
-              write(*,*) "Ordering graph by mixed ordering with coeficients."
+              write(*,*) "Ordering graph using mixed ordering with coeficients."
             end select
           ! -- Apply ordering
           call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
@@ -201,14 +156,17 @@
           deallocate(parent, ancstr, colcnt, marker)
         end do
         write(*,*) "Nonzeros in L", cholFill
-
+        ! -- Deallocate all fields allocated by createSubgraphs
+        call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
+        ! -- If there was no vertex separator after initial partion
+        if (metisierr == METIS_NO_SEP) then
+          exit
+        end if
         ! -- Move vertex separator to balace nonzeros in Cholesky factor
         if (i < vsMoves) then
           call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFill,1), sepsize)
         end if
-        ! -- Deallocate all fields
         deallocate(cholFill)
-        call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
       end do
 
 !

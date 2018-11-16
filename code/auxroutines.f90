@@ -161,7 +161,7 @@
         deallocate(newArr)
       end subroutine trimArr
 !-------------------------------------------------------------------- 
-! subroutine shift
+! subroutine shiftArr
 ! (c) Vladislav Matus
 ! last edit: 21. 09. 2018  
 !      

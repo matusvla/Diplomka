@@ -33,6 +33,7 @@
       character(len=*), parameter :: metarguments = ">nul 2>&1"
       
       integer, parameter :: METIS_OPTION_NUMBERING = 17
+      integer, parameter :: METIS_OK = 1
       integer, parameter :: metisncon = 1      
 ! -- constants for Graphviz file
       character(len=*), parameter :: graphvizfilename = "GVgraph"  
@@ -148,69 +149,82 @@
       write(*,*) TRIM(ADJUSTL(matrixpath)), ": "
       
 !
-! -- calling Graph partitioner METIS embeded into program
-!    TODO miscelaneous error handling    
+! -- Calling Graph partitioner METIS embeded into program 
 !     
-    
+      ! -- Preparation of fields for METIS
       call remloops(n, ia, ja, iaNoLoops, jaNoLoops, ierr)
       allocate(part(n), stat=ierr)      
       metis_call_status=METIS_SetDefaultOptions(metisoptions)
-      call shiftnumbering(-1, n, iaNoLoops, jaNoLoops)  ! transform graph into C++ notation (starting from 0)    
-            
-      metis_call_status=METIS_ComputeVertexSeparator(n, iaNoLoops, jaNoLoops, C_NULL_PTR, metisoptions, sepsize, part)
-
-      call shiftnumbering(1, n, iaNoLoops, jaNoLoops, part)  ! transform graph back into Fortran notation (starting from 1)
+      ! -- Transform graph into C++ notation (starting from 0)    
+      call shiftnumbering(-1, n, iaNoLoops, jaNoLoops)  
+      ! -- Call METIS           
+      metis_call_status = METIS_ComputeVertexSeparator(n, iaNoLoops, jaNoLoops, C_NULL_PTR, metisoptions, sepsize, part)
+      if(metis_call_status /= METIS_OK) then
+        write(*,*) "ERROR: METIS graph partitioner failed!"
+        stop
+      end if
+      deallocate(iaNoLoops, jaNoLoops)
+      ! -- Transform graph partition into Fortran notation (starting from 1)
+      part = part + 1
+      ! -- Check for nonempty separator
       if (sepsize == 0) then
         write(*,*) "Graph created from matrix has more components and it is well partitioned by default."
         stop 
       end if
-      write(*,*) "Separator size:",sepsize
-!
-! -- Create subgraphs
-!
-      call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
-!
-! -- Find best ordering of vertices   
-!            
-    
-      if(TRIM(ADJUSTL(orderingType)) /= 'no') then
-        select case(TRIM(ADJUSTL(orderingType)))
-          case ('MD')
-            call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
-            write(*,*) "Ordering graph using MD ordering."
-          case ('DIST')
-            call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
-            write(*,*) "Ordering graph by distance from separator."
-          case ('MIX')
-            call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
-            write(*,*) "Ordering graph using mixed ordering"
-          case default
-            call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, mixedCoef, ierr)
-            write(*,*) "Ordering graph by mixed ordering with coeficients."
-          end select
+      write(*,*) "Separator size:", sepsize
 
-        call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+!
+! -- The main program
+!
+      do j = 1, 5
+        ! -- Create subgraphs
+        call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
 
+        ! -- Find ordering of vertices of the original graph              
+        if(TRIM(ADJUSTL(orderingType)) /= 'no') then
+          select case(TRIM(ADJUSTL(orderingType)))
+            case ('MD')
+              call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
+              write(*,*) "Ordering graph using MD ordering."
+            case ('DIST')
+              call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
+              write(*,*) "Ordering graph by distance from separator."
+            case ('MIX')
+              call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+              write(*,*) "Ordering graph using mixed ordering"
+            case default
+              call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, mixedCoef, ierr)
+              write(*,*) "Ordering graph by mixed ordering with coeficients."
+            end select
+          ! -- Apply ordering
+          call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+          do i = 1, parts
+            call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
+              nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
+              invordpermp%vectors(i)%elements, ierr)
+          end do
+          call deallocRaggedArr(ordpermp, parts + 1, ierr)
+          call deallocRaggedArr(invordpermp, parts + 1, ierr)
+        end if
+
+        ! -- Count nonzeros in Cholesky factor
+        allocate(cholFill(parts), stat=ierr)
         do i = 1, parts
-          call applyOrdering(iap%vectors(i)%elements, jap%vectors(i)%elements, np(i), &
-            nvs%vectors(i)%elements, ordpermp%vectors(i)%elements, &
-            invordpermp%vectors(i)%elements, ierr)
+          allocate(parent(np(i)), ancstr(np(i)), colcnt(np(i)), marker(np(i) + 1), stat=ierr)
+          call eltree2(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, parent, ancstr)
+          call colcnts(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, colcnt, parent, marker)
+          cholFill(i) = SUM(colcnt)
+          deallocate(parent, ancstr, colcnt, marker)
         end do
-      end if
+        write(*,*) "Nonzeros in L", cholFill
 
-      allocate(cholFill(parts), stat=ierr)
-      do i = 1, parts
-        allocate(parent(np(i)), ancstr(np(i)), colcnt(np(i)), marker(np(i) + 1), stat=ierr)
-        call eltree2(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, parent, ancstr)
-        call colcnts(np(i), iap%vectors(i)%elements, jap%vectors(i)%elements, colcnt, parent, marker)      
-      !   allocate(parent(n), ancstr(n), colcnt(n), marker(n + 1), stat=ierr)
-      !   call eltree2(n, ia, ja, parent, ancstr)
-      !   call colcnts(n, ia, ja, colcnt, parent, marker)
-        cholFill(i) = SUM(colcnt)
-        deallocate(parent, ancstr, colcnt, marker)
+        ! -- Move vertex separator to balace nonzeros in Cholesky factor
+        call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFIll,1), sepsize)
+        deallocate(cholFill)
+        
+        ! -- Deallocate all fields allocated by createSubgraphs
+        call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
       end do
-      write(*,*) "Nonzeros in L", cholFill
-      deallocate(cholFill)
 
 !
 ! -- Write out partitioned graph in Graphviz format        
@@ -231,7 +245,6 @@
       aa = 1
       call ommatl4(np(k), iap%vectors(k)%elements, jap%vectors(k)%elements, aa, 0)
       deallocate(aa)
-
 
 !
 ! -- final tests in test mode
@@ -336,6 +349,4 @@
 !
 ! program end
 !      
-      end program 
-
-
+      end program

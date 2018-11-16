@@ -1,6 +1,6 @@
 ! module raggedmultiarray
 ! (c) Vladislav Matus
-! last edit: 22. 09. 2018      
+! last edit: 16. 11. 2018      
 
       module raggedmultiarray
         implicit none
@@ -34,6 +34,48 @@
       end type logicalRaggedArr
       
 !--------------------------------------------------------------------
+      contains   
+!--------------------------------------------------------------------
+! subroutine deallocRaggedArr
+! (c) Vladislav Matus
+! last edit: 16. 11. 2018
+!
+! Purpose:
+!   deallocate everything allocated when creating intRaggedArr
+! Input:
+!   ra ... ragged array to deallocate     
+!   dim ... first dimension of ra
+! Output:
+!   ierr ... error code, nonzero if not succcessful
+! Allocations: none             
+
+      subroutine deallocRaggedArr(ra, dim, ierr)
+        implicit none
+!
+! parameters
+!
+      type(intRaggedArr) :: ra
+      integer :: dim, ierr
+!
+! internals
+!        
+        integer :: i, iierr
+!
+! start of deallocRaggedArr
+!      
+        iierr = 0
+        do i = 1, dim
+          deallocate(ra%vectors(i)%elements, stat = iierr)
+          ierr = ierr + iierr
+        end do
+        deallocate(ra%vectors, stat = iierr)
+        ierr = ierr + iierr
+!
+! end of deallocRaggedArr
+!  
+      end subroutine deallocRaggedArr    
+
+!
 ! end of module
 !      
       end module raggedmultiarray      

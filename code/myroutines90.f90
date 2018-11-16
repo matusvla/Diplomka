@@ -142,8 +142,9 @@
 !   invperm ... multidimensional array containing the original indices
 ! Allocations: iap%vectors,iap%vectors%elements(1..parts+1),
 !   jap%vectors, jap%vectors%elements(1..parts+1),
-!   aap%vectors, aap%vectors%elements(1..parts+1),
+!   nextToVertSep%vectors, nextToVertSep%vectors%elements(1..parts+1),
 !   np, perm, invperm%vectors, invperm%vectors%elements(1..parts+1) 
+!   aap%vectors, aap%vectors%elements(1..parts+1),
 
       subroutine createSubgraphs(ia, ja, n, part, parts, iap, jap, np, &
         nextToVertSep, perm, invperm, ierr, aa, aap)
@@ -438,9 +439,9 @@
 !   This routine removes all loops in the graph
 ! Input:
 !   n ... integer, number of vertices in graph
-!   ia,ja,aa ... graph in CSR format
+!   ia, ja, aa ... graph in CSR format
 ! Output:
-!   iaN,jaN,aaN .. graph without loops in CSR format
+!   iaN, jaN, aaN .. graph without loops in CSR format
 ! Allocations: iaN, jaN, aaN
 ! TODO Error handling
 ! TODO Test after change      
@@ -785,7 +786,8 @@
         end do
         ordering(n - 1) = 1 !two vertex graph is symetrical
         ordering(n) = 1
-        call normalizeOrdering(ordering)  
+        call normalizeOrdering(ordering)
+        deallocate(iaIn, jaIn, stat = ierr)
         
 
 !
@@ -846,7 +848,7 @@
         end do        
         ordering(n) = 1
         call normalizeOrdering(ordering)  
-        
+        deallocate(iaIn, jaIn, stat = ierr)
 
 !
 ! end of mixedOrdering

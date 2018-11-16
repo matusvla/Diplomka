@@ -1,6 +1,6 @@
 ! module myroutines90
 ! (c) Vladislav Matus
-! last edit: 21. 09. 2018      
+! last edit: 16. 11. 2018      
 
       module myroutines90
         use auxroutines
@@ -12,108 +12,7 @@
         integer, parameter :: INT_SIZE =  4
       contains
 
-!--------------------------------------------------------------------           
-! subroutine metcr
-! (c) Vladislav Matus
-! last edit: 22. 7. 2018
-! TODO: check contents of ia, ja      
-! TODO: fill ierr
-!
-! Purpose:
-!   creating contents of a file suitable for METIS graph partitioner
-! Input:
-!   ia, ja ... matrix in CSR format
-!   n ... size of this matrix
-!   unitn ... nuber of unit of the opened file         
-! Output:
-!   ierr ... error code (0 if succesful, 1 otherwise)  
-! Allocations: none             
-! TODO TEST, changed but not tested!
-
-      subroutine metcr(ia,ja,n,unitn,ierr)
-        implicit none
-!
-! parameters
-!
-      integer :: n, unitn, ierr
-      integer, allocatable, dimension(:) :: ia, ja
-!
-! internals
-!        
-        integer :: i,j,loop
-!
-! start of metcr
-!      
-! -- count number of loops in graph
-!        
-        loop = countloops(n,ia,ja)
-!
-! -- write header for METIS
-!             
-        write(unitn,"(I10.1)",advance="no") n    ! number of vertices
-        write(unitn,"(I10)") (ia(n+1)-1-loop)/2  ! number of edges-loops
-!
-! -- write the rest of the file
-! 
-        do i = 1, n
-          do j = ia(i), ia(i+1)-1
-            if(i/=ja(j)) then
-              write(unitn,"(I12.1)",advance="no") ja(j);
-            end if
-          end do
-          write(unitn,*)
-        end do
-!
-! end of metcr
-!  
-      end subroutine metcr    
-      
-!--------------------------------------------------------------------           
-
-! subroutine loadpartition
-! (c) Vladislav Matus
-! last edit: 16. 03. 2018  
-! TODO error handling      
-! TODO fill ierr  
-! TODO check if nubmer of parts is as it should be
-!
-! Purpose:
-!   Loading of graph partition from input file into an array,
-!   partitions are indexed from 1.
-! Input:
-!   n ... size of this matrix
-!   unitn ... nuber of unit of the opened file         
-! Output:
-!   part ... partitioning of matrix
-!   ierr ... error code (0 if succesful, 1 otherwise)  
-! Allocations: part 
-
-      subroutine loadpartition(part,n,unitn,ierr)
-        implicit none
-!
-! parameters
-!
-      integer :: n, unitn, ierr
-      integer, allocatable :: part(:)
-!
-! internals
-!        
-      integer :: i,j
-!
-! start of loadpartition
-!
-      allocate(part(n),stat=ierr)        
-      do i = 1, n
-        read(unitn,*) part(i)
-        part(i) = part(i) + 1 ! indexing from 1
-      end do       
-!
-! end of loadpartition
-!  
-      end subroutine loadpartition
-
 !--------------------------------------------------------------------
-
 ! subroutine createSubgraphs
 ! (c) Vladislav Matus
 ! last edit: 12. 11. 2018
@@ -281,7 +180,6 @@
       end subroutine createSubgraphs
       
 !--------------------------------------------------------------------
-
 ! subroutine subgraphCleanup
 ! (c) Vladislav Matus
 ! last edit: 12. 11. 2018  
@@ -337,7 +235,6 @@
       end subroutine subgraphCleanup
         
 !--------------------------------------------------------------------        
-
 ! subroutine shiftnumbering
 ! (c) Vladislav Matus
 ! last edit: 22. 07. 2018  
@@ -386,7 +283,6 @@
       end subroutine shiftnumbering
         
 !-------------------------------------------------------------------- 
-
 ! function countloops
 ! (c) Vladislav Matus
 ! last edit: 22. 07. 2018  
@@ -1228,6 +1124,7 @@
 ! end of applyOrdering
 !  
       end subroutine applyOrdering
+
 !--------------------------------------------------------------------   
 ! function countComponents
 ! (c) Vladislav Matus
@@ -1380,9 +1277,6 @@
 ! end of moveVertSep
 !	 
       end subroutine moveVertSep
-
-      
-!
-! end of module
-!      
+ 
+!--------------------------------------------------------------------            
       end module myroutines90

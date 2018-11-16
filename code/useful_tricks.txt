@@ -20,6 +20,7 @@ git add --patch <filename>
   e manually edit the current hunk
   ? print hunk help
 git stash list
+git commit --amend
 
 GraphViz
 dot -Tpdf GVgraph.txt -o GVgraph.pdf

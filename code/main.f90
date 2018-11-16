@@ -21,28 +21,24 @@
 !        
 ! constants  
 !     
-! -- unit numbers for file handling            
-      integer, parameter :: graphvizunit = 2      
 ! -- constants for Graphviz file
-      character(len=*), parameter :: graphvizfilename = "GVgraph"  
-! -- miscelaneous      
-      integer, parameter :: partsch_max_len = 100 !length of string partsch
+      integer, parameter :: GRAPHVIZ_UNIT = 2      
+      character(len=*), parameter :: GRAPHVIZ_FILENAME = "GVgraph"  
 
 !--------------------------------------------------------------------      
 !      
 ! work variables
 !
 ! -- number of parts in partition
-      integer :: parts          
+      integer :: parts    
 ! -- dimension of the matrix
-      integer :: n
-! -- number of edges in corresponding graph
-!      integer :: ne      
+      integer :: n   
 ! -- matrix in CSR format      
       integer, allocatable, dimension(:) :: ia, ja
-      double precision, allocatable, dimension(:) :: aa
-! -- obtained partitioning, vertex separator is denoted by (parts +1)
+      double precision, allocatable, dimension(:) :: aa !TODO decide if keeping
+! -- obtained partitioning (vertex separator is denoted by (parts +1)) and its size
       integer, allocatable, dimension(:) :: part     
+      integer :: sepsize
 ! -- multidimensional ragged arrays corresponding to partitions 
 !    containing matrices in CSR format
       type(intRaggedArr) :: iap, jap
@@ -51,7 +47,7 @@
       ! Corresponding permutations from original to partitioned and back
       integer, allocatable, dimension(:) :: np, perm
       type(intRaggedArr) :: invperm      
-! -- permutations from original to ordered matrix and back, describes position in new matrix, old matrix
+! -- permutations from original to ordered matrix and back
       integer, allocatable, dimension(:) :: ordperm, invordperm
       type(intRaggedArr) :: ordpermp, invordpermp
 ! -- description of elimination tree
@@ -59,25 +55,18 @@
 ! -- fill in Cholesky factor of matrix
       integer, allocatable, dimension(:) :: cholFill
 ! -- command line arguments
-      character*(CMDARG_MAXLEN) :: matrixtype
-      character*(CMDARG_MAXLEN) :: matrixpath
-      character*(ORDERINGTYPE_MAXLEN) :: orderingType
-      double precision :: mixedCoef
-      integer :: vsMoves
-! -- work variables for calling METIS  
-      integer :: metisobjval    
-      integer :: metis_call_status       
-      integer :: sepsize
+      character*(CMDARG_MAXLEN) :: matrixtype ! 'RSA'/'P'/'T'
+      character*(CMDARG_MAXLEN) :: matrixpath ! path to matrix if matrixtype == 'RSA'
+      character*(ORDERINGTYPE_MAXLEN) :: orderingType ! how should the matrix be ordered
+      double precision :: mixedCoef ! coeficient for mixed ordering
+      integer :: vertSepMoves ! how many times the vertex separator should be moved
+      integer :: testMatrixNumber ! index of test matrix if matrixtype == 'T'
+      integer :: nfull ! one dimension of poisson matrix if matrixtype == 'P'
 ! -- miscelaneous 
-      integer :: nfull ! one dimension of matrix, "nfull = sqrt(n)"
-      integer :: i, j, k
+      integer :: i, j
+      integer :: k !TODO decide if delete
       integer :: ierr, metisierr ! error codes      
       integer :: chsize ! size of the fill      
-      ! -- conversions of numbers to strings
-      integer :: ndigits      
-      !number of parts as string, use partsch(1:ndigits)
-      character*(partsch_max_len) :: partsch       
-      integer :: testGraphNumber ! which matrix should be loaded in test mode
 ! -- for testing purposes only
       logical :: TESTswitch
       integer, allocatable, dimension(:) :: TESTordperm1, TESTordperm2
@@ -93,11 +82,11 @@
 ! -- Command line arguments parsing
 !	  
      parts = 2
-     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testGraphNumber, orderingType, mixedCoef, vsMoves)
+     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testMatrixNumber, orderingType, mixedCoef, vertSepMoves)
 !
 ! -- Matrix loading
 !      
-      call loadMatrix(ia, ja, n, matrixtype, matrixpath, nfull, testGraphNumber)
+      call loadMatrix(ia, ja, n, matrixtype, matrixpath, nfull, testMatrixNumber)
 !
 ! -- Calling Graph partitioner METIS 
 !     
@@ -105,15 +94,15 @@
 !
 ! -- The main loop
 !
-      do i = 0, vsMoves
+      do i = 0, vertSepMoves
         ! -- Create subgraphs
         call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
 
 
         ! TODO delete
-        open(unit=graphvizunit, file=graphvizfilename)                  
-        call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)
-        close(graphvizunit)   
+        open(unit=GRAPHVIZ_UNIT, file=GRAPHVIZ_FILENAME)                  
+        call  gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)
+        close(GRAPHVIZ_UNIT)   
         write(unit=chari,fmt=*) i
         write(*,*) "dot -Tpdf GVgraph -o ./temp/"//TRIM(ADJUSTL(chari))//".pdf"
         CALL EXECUTE_COMMAND_LINE("dot -Tpdf GVgraph -o './temp/"//TRIM(ADJUSTL(chari))//".pdf'")
@@ -163,32 +152,36 @@
           exit
         end if
         ! -- Move vertex separator to balace nonzeros in Cholesky factor
-        if (i < vsMoves) then
+        if (i < vertSepMoves) then
           call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFill,1), sepsize)
         end if
         deallocate(cholFill)
       end do
-
 !
 ! -- Write out partitioned graph in Graphviz format        
 !      
-      open(unit=graphvizunit, file=graphvizfilename)                  
-      call  gvColorGraph (ia, ja, n, part, graphvizunit, ierr)  
-      ! call  gvSetLabels (ia, ja, n, ordperm, graphvizunit, ierr)  
+      open(unit=GRAPHVIZ_UNIT, file=GRAPHVIZ_FILENAME)                  
+      call  gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)  
+      ! call  gvSetLabels (ia, ja, n, ordperm, GRAPHVIZ_UNIT, ierr)  
       ! call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-      !  graphvizunit, ierr)  
-      close(graphvizunit)   
-      
+      !  GRAPHVIZ_UNIT, ierr)  
+      close(GRAPHVIZ_UNIT)         
 !      
 ! -- write out matlab format for displaying this matrix
 !      
       ! call ommatl4(n, ia, ja, aa, mformat)
-      k = 1
-      allocate(aa(iap%vectors(k)%elements(np(k)+1)-1))
-      aa = 1
-      call ommatl4(np(k), iap%vectors(k)%elements, jap%vectors(k)%elements, aa, 0)
-      deallocate(aa)
+      ! k = 1
+      ! allocate(aa(iap%vectors(k)%elements(np(k)+1)-1))
+      ! aa = 1
+      ! call ommatl4(np(k), iap%vectors(k)%elements, jap%vectors(k)%elements, aa, 0)
+      ! deallocate(aa)
 
+!
+! -- Final deallocations
+!
+      deallocate(ia, ja, part, ordperm, invordperm, stat=ierr)
+
+  
 !
 ! -- final tests in test mode
 !            
@@ -283,13 +276,6 @@
 
 
       end if
-!
-! -- deallocate all allocated fields
-!
-      !TODO check deallocations
-      deallocate(ia, ja, part, ordperm, invordperm, stat=ierr)
-      call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
-!
 !--------------------------------------------------------------------          
 !
 ! program end

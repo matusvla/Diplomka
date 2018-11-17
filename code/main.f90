@@ -23,8 +23,6 @@
 !     
 ! -- constants for Graphviz file
       integer, parameter :: GRAPHVIZ_UNIT = 2      
-      character(len=*), parameter :: GRAPHVIZ_FILENAME = "GVgraph"  
-
 !--------------------------------------------------------------------      
 !      
 ! work variables
@@ -58,6 +56,9 @@
       integer :: vertSepMoves ! how many times the vertex separator should be moved
       integer :: testMatrixNumber ! index of test matrix if matrixtype == 'T'
       integer :: nfull ! one dimension of poisson matrix if matrixtype == 'P'
+      logical :: hasGvOutput ! Should a Grapgviz file be created
+      character*(CMDARG_MAXLEN) :: gvFilename ! name of output file
+
 ! -- miscelaneous 
       integer :: i, j
       integer :: k !TODO decide if delete
@@ -79,12 +80,13 @@
 ! -- Command line arguments parsing
 !	  
      parts = 2
-     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testMatrixNumber, orderingType, mixedCoef, vertSepMoves)
+     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testMatrixNumber, & 
+      orderingType, mixedCoef, vertSepMoves, hasGvOutput, gvFilename)
 !
 ! -- Matrix loading
 !      
       call loadMatrix(ia, ja, n, matrixtype, matrixpath, nfull, testMatrixNumber)
-      write(*,*) matrixpath
+      write(*,*) "Processing ", TRIM(ADJUSTL(matrixpath)), ":"
 !
 ! -- Calling Graph partitioner METIS 
 !     
@@ -95,15 +97,6 @@
       do i = 0, vertSepMoves
         ! -- Create subgraphs
         call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
-
-        ! TODO delete
-        ! open(unit=GRAPHVIZ_UNIT, file=GRAPHVIZ_FILENAME)                  
-        ! call  gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)
-        ! close(GRAPHVIZ_UNIT)   
-        ! write(unit=chari,fmt=*) i
-        ! write(*,*) "dot -Tpdf GVgraph -o ./temp/"//TRIM(ADJUSTL(chari))//".pdf"
-        ! CALL EXECUTE_COMMAND_LINE("dot -Tpdf GVgraph -o './temp/"//TRIM(ADJUSTL(chari))//".pdf'")
- 
         ! -- Find ordering of vertices of the original graph
         call orderSubgraphs(orderingType, mixedCoef, ia, ja, n, part, parts, iap, jap, np, nvs)
         ! -- Count nonzeros in Cholesky factor
@@ -115,7 +108,7 @@
           cholFill(j) = SUM(colcnt)
           deallocate(parent, ancstr, colcnt, marker)
         end do
-        write(*,*) "Nonzeros in L", cholFill
+        write(*,*) "Nonzeros in L: ", cholFill
         ! -- Deallocate all fields allocated by createSubgraphs
         call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
         ! -- If there was no vertex separator after initial partion
@@ -127,12 +120,20 @@
 !
 ! -- Write out partitioned graph in Graphviz format        
 !      
-      open(unit=GRAPHVIZ_UNIT, file=GRAPHVIZ_FILENAME)                  
-      call  gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)  
-      ! call  gvSetLabels (ia, ja, n, ordperm, GRAPHVIZ_UNIT, ierr)  
-      ! call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
-      !  GRAPHVIZ_UNIT, ierr)  
-      close(GRAPHVIZ_UNIT)         
+
+      if(hasGvOutput) then
+        open(unit=GRAPHVIZ_UNIT, file=gvFilename)                  
+        call gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)
+        close(GRAPHVIZ_UNIT)
+      end if   
+
+      ! CALL EXECUTE_COMMAND_LINE("dot -Tpdf GVgraph -o './temp/"//TRIM(ADJUSTL(chari))//".pdf'")
+      ! open(unit=GRAPHVIZ_UNIT, file=gvFilename)                  
+      ! call  gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)  
+      ! ! call  gvSetLabels (ia, ja, n, ordperm, GRAPHVIZ_UNIT, ierr)  
+      ! ! call  gvSimpleGraph (iap%vectors(1)%elements, jap%vectors(1)%elements, np(1), &
+      ! !  GRAPHVIZ_UNIT, ierr)  
+      ! close(GRAPHVIZ_UNIT)         
 !      
 ! -- write out matlab format for displaying this matrix
 !      

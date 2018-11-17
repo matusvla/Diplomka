@@ -172,7 +172,7 @@
 ! subroutine gvColorVertSep
 ! (c) Vladislav Matus
 ! last edit: 19. 09. 2018
-! Interface for using graphvizcr for drawing a graph with every part in different color    
+! Interface for using graphvizcr for drawing a graph with separator highlighted  
 !--------------------------------------------------------------------         
     subroutine gvColorVertSep (ia, ja, n, part, unitn, ierr)
       implicit none

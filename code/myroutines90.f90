@@ -1308,7 +1308,8 @@
 ! Allocations: none
 !
 
-      subroutine orderSubgraphs(orderingType, mixedCoef, ia, ja, n, part, parts, iap, jap, np, nvs)
+      subroutine orderSubgraphs(orderingType, mixedCoef, ia, ja, n, part, &
+        parts, iap, jap, np, nvs, hasOutput)
         implicit none
 !
 ! parameters
@@ -1320,6 +1321,7 @@
         type(intRaggedArr) :: iap, jap
         type(logicalRaggedArr) :: nvs
         integer :: parts, n
+        logical :: hasOutput
 !
 ! internals
 !
@@ -1334,16 +1336,16 @@
       if(TRIM(ADJUSTL(orderingType)) /= 'no') then
         select case(TRIM(ADJUSTL(orderingType)))
           case ('MD')
-            write(*,*) "Ordering graph using MD ordering."
+            if(hasOutput) write(*,*) "Ordering graph using MD ordering..."
             call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
           case ('DIST')
-            write(*,*) "Ordering graph by distance from separator."
+            if(hasOutput) write(*,*) "Ordering graph by distance from separator..."
             call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
           case ('MIX')
-            write(*,*) "Ordering graph using mixed ordering."
+            if(hasOutput) write(*,*) "Ordering graph using mixed ordering."
             call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
           case default
-            write(*,*) "Ordering graph using mixed ordering with coeficients."
+            if(hasOutput) write(*,*) "Ordering graph using mixed ordering with coeficients..."
             call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, mixedCoef, ierr)
           end select
         ! -- Apply ordering

@@ -58,6 +58,7 @@
       integer :: nfull ! one dimension of poisson matrix if matrixtype == 'P'
       logical :: hasGvOutput ! Should a Grapgviz file be created
       character*(CMDARG_MAXLEN) :: gvFilename ! name of output file
+      logical :: writesProgress
 
 ! -- miscelaneous 
       integer :: i, j
@@ -79,28 +80,36 @@
 !
 ! -- Command line arguments parsing
 !	  
-     parts = 2
-     call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testMatrixNumber, & 
-      orderingType, mixedCoef, vertSepMoves, hasGvOutput, gvFilename)
-!
-! -- Matrix loading
-!      
-      call loadMatrix(ia, ja, n, matrixtype, matrixpath, nfull, testMatrixNumber)
+      parts = 2
+      call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testMatrixNumber, & 
+        orderingType, mixedCoef, vertSepMoves, hasGvOutput, gvFilename, writesProgress)
       write(*,*) "Processing ", TRIM(ADJUSTL(matrixpath)), ":"
 !
-! -- Calling Graph partitioner METIS 
+! -- Matrix loading
 !     
+      if(writesProgress) write(*,*) "Loading matrix from file..." 
+      call loadMatrix(ia, ja, n, matrixtype, matrixpath, nfull, testMatrixNumber)  
+!
+! -- Calling Graph partitioner METIS 
+!  
+      if(writesProgress) write(*,*) "Running METIS graph partitioner..." 
       call metisCall(ia, ja, n, part, sepsize, metisierr)
 !
 ! -- The main loop
 !
+      allocate(cholFill(parts), stat=ierr)
       do i = 0, vertSepMoves
+        if(writesProgress) write(*,*) "Separator size:", sepsize
         ! -- Create subgraphs
+        if(writesProgress) write(*,*) "Creating subgraphs from the original graph..." 
         call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
         ! -- Find ordering of vertices of the original graph
-        call orderSubgraphs(orderingType, mixedCoef, ia, ja, n, part, parts, iap, jap, np, nvs)
+        if (i == vertSepMoves) then
+          call orderSubgraphs(orderingType, mixedCoef, ia, ja, n, part, parts, &
+            iap, jap, np, nvs, writesProgress)
+        end if
         ! -- Count nonzeros in Cholesky factor
-        allocate(cholFill(parts), stat=ierr)
+        if(writesProgress) write(*,*) "Counting nonzeros in Cholesky factor..." 
         do j = 1, parts
           allocate(parent(np(j)), ancstr(np(j)), colcnt(np(j)), marker(np(j) + 1), stat=ierr)
           call eltree2(np(j), iap%vectors(j)%elements, jap%vectors(j)%elements, parent, ancstr)
@@ -108,20 +117,25 @@
           cholFill(j) = SUM(colcnt)
           deallocate(parent, ancstr, colcnt, marker)
         end do
-        write(*,*) "Nonzeros in L: ", cholFill
+        if(writesProgress) write(*,*) "Nonzeros in L: ", cholFill
         ! -- Deallocate all fields allocated by createSubgraphs
+        if(writesProgress) write(*,*) "Cleaning up subgraphs..." 
         call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
         ! -- If there was no vertex separator after initial partion
         if (metisierr == METIS_NO_SEP) exit
         ! -- Move vertex separator to balace nonzeros in Cholesky factor
-        if (i < vertSepMoves) call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFill,1), sepsize)
-        deallocate(cholFill)
+        if (i < vertSepMoves) then
+          if(writesProgress) write(*,*) "Moving vertex separator..."
+          call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFill,1), sepsize)
+        end if
       end do
+
 !
 ! -- Write out partitioned graph in Graphviz format        
 !      
 
       if(hasGvOutput) then
+        if(writesProgress) write(*,*) "Outputting Graphviz file..."
         open(unit=GRAPHVIZ_UNIT, file=gvFilename)                  
         call gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)
         close(GRAPHVIZ_UNIT)
@@ -145,9 +159,11 @@
       ! deallocate(aa)
 
 !
-! -- Final deallocations
+! -- Final steps
 !
-     ! deallocate(ia, ja, part, ordperm, invordperm, stat=ierr) TODO uncomment
+      write(*,*) "Final size of separator: ", sepsize
+      write(*,*) "Final count of nonzeros in L: ", cholFill
+     ! deallocate(ia, ja, part, ordperm, invordperm, cholFill, stat=ierr) TODO uncomment
 
 !
 ! -- final tests in test mode

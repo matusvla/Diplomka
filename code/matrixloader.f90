@@ -64,7 +64,8 @@
             call loadTestGraph(ia, ja, n, testGraphNumber)
 
         case default
-          stop 'Unrecognised matrix format!'
+          write(*,*) "[matrixloader.90:loadMatrix] ERROR: Unrecognised matrix type!"
+          stop
       end select   
 !
 ! end of loadMatrix

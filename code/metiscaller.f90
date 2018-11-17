@@ -61,11 +61,10 @@
       part = part + 1
       ! -- Check for nonempty separator
       if (sepsize == 0) then
-        write(*,*) "[metiscaller.f90:metisCall] Warning:", &
+        write(*,*) "[metiscaller.f90:metisCall] Warning: ", &
           "Graph created from matrix has more components and it is well partitioned by default."
         ierr = METIS_NO_SEP
       end if
-      write(*,*) "Separator size:", sepsize
 !
 ! end of metisCall
 !  

@@ -23,5 +23,5 @@ git stash list
 git commit --amend
 
 GraphViz
-dot -Tpdf GVgraph.txt -o GVgraph.pdf
+dot -Tpdf GVgraph -o GVgraph.pdf
 taillabel = <<font color="red">tail</font>>

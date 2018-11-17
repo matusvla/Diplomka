@@ -46,9 +46,6 @@
       ! Corresponding permutations from original to partitioned and back
       integer, allocatable, dimension(:) :: np, perm
       type(intRaggedArr) :: invperm      
-! -- permutations from original to ordered matrix and back
-      integer, allocatable, dimension(:) :: ordperm, invordperm
-      type(intRaggedArr) :: ordpermp, invordpermp
 ! -- description of elimination tree
       integer, allocatable, dimension(:) :: parent, ancstr, colcnt, marker
 ! -- fill in Cholesky factor of matrix
@@ -99,7 +96,6 @@
         ! -- Create subgraphs
         call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
 
-
         ! TODO delete
         ! open(unit=GRAPHVIZ_UNIT, file=GRAPHVIZ_FILENAME)                  
         ! call  gvColorGraph (ia, ja, n, part, GRAPHVIZ_UNIT, ierr)
@@ -107,35 +103,9 @@
         ! write(unit=chari,fmt=*) i
         ! write(*,*) "dot -Tpdf GVgraph -o ./temp/"//TRIM(ADJUSTL(chari))//".pdf"
         ! CALL EXECUTE_COMMAND_LINE("dot -Tpdf GVgraph -o './temp/"//TRIM(ADJUSTL(chari))//".pdf'")
-
  
-        ! -- Find ordering of vertices of the original graph              
-        if(TRIM(ADJUSTL(orderingType)) /= 'no') then
-          select case(TRIM(ADJUSTL(orderingType)))
-            case ('MD')
-              call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
-              write(*,*) "Ordering graph using MD ordering."
-            case ('DIST')
-              call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
-              write(*,*) "Ordering graph by distance from separator."
-            case ('MIX')
-              call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
-              write(*,*) "Ordering graph using mixed ordering"
-            case default
-              call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, mixedCoef, ierr)
-              write(*,*) "Ordering graph using mixed ordering with coeficients."
-            end select
-          ! -- Apply ordering
-          call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
-          do j = 1, parts
-            call applyOrdering(iap%vectors(j)%elements, jap%vectors(j)%elements, np(j), &
-              nvs%vectors(j)%elements, ordpermp%vectors(j)%elements, &
-              invordpermp%vectors(j)%elements, ierr)
-          end do
-          call deallocRaggedArr(ordpermp, parts + 1, ierr)
-          call deallocRaggedArr(invordpermp, parts + 1, ierr)
-        end if
-
+        ! -- Find ordering of vertices of the original graph
+        call orderSubgraphs(orderingType, mixedCoef, ia, ja, n, part, parts, iap, jap, np, nvs)
         ! -- Count nonzeros in Cholesky factor
         allocate(cholFill(parts), stat=ierr)
         do j = 1, parts
@@ -149,13 +119,9 @@
         ! -- Deallocate all fields allocated by createSubgraphs
         call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
         ! -- If there was no vertex separator after initial partion
-        if (metisierr == METIS_NO_SEP) then
-          exit
-        end if
+        if (metisierr == METIS_NO_SEP) exit
         ! -- Move vertex separator to balace nonzeros in Cholesky factor
-        if (i < vertSepMoves) then
-          call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFill,1), sepsize)
-        end if
+        if (i < vertSepMoves) call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFill,1), sepsize)
         deallocate(cholFill)
       end do
 !

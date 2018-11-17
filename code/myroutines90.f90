@@ -1279,6 +1279,87 @@
 ! end of moveVertSep
 !	 
       end subroutine moveVertSep
+
+!--------------------------------------------------------------------   
+! subroutine orderSubgraphs
+! (c) Vladislav Matus
+! last edit: 17. 11. 2018  
+!
+! Purpose: 
+!   Interface for running the appropriate ordering on original graph
+!   and applying it to all the subgraphs.
+!   
+! Input:
+!   orderingType ... 'no', 'MD', 'DIST', 'MIX', 'MIX[number]'
+!   mixedCoef ... coeficient for mixed ordering      
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices of the graph
+!   part ... partition of the graph
+!   parts ... number of parts in partition
+!   iap, jap, ... multidimensional ragged arrays containing submatrices in CSR format
+!   np ... vector of sizes of the submatrices
+!   nvs ... logical multidimensional ragged array containig for each vertex info
+!     if it is connected to the vertex separator      
+!   
+! Output:
+!   iap, jap, ... multidimensional ragged arrays containing submatrices in CSR format,
+!     newly ordered       
+!   
+! Allocations: none
+!
+
+      subroutine orderSubgraphs(orderingType, mixedCoef, ia, ja, n, part, parts, iap, jap, np, nvs)
+        implicit none
+!
+! parameters
+!
+        character(len=*) :: orderingType ! how should the matrix be ordered
+        double precision :: mixedCoef ! coeficient for mixed ordering
+        integer, allocatable, dimension(:) :: ia, ja, np
+        integer, allocatable, dimension(:) :: part 
+        type(intRaggedArr) :: iap, jap
+        type(logicalRaggedArr) :: nvs
+        integer :: parts, n
+!
+! internals
+!
+      integer :: ierr, j
+      ! -- permutations from original to ordered matrix and back
+      integer, allocatable, dimension(:) :: ordperm, invordperm
+      type(intRaggedArr) :: ordpermp, invordpermp
+
+!
+! start of orderSubgraphs
+!
+      if(TRIM(ADJUSTL(orderingType)) /= 'no') then
+        select case(TRIM(ADJUSTL(orderingType)))
+          case ('MD')
+            write(*,*) "Ordering graph using MD ordering."
+            call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
+          case ('DIST')
+            write(*,*) "Ordering graph by distance from separator."
+            call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
+          case ('MIX')
+            write(*,*) "Ordering graph using mixed ordering."
+            call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+          case default
+            write(*,*) "Ordering graph using mixed ordering with coeficients."
+            call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, mixedCoef, ierr)
+          end select
+        ! -- Apply ordering
+        call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+        do j = 1, parts
+          call applyOrdering(iap%vectors(j)%elements, jap%vectors(j)%elements, np(j), &
+            nvs%vectors(j)%elements, ordpermp%vectors(j)%elements, &
+            invordpermp%vectors(j)%elements, ierr)
+        end do
+        call deallocRaggedArr(ordpermp, parts + 1, ierr)
+        call deallocRaggedArr(invordpermp, parts + 1, ierr)
+      end if
+!
+! end of orderSubgraphs
+!	 
+      end subroutine orderSubgraphs
  
 !--------------------------------------------------------------------            
       end module myroutines90

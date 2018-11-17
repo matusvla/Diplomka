@@ -150,7 +150,7 @@
         integer :: endIndex, ierr
         ierr = 0
         if(endIndex > SIZE(arr)) then
-          write(*,*) "[auxroutines.f90:trimArr] Warning: endIndex > SIZE(arr), not trimmed", endIndex, SIZE(arr)
+          write(*,*) "[auxroutines.f90:trimArr] WARNING: endIndex > SIZE(arr), not trimmed"
           ierr = 1
           return 
         end if

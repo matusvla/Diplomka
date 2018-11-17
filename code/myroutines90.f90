@@ -468,7 +468,7 @@
         end do 
         if (testVertexNo /= n) then
           ierr = 1
-          write(*,*) "[myroutines90.f90:countDistance] Warning: Partition not continuous", &
+          write(*,*) "[myroutines90.f90:countDistance] WARNING: Partition not continuous", &
             " and therefore not all counted!"
         end if
         countDistance = maxDepth  

@@ -47,7 +47,7 @@
         case ('RSA')
           open(unit=infileunit, file=matrixpath, action='read', iostat=statio)        
           if(statio .ne. 0) then
-            write(*,*) 'Error: Specified matrix file cannot be opened.'
+            write(*,*) 'ERROR: Specified matrix file cannot be opened.'
             stop
           end if   
           ! read a matrix in a RB format

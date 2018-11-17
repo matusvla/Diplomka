@@ -85,7 +85,7 @@
               if (argValue(1:1) /= '-' .and. i < n) then
                 matrixpath = TRIM(ADJUSTL(argValue))
               else
-                write(*,*) "Error: Input file name not specified" 
+                write(*,*) "ERROR: Input file name not specified! Use -h for help." 
                 stop
               end if
               i = i + 1
@@ -95,7 +95,7 @@
               if (argValue(1:1) /= '-' .and. i < n) then
                 outputFile = argValue
               else
-                write(*,*) "Error: Output file name not specified" 
+                write(*,*) "ERROR: Output file name not specified! Use -h for help." 
                 stop
               end if
               i = i + 1
@@ -107,7 +107,7 @@
                 matrixpath = matrixtype
                 read(matrixtype(2:),*,iostat=stat) nfull
                 if ( stat /= 0 .or. nfull < 1) then
-                  write(*,*) 'Invalid or unspecified number for matrix type "P"' 
+                  write(*,*) "ERROR: Invalid or unspecified number for matrix type 'P'" 
                   stop
                 endif
                 matrixtype = "P"
@@ -116,7 +116,7 @@
                 matrixpath = matrixtype
                 read(matrixtype(2:),*,iostat=stat) testGraphNumber
                 if ( stat /= 0 .or. testGraphNumber < 1) then
-                  write(*,*) 'Invalid or unspecified number for matrix type "T"' 
+                  write(*,*) 'ERROR: Invalid or unspecified number for matrix type "T"' 
                   stop
                 endif
                 matrixtype = "T"
@@ -133,13 +133,14 @@
               call get_command_argument(i + 1, argValue)
               orderingType = TRIM(ADJUSTL(argValue))
               if ( orderingType /= "MD" .and. orderingType /= "DIST" .and. orderingType(1:3) /= "MIX") then
-                write(*,*) "Warning: Invalid ordering type '", &
+                write(*,*) "WARNING: Invalid ordering type '", &
                   TRIM(ADJUSTL(orderingType)), "' was reset to no ordering!"
                 orderingType = "no"
               else if (orderingType(1:3) == "MIX" .and. orderingType /= 'MIX') then 
                 read(orderingType(4:),*,iostat=stat) mixedCoef
                 if(stat /= 0) then
-                  write(*,*) "Invalid ordering type '", TRIM(ADJUSTL(orderingType)), "' was reset to no ordering"
+                  write(*,*) "WARNING: Invalid ordering type '", TRIM(ADJUSTL(orderingType)), &
+                    "' was reset to no ordering"
                   orderingType = "no"
                 end if
               end if
@@ -149,7 +150,7 @@
               read(argValue, *, iostat=stat) vsMoves 
               if (stat /= 0 .or. vsMoves < 0 .or. vsMoves > MVS_MAX) then
                 write(unit=mvsch,fmt=*) MVS_MAX
-                write(*,*) "Error: Invalid value was provided for -mvs argument. Minimum is 0, maximum is "//TRIM(ADJUSTL(mvsch))
+                write(*,*) "ERROR: Invalid value was provided for -mvs argument. Minimum is 0, maximum is "//TRIM(ADJUSTL(mvsch))
                 stop
               end if
               i = i + 1
@@ -158,7 +159,8 @@
             case("-t")
               testSwitch = .true.
             case default
-              write(*,*) 'Invalid command line argument "', TRIM(ADJUSTL(argValue)), '" encountered, use -h for help'
+              write(*,*) "ERROR: Invalid command line argument '", TRIM(ADJUSTL(argValue)), &
+                "' encountered, use -h for help"
               stop
           end select
           i = i + 1

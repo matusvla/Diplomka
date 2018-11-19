@@ -5,6 +5,7 @@
         use mydepend
         use mydepend90
         use cmdlineloader, only: CMDARG_MAXLEN
+        use myroutines90, only: countloops, addDiagonal
         use testing
         implicit none
 	      integer, parameter :: infileunit = 4	  
@@ -38,8 +39,9 @@
 !
 ! internals
 !        
-      integer :: info = 0, statio, m, mformat = 0, ierr
+      integer :: info = 0, statio, m, mformat = 0, ierr, loops
       integer, allocatable, dimension(:) :: wn01, wn02 !auxiliary vectors
+      integer, allocatable, dimension(:) :: iaNew, jaNew
 !
 ! start of loadMatrix
 !      
@@ -47,15 +49,28 @@
         case ('RSA')
           open(unit=infileunit, file=matrixpath, action='read', iostat=statio)        
           if(statio .ne. 0) then
-            write(*,*) 'ERROR: Specified matrix file cannot be opened.'
+            write(*,*) 'ERROR: Specified matrix file cannot be opened!'
             stop
           end if   
           ! read a matrix in a RB format
           call imhb3(infileunit, m, n, mformat, ia, ja, info) 
+          if (mformat /= 111) then
+            write(*,*) 'ERROR: Unsymmetric matrices are not supported!'
+            stop
+          end if
           allocate(wn01(n+1), wn02(n+1), stat=ierr)
+          loops = countloops(n,ia,ja)
+          if(loops < n) then
+            allocate(jaNew(2 * ia(n+1) + n - loops), iaNew(n + 1), stat=ierr)
+            call addDiagonal(ia, ja, n, iaNew, jaNew)
+            deallocate(ja, stat=ierr)
+            ia = iaNew
+            ja = jaNew
+            deallocate(iaNew, jaNew, stat=ierr)
+          end if
           call symtr6(n, ia, ja, wn01, wn02)
           deallocate(wn01, wn02, stat=ierr)
-          
+
         case ('P')
           call poisson1(nfull, n, ia, ja, info)
 

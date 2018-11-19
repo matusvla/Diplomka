@@ -48,10 +48,16 @@
       call remloops(n, ia, ja, iaNoLoops, jaNoLoops, iierr)
       allocate(part(n), stat=iierr)      
       metis_call_status=METIS_SetDefaultOptions(metisoptions)
-      ! -- Transform graph into C++ notation (starting from 0)    
+      ! -- Transform graph into C++ notation (starting from 0) 
       call shiftnumbering(-1, n, iaNoLoops, jaNoLoops)  
       ! -- Call METIS           
       metis_call_status = METIS_ComputeVertexSeparator(n, iaNoLoops, jaNoLoops, C_NULL_PTR, metisoptions, sepsize, part)
+
+      if(sepsize /= COUNT(part == 2)) then
+        write(*,*) "ERROR: Internal error in METIS!"
+        stop
+      end if
+      
       if(metis_call_status /= METIS_OK) then
         write(*,*) "ERROR: METIS graph partitioner failed!"
         stop

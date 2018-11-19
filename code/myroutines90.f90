@@ -385,6 +385,56 @@
 ! end of remloops
 !  
       end subroutine remloops
+
+!-------------------------------------------------------------------- 
+! subroutine addDiagonal
+! (c) Vladislav Matus
+! last edit: 19. 11. 2018  
+!
+! Purpose:
+!   This routine adds diagonal entries to the input matrix.
+! Input:
+!   n ... integer, size of graph
+!   ia,ja ... matrix in CSR format
+! Output:
+!   iaNew, jaNew ... new matrix in CSR format
+! Allocations:  iaNew, jaNew
+
+      subroutine addDiagonal(ia, ja, n, iaNew, jaNew)
+        implicit none
+!
+! parameters
+!
+      integer :: n
+      integer, allocatable, dimension(:) :: ia, ja, iaNew, jaNew
+!
+! internals
+!           
+      integer :: i, j, before, added
+      logical :: hasDiagonal
+!
+! start of addDiagonal
+!	      
+      added = 0
+      iaNew(1) = ia(1)
+      jaNew = 0
+      do i = 1, n
+        hasDiagonal = .false.
+        do j = ia(i), ia(i + 1) - 1
+          if (ja(j) == i) hasDiagonal = .true.
+        end do
+        if(.not. hasDiagonal) then
+          jaNew(ia(i) + added) = i
+          added = added + 1
+        end if
+        iaNew(i + 1) = ia(i + 1) + added 
+        jaNew(ia(i) + added : ia(i + 1) + added - 1) = ja(ia(i) : ia(i + 1) - 1)
+      end do
+!
+! end of addDiagonal
+!  
+      end subroutine addDiagonal
+
 !-------------------------------------------------------------------- 
 ! function countDistance
 ! (c) Vladislav Matus

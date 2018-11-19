@@ -237,7 +237,7 @@ Pro získání hrubšího grafu byly popsány dva hlavní postupy. První z nich
 \paragraph{Dělení získaného grafu}
 V této fázi dochází k rozdělení grafu $H$ libovolným algoritmem pro dělení grafů, například lze použít spektrální dělení popsané níže v kapitole \ref{spektral}. Pomocí tohoto algoritmu získáme rozdělení $P_m$ grafu $G_m$.
 
-Tato fáze víceúrovňového dělení grafu může být vynechána \TODO{cite}. V takovém případě ve zhrubovací fázi víceúrovňového dělení pokračujeme až do té doby než má výsledný graf $G_m$ počet vrcholů roven počtu částí, na které chceme graf $G$ rozdělit. Každý z vrcholů grafu $G_m$ pak přiřadíme do jiné části rozdělení $P_m$ a můžeme přímo přistoupit k projekci tohoto rozdělení na původní graf.
+Tato fáze víceúrovňového dělení grafu může být vynechána \cite{kaku:95}. V takovém případě ve zhrubovací fázi víceúrovňového dělení pokračujeme až do té doby než má výsledný graf $G_m$ počet vrcholů roven počtu částí, na které chceme graf $G$ rozdělit. Každý z vrcholů grafu $G_m$ pak přiřadíme do jiné části rozdělení $P_m$ a můžeme přímo přistoupit k projekci tohoto rozdělení na původní graf.
 
 \paragraph{Projekce rozdělení na původní graf}
 Cílem této fáze je převést získané rozdělení $P_m$ grafu $G_m$ na rozdělení $P_0$ vstupního grafu $G$. Toho dosáhneme postupnou tvorbou posloupnosti rozdělení $P_{m-1}, \ldots, P_1$ grafů $G_{m-1}, \ldots, G_1$. Nejjednodušším způsobem projekce rozdělení grafu $G_{i+1}$ na rozdělení grafu $G_i$ je umístit všechny vrcholy grafu $G_i$, jejichž spojením vznikl vrchol $v$ grafu $G_{i+1}$ do části rozdělení, v níž leží vrchol $v$.
@@ -375,7 +375,7 @@ Tím se nám podaří docílit toho, že nejen matice sousednosti, ale i její l
 \subsection{Dělení obecných grafů metodou vnořených řezů}
 \label{NDobecne}
 
-Pro použití metody vnořených řezů pro obecné grafy existují různé přístupy \TODO{cite?}. V této kapitole popíšeme jeden z nich. Jedná se o heuristický algoritmus fungující na principu hledání struktury úrovní daného grafu a následného rozdělení grafu podle úrovně "uprostřed".
+Pro použití metody vnořených řezů pro obecné grafy existují různé přístupy \cite{litaro:79}. V této kapitole popíšeme jeden z nich. Jedná se o heuristický algoritmus fungující na principu hledání struktury úrovní daného grafu a následného rozdělení grafu podle úrovně "uprostřed".
 
 Mějme souvislý graf $G=(V,E)$. Algoritmus pro jeho rozdělení využívající metodu vnořených řezů pak vypadá následovně.
 
@@ -999,15 +999,15 @@ Zmíněná rutina není zmíněna v oficiální dokumentaci knihovny METIS a nen
 
 Výstupem rutiny \texttt{METIS\_ComputeVertexSeparator} je pole $part$ o délce rovné počtu vrcholů grafu. Na $i$-té pozici tohoto pole je číslo od $1$ do $k+1$ (po převedení do indexování od $1$ používaného v jazyce Fortran). To určuje, ve které části rozdělení se daný vrchol nachází. Pro vrchol s indexem $j$ ve vrcholovém separátoru je \texttt{part}$[j] = k+1$.
 
-\section{Tvorba podgrafů a přerozdělení}
+\section{Tvorba podgrafů}
+\TODO{doplnit}
+\
+\section{Číslování}
+\TODO{doplnit- jeden graf -> podgrafy}
 
-\TODO{doplnit}
-\subsection{Číslování}
-\TODO{doplnit}
-\subsection{Přerozdělení}
-\TODO{doplnit}
+\section{Přesun vrcholového separátoru}
 
-\section{Výpočet Choleského rozkladu}
+\section{Tvorba eliminačního stromu a výpočet Choleského rozkladu}
 \TODO{doplnit}
 
 \section{Volání programu z příkazové řádky}
@@ -1021,12 +1021,15 @@ Náš program byl testován na MacBook Pro (Retina, 15-inch, Mid 2015) s proceso
 Pro úspěšné zkompilování a slinkování projektu je třeba mít nainstalovaný GNU Make (testováno na verzi 3.81), gcc a gfortran (testováno pro verzi 6.3.0) a dělič grafů METIS (testováno pro verzi 5.1.0). \TODO{dot-Grapvhiz}
 
 \section{Dělení grafu na dvě části}
+\section{Dělení grafu na víc částí}
+\TODO{bude to?}
 
 %----------------------------------------------------------------------
 
 \chapter*{Závěr}
 \TODO{doplnit}
 \TODO{motivace: nelineární problém viz Tumovy stranky}
+\TODO{radkovy vs. sloupcovy algoritmus}
 
 
 %----------------------------------------------------------------------

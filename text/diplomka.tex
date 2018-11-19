@@ -163,7 +163,6 @@ Pokud bychom chtěli do grafu zanést i numerické hodnoty jednotlivých prvků 
 
 \bigskip
 {
-  \label{MatGrPicture}
   \centering
   \includegraphics[width=0.7\textwidth]{pictures/matgr.pdf}
   \captionof{figure}{Příklad grafu a jemu odpovídající struktury matice\label{prGrMat}}
@@ -944,31 +943,27 @@ Algoritmy uvedené v této kapitole jsou popsány tak, aby byly dostatečně ná
 
 \chapter{Algoritmizace a implementace}
 
-Cílem programu, který jsme implementovali, je ukázat, že rozdělení grafu získané za pomoci profesionální numerické knihovny pro dělení grafů METIS, nemusí být vyvážené vzhledem k výpočtu Choleského rozkladu na vzniklých oblastech. Dále jsme se pokusili navrhnout a otestovat metodu přerozdělení grafu založenou na přečíslování vrcholů grafu. Cílem navržené metody je zlepšit rozdělení grafu tak, aby počet operací potřebných pro Choleského faktorizaci na jednotlivých oblastem byl pokud možno stejný a nebyl vyšší než maximum z počtu operací při rozdělení počátečním.
+Cílem programu, který jsme implementovali, je analyzovat rozdělení grafu získané za pomoci profesionální numerické knihovny pro dělení grafů METIS a ukázat, že nemusí být vyvážené vzhledem k výpočtu Choleského rozkladu na vzniklých oblastech. Dále jsme testovali závislost kvality rozdělení vzhledem k Choleského rozkladu na očíslování grafu. Prozkoumali jsme, zda lze lehkou modifikací vrcholového separátoru dosáhnout zlepšení vyváženosti počtu operací potřebných pro Choleského rozklad na jednotlivých oblastech.
 
-\TODO{Fortran, Fortran90, c++}
 \TODO{dělení na kolik částí?}
 
-Naši implementaci můžeme rozdělit na několik logických celků. \TODO{doplnit}
+Námi implementovaný program se volá z příkazové řádky a jeho funkce závisí na argumentech, s nimiž je zavolán. Tyto argumenty budou popsány níže v odstavci \TODO{ref}. Základní struktura programu, která je nezávislá na tom, s jakými argumenty je zavolán, je následující. Nejprve dojde k načtení matice, která je poté rozdělena na \TODO{několik} částí pomocí profesionální knihovny pro dělení grafů METIS. Následně v hlavní smyčce programu probíhá samotné zpracování matice. Nejprve jsou za použití rozdělení získaného pomocí knihovny METIS vytvořeny CSR reprezentace podgrafů. Následně dojde k přečíslování vrcholů jednotlivých podgrafů, pokud je požadováno. Poté je zkonstruován eliminační strom a s jeho pomocí určen počet nenulových prvků v jednotlivých Choleského faktorech matic odpovídajících jednotlivým podgrafům. Pokud je to požadováno, je posunutím vrcholového separátoru vytvořeno nové rozdělení grafu odpovídajícího vstupní matici a hlavní smyčka spuštěna znovu. Dále náš program podporuje výstup v jazyce DOT, který může být použit pro zobrazení výsledného rozdělení grafu pomocí knihovny GraphViz.
+
+Náš program byl implementován v programovacím jazyce Fortran, pro použití knihovny METIS napsané v C++ jsme vytvořili rozhraní pro volání rutin napsaných v C++ z Fortranu. Pro opakované spouštění programu za účelem testování jsme používali skript napsaný v jazyce Python.
 
 \section{Formát a uložení vstupní matice}
-V této podkapitole bude popsán vstupní formát matice a způsob její reprezentace v našem programu.
-\TODO{Zajímá nás jen struktura}
+V této podkapitole bude zmíněn formát vstupní matice a způsob její reprezentace v programu. Vzhledem k tomu, že se nezabýváme výpočtem numerických hodnot v Choleského faktoru zpracovávané matice, bereme v potaz pouze strukturu matice a nikoliv hodnoty jejích nenulových prvků.
 
-\subsection{Vstupní formát matice}
+Pro testování výsledků našeho programu nám posloužily matice uložené ve formátech RSA a PSA. Tyto formáty mají podobnou strukturu, ve formátu RSA jsou navíc uloženy i numerické hodnoty matice, na které ale v našem programu nebereme ohled. Bližší popis struktury matic můžeme nalézt například v \cite{bopo:97}. Popis kolekcí matic, z nichž jsme čerpali, nalezneme například v \cite{ssmcol} a \cite{hbcol}. Tyto matice jsou standardně uloženy v souborech s příponou \texttt{.rsa} nebo \texttt{.rb}.
 
-Jako základní matice pro testování výsledků našeho programu nám posloužily matice uložené ve formátu RSA v souborech s příponou \texttt{.rsa} nebo \texttt{.rb}. Jako zdroj pro tyto matice jsme použili kolekci \cite{hbcol}.
-
-\TODO{popis HB formátu}
-
-Pro testování jsme dále používali matice vygenerované při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice (podprogram \texttt(poisson)) a několik jednoduchých testovacích matic, které jsme si ručně zapsali do souboru \texttt{testing.f90}
+Pro testování jsme dále používali matice vygenerované při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice (podprogram \texttt(poisson)) a několik jednoduchých testovacích matic, které jsme si ručně vytvořili v souboru \texttt{testing.f90}.
 
 \subsection{Reprezentace matice v programu}
 \label{matrixProgReprez}
 
-Matice je v našem programu uložena v \textbf{CSR formátu} (compressed sparse row format) \cite{pis:84,saad:94}, který je běžně využívaným formátem sloužícím pro reprezentaci řídkých matic a grafů. 
+Matice je v našem programu uložena v \textbf{CSR formátu} (compressed sparse row format) \cite{pis:84,saad:94}, který je běžně využívaným formátem sloužícím pro reprezentaci řídkých matic a grafů.
 
-Mějme řídkou matici $A$ o rozměrech $n \times n$, která obsahuje $n_e$ nenulových prvků. Tuto matici v programu reprezentujeme pomocí tří polí: pole \texttt{ia} o délce $n+1$ a polí \texttt{ja},\texttt{aa} o délce $n_e$. V poli \texttt{ja} na pozicích \texttt{ia($i$)},\ldots,\texttt{ia($i+1$)-1} jsou uloženy sloupcové indexy nenulových prvků na $i$-tém řádku matice $A$, na odpovídajících pozicích v poli \texttt{aa} jsou uloženy numerické hodnoty těchto prvků.
+Mějme řídkou matici $A$ o rozměrech $n \times n$, která obsahuje $n_e$ nenulových prvků. Tuto matici v programu reprezentujeme pomocí dvou polí: pole ukazatelů \texttt{ia} o délce $n+1$ a pole \texttt{ja} o délce $n_e$. V poli \texttt{ja} na pozicích \texttt{ia($i$)}, \ldots, \texttt{ia$(i+1)-1$} jsou uloženy sloupcové indexy nenulových prvků na $i$-tém řádku matice $A$. Na odpovídajících pozicích v poli \texttt{aa} jsou uloženy numerické hodnoty těchto prvků.
 
 \begin{example}
   \label{CSRexample}
@@ -990,22 +985,22 @@ Mějme řídkou matici $A$ o rozměrech $n \times n$, která obsahuje $n_e$ nenu
   \end{verbatim}
 \end{example}
 
-Pokud budeme uvažovat pouze pole \texttt{ia}, \texttt{ja}, je podle teorie popsané v oddíle \ref{GrMatRel} výsledná reprezentace matice $A$ zároveň reprezentací neorientovaného grafu, kterému matice $A$ odpovídá. Pokud tedy nebudeme brát v úvahu hodnoty jednotlivých prvků matice, můžeme při popisu implementace bez újmy na obecnosti pojmy graf a matice zaměňovat.
+Vzhledem k tomu, že v našem programu pracujeme pouze se strukturou matice, můžeme při reprezentaci matice vynechat pole $\texttt{aa}$. Zřejmě je pak výsledná reprezentace matice $A$ zároveň reprezentací neorientovaného grafu, kterému matice $A$ odpovídá a můžeme tedy při popisu implementace bez újmy na obecnosti pojmy graf a matice zaměňovat.
 
 \begin{example}
-  Vezměme matici z příkladu \ref{CSRexample}. Pak graf, který je reprezentován pomocí polí \texttt{ia}, \texttt{ja} je zobrazen na obrázku \ref{MatGrPicture}
+  Vezměme matici z Příkladu \ref{CSRexample}. Pak graf, který je reprezentován pomocí polí \texttt{ia}, \texttt{ja} je zobrazen na obrázku \ref{prGrMat}
 \end{example}
 
 \section{Knihovna METIS pro dělení grafu}
 
 Pro samotné dělení grafu na $k$ částí jsme využili knihovnu pro dělení grafů METIS \cite{kary:13} verze 5.1.0. Vzhledem k tomu, že jsme dělení grafů používali jako nástroj pro vyvažování počtu operací při Choleského rozkladu na jednotlivých oblastech, potřebovali jsme nalézt rozdělení grafu pomocí vrcholového separátoru. Takové rozdělení nám poskytne rutina \texttt{METIS\_ComputeVertexSeparator}, kterou jsme ve Fortranu implementovali pomocí rozhraní \texttt{metis\_interface.f95} a \texttt{metisinclude.c}.
 
-Zmíněná rutina není zmíněna v oficiální dokumentaci knihovny METIS a není tedy ve své základní verzi kompatibilní s jazykem Fortran. Proto bylo nutné učinit několik změn ve formátu CSR tak, aby bylo možné rutinu použít. Nejprve bylo třeba odebrat z grafu smyčky a poté jej přečíslovat tak, aby bylo vrcholy indexovány od 0, jak je požadováno v jazycích C a C++.
+Zmíněná rutina není zmíněna v oficiální dokumentaci knihovny METIS a není tedy ve své základní verzi kompatibilní s jazykem Fortran. Proto bylo nutné učinit několik změn ve formátu CSR tak, aby bylo možné rutinu použít. Nejprve bylo třeba odebrat z grafu smyčky a poté jej přečíslovat tak, aby byly vrcholy indexovány od 0, jak je požadováno v jazycích C a C++.
 
-Výstupem rutiny \texttt{METIS\_ComputeVertexSeparator} je pole $part$ o délce rovné počtu vrcholů grafu. Na $i$-té pozici tohoto pole je číslo od $1$ do $k+1$ (po převedení do Fortranového zápisu), které určuje, ve které části rozdělení se daný vrchol nachází. $k+1$ značí, že daný vrchol je ve vrcholovém separátoru.
+Výstupem rutiny \texttt{METIS\_ComputeVertexSeparator} je pole $part$ o délce rovné počtu vrcholů grafu. Na $i$-té pozici tohoto pole je číslo od $1$ do $k+1$ (po převedení do indexování od $1$ používaného v jazyce Fortran). To určuje, ve které části rozdělení se daný vrchol nachází. Pro vrchol s indexem $j$ ve vrcholovém separátoru je \texttt{part}$[j] = k+1$.
 
 \section{Tvorba podgrafů a přerozdělení}
-\TODO{bereme jen grafy s jednou komponentou}
+
 \TODO{doplnit}
 \subsection{Číslování}
 \TODO{doplnit}
@@ -1015,10 +1010,17 @@ Výstupem rutiny \texttt{METIS\_ComputeVertexSeparator} je pole $part$ o délce 
 \section{Výpočet Choleského rozkladu}
 \TODO{doplnit}
 
-\section{Softwarové požadavky pro běh}
-\TODO{mám to tam vůbec dávat?}
-Pro úspěšné slinkování a zkompilování
-\TODO{nainstalovaný METIS}
+\section{Volání programu z příkazové řádky}
+
+%----------------------------------------------------------------------
+\chapter{Výsledky}
+
+\section{Informace o systému}
+Náš program byl testován na MacBook Pro (Retina, 15-inch, Mid 2015) s procesorem 2,5 GHz Intel Core i7, operační pamětí 16GB 1600 MHz DDR3 a grafickou kartou Intel Iris Pro 1536 MB.
+
+Pro úspěšné zkompilování a slinkování projektu je třeba mít nainstalovaný GNU Make (testováno na verzi 3.81), gcc a gfortran (testováno pro verzi 6.3.0) a dělič grafů METIS (testováno pro verzi 5.1.0). \TODO{dot-Grapvhiz}
+
+\section{Dělení grafu na dvě části}
 
 %----------------------------------------------------------------------
 

@@ -761,6 +761,7 @@ Metoda minimálního stupně je jednoduchým algoritmem pro nalezení očíslov�
 Očíslování vrcholů grafu G pomocí tohoto algoritmu není jednoznačné, protože vrcholů s minimálním stupněm může být více.
 
 \subsection{Smíšené číslování}
+\label{Mixedordering}
 Vzhledem k povaze číslování popsaných v oddílech \ref{MDordering} a \ref{sepDistOrdering} můžeme tyto algoritmy zkombinovat. V tomto oddíle popisujeme dvě možnosti přístupu k tomuto problému.
 
 Pokud máme rozdělení $G_1, \ldots, G_k$ grafu $G$ s vrcholovým separátorem $G_S$, můžeme pro očíslování části $G_i$ použít číslování vrcholů pomocí metody minimálního stupně, kde při výběru vrcholu ve \ref{mindegloop}. kroku algoritmu popsaného v \ref{MDordering} přidáme kritérium vzdálenosti od separátoru popsané v \ref{sepDistOrdering}. Nejprve tedy nalezneme množinu všech vrcholů grafu $G$, které mají minimální stupeň a poté z nich zvolíme ten, který je nejdál od vrcholového separátoru.
@@ -827,6 +828,7 @@ Pokud $x_i$ je vlastním předchůdcem $x_j$ v eliminačním stromu, pak $i > j$
 Přímým důsledkem tvrzení \ref{ColDepProposition} je, že graf $G(F)$ zachycuje informace o závislostech mezi jednotlivými sloupci při výpočtu Choleského rozkladu. 
 
 \subsection{Využití a konstrukce eliminačních stromů}
+\label{EltreeAlgSection}
 
 Z definice eliminačních stromů je zřejmé, že budou obsahovat velké množství informací o rozkladu matice a procesu jeho vytváření. Například v \cite{schr:82} byly popsány vlastnosti eliminačních stromů vzhledem ke Gaussově eliminaci. My však budeme eliminační stromy využívat jako nástroj pro výpočet počtu nenulových prvků v Choleského faktoru matice \cite{liu:90}. Uveďme větu, která dává do souvislosti nenulové prvky v Choleského faktoru a strukturu eliminačního stromu \cite{liu:86}.
 
@@ -943,27 +945,29 @@ Algoritmy uvedené v této kapitole jsou popsány tak, aby byly dostatečně ná
 
 \chapter{Algoritmizace a implementace}
 
-Cílem programu, který jsme implementovali, je analyzovat rozdělení grafu získané za pomoci profesionální numerické knihovny pro dělení grafů METIS a ukázat, že nemusí být vyvážené vzhledem k výpočtu Choleského rozkladu na vzniklých oblastech. Dále jsme testovali závislost kvality rozdělení vzhledem k Choleského rozkladu na očíslování grafu. Prozkoumali jsme, zda lze lehkou modifikací vrcholového separátoru dosáhnout zlepšení vyváženosti počtu operací potřebných pro Choleského rozklad na jednotlivých oblastech.
+Cílem programu, který jsme implementovali, je analyzovat rozdělení grafu získané za pomoci profesionální numerické knihovny pro dělení grafů METIS a ukázat, že nemusí být vyvážené vzhledem k výpočtu Choleského rozkladu na vzniklých oblastech. Dále jsme testovali závislost kvality rozdělení vzhledem k Choleského rozkladu na očíslování grafu. Prozkoumali jsme, zda lze lehkou modifikací vrcholového separátoru dosáhnout zlepšení vyváženosti počtu operací potřebných pro Choleského rozklad na jednotlivých oblastech. Vzhledem k analytickému charakteru této práce jsme zvolili implementaci, která si neklade za cíl používat co nejefektivnější algoritmy, ale dává přednost dobré přehlednosti a názornosti programu.
 
-\TODO{dělení na kolik částí?}
+V naší implementaci jsme se omezili na dělení grafu na dvě části pomocí vrcholového separátoru. Toto omezení nám přirozeně vyplynulo z implementace, jelikož knihovna METIS neposkytuje rutiny pro dělení grafu pomocí vrcholového separátoru na více než dvě části. Námi implementovaný kód je napsán obecně pro graf rozdělený na $n$ částí. Implementací jiného grafového děliče nebo použitím algoritmů pro převod hranového separátoru na vrcholový by tedy bylo možné výsledky rozšířit i pro dělení grafu na $n>2$ částí.
 
-Námi implementovaný program se volá z příkazové řádky a jeho funkce závisí na argumentech, s nimiž je zavolán. Tyto argumenty budou popsány níže v odstavci \TODO{ref}. Základní struktura programu, která je nezávislá na tom, s jakými argumenty je zavolán, je následující. Nejprve dojde k načtení matice, která je poté rozdělena na \TODO{několik} částí pomocí profesionální knihovny pro dělení grafů METIS. Následně v hlavní smyčce programu probíhá samotné zpracování matice. Nejprve jsou za použití rozdělení získaného pomocí knihovny METIS vytvořeny CSR reprezentace podgrafů. Následně dojde k přečíslování vrcholů jednotlivých podgrafů, pokud je požadováno. Poté je zkonstruován eliminační strom a s jeho pomocí určen počet nenulových prvků v jednotlivých Choleského faktorech matic odpovídajících jednotlivým podgrafům. Pokud je to požadováno, je posunutím vrcholového separátoru vytvořeno nové rozdělení grafu odpovídajícího vstupní matici a hlavní smyčka spuštěna znovu. Dále náš program podporuje výstup v jazyce DOT, který může být použit pro zobrazení výsledného rozdělení grafu pomocí knihovny GraphViz.
+Námi implementovaný program se volá z příkazové řádky a jeho funkce závisí na argumentech, s nimiž je zavolán. Tyto argumenty budou popsány níže v odstavci \TODO{ref}. Základní struktura programu, která je nezávislá na tom, s jakými argumenty je zavolán, je následující. Nejprve dojde k načtení matice, která je poté rozdělena na \TODO{několik} částí pomocí profesionální knihovny pro dělení grafů METIS. Následně v hlavní smyčce programu probíhá samotné zpracování matice. Nejprve jsou za použití rozdělení získaného pomocí knihovny METIS vytvořeny CSR reprezentace podgrafů. Následně dojde k přečíslování vrcholů jednotlivých podgrafů, pokud se jedná o poslední iteraci hlavní smyčky a je to požadováno. Poté je zkonstruován eliminační strom a s jeho pomocí určen počet nenulových prvků v jednotlivých Choleského faktorech matic odpovídajících jednotlivým podgrafům. Pokud je to požadováno, je posunutím vrcholového separátoru vytvořeno nové rozdělení grafu odpovídajícího vstupní matici a hlavní smyčka spuštěna znovu. Dále náš program podporuje výstup v jazyce DOT, který může být použit pro zobrazení grafu a jeho výsledného rozdělení pomocí knihovny GraphViz.
 
 Náš program byl implementován v programovacím jazyce Fortran, pro použití knihovny METIS napsané v C++ jsme vytvořili rozhraní pro volání rutin napsaných v C++ z Fortranu. Pro opakované spouštění programu za účelem testování jsme používali skript napsaný v jazyce Python.
 
 \section{Formát a uložení vstupní matice}
-V této podkapitole bude zmíněn formát vstupní matice a způsob její reprezentace v programu. Vzhledem k tomu, že se nezabýváme výpočtem numerických hodnot v Choleského faktoru zpracovávané matice, bereme v potaz pouze strukturu matice a nikoliv hodnoty jejích nenulových prvků.
+V této podkapitole bude specifikován formát vstupní matice a způsob její reprezentace v programu.
 
-Pro testování výsledků našeho programu nám posloužily matice uložené ve formátech RSA a PSA. Tyto formáty mají podobnou strukturu, ve formátu RSA jsou navíc uloženy i numerické hodnoty matice, na které ale v našem programu nebereme ohled. Bližší popis struktury matic můžeme nalézt například v \cite{bopo:97}. Popis kolekcí matic, z nichž jsme čerpali, nalezneme například v \cite{ssmcol} a \cite{hbcol}. Tyto matice jsou standardně uloženy v souborech s příponou \texttt{.rsa} nebo \texttt{.rb}.
+\subsection{Podporované formáty vstupních matic}
 
-Pro testování jsme dále používali matice vygenerované při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice (podprogram \texttt(poisson)) a několik jednoduchých testovacích matic, které jsme si ručně vytvořili v souboru \texttt{testing.f90}.
+Náš program pracuje s maticemi uloženými v souborech v Harwell-Boeingově formátu \cite{bopo:97}. Konkrétně je schopen zpracovat reálné symetrické matice ve formátech RSA a PSA. Tyto dva formáty mají navzájem si podobnou strukturu, ve formátu RSA jsou navíc uloženy i numerické hodnoty matice. Ty však v našem programu nebereme v úvahu, protože se nezabýváme výpočtem numerických hodnot v Choleského faktoru zpracovávané matice, ale pouze jeho strukturou. Popis kolekcí matic, z nichž jsme čerpali při testování našeho programu, lze nalézt například v \cite{ssmcol} a \cite{hbcol}. Tyto matice bývají standardně uloženy v souborech s příponou \texttt{.rsa} nebo \texttt{.rb}.
+
+Pro testování jsme dále používali matice vygenerované při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice (podprogram \texttt{poisson}) a několik jednoduchých testovacích matic, které jsme si ručně vytvořili v souboru \texttt{testing.f90}. Všechny tyto matice jsou uloženy nebo generovány v programu a jejich zpracování zve vyvolat pomocí argumentu \texttt{-mt} z příkazové řádky.
 
 \subsection{Reprezentace matice v programu}
 \label{matrixProgReprez}
 
 Matice je v našem programu uložena v \textbf{CSR formátu} (compressed sparse row format) \cite{pis:84,saad:94}, který je běžně využívaným formátem sloužícím pro reprezentaci řídkých matic a grafů.
 
-Mějme řídkou matici $A$ o rozměrech $n \times n$, která obsahuje $n_e$ nenulových prvků. Tuto matici v programu reprezentujeme pomocí dvou polí: pole ukazatelů \texttt{ia} o délce $n+1$ a pole \texttt{ja} o délce $n_e$. V poli \texttt{ja} na pozicích \texttt{ia($i$)}, \ldots, \texttt{ia$(i+1)-1$} jsou uloženy sloupcové indexy nenulových prvků na $i$-tém řádku matice $A$. Na odpovídajících pozicích v poli \texttt{aa} jsou uloženy numerické hodnoty těchto prvků.
+Popišme CSR formát pro řídkou matici $A$ o rozměrech $n \times n$, která obsahuje $n_e$ nenulových prvků. Tuto matici v programu reprezentujeme pomocí dvou polí: pole ukazatelů \texttt{ia} o délce $n+1$ a pole \texttt{ja} o délce $n_e$. Pro $i\in\{1,\ldots,n\}$ jsou v poli \texttt{ja} na pozicích \texttt{ia($i$)}, \ldots, \texttt{ia$(i+1)-1$} uloženy sloupcové indexy nenulových prvků na $i$-tém řádku matice $A$. Na odpovídajících pozicích v poli \texttt{aa} jsou uloženy numerické hodnoty těchto prvků.
 
 \begin{example}
   \label{CSRexample}
@@ -993,22 +997,32 @@ Vzhledem k tomu, že v našem programu pracujeme pouze se strukturou matice, mů
 
 \section{Knihovna METIS pro dělení grafu}
 
-Pro samotné dělení grafu na $k$ částí jsme využili knihovnu pro dělení grafů METIS \cite{kary:13} verze 5.1.0. Vzhledem k tomu, že jsme dělení grafů používali jako nástroj pro vyvažování počtu operací při Choleského rozkladu na jednotlivých oblastech, potřebovali jsme nalézt rozdělení grafu pomocí vrcholového separátoru. Takové rozdělení nám poskytne rutina \texttt{METIS\_ComputeVertexSeparator}, kterou jsme ve Fortranu implementovali pomocí rozhraní \texttt{metis\_interface.f95} a \texttt{metisinclude.c}.
+Pro samotné dělení grafu na $k$ částí jsme využili knihovnu pro dělení grafů METIS \cite{kary:13} verze 5.1.0. Vzhledem k tomu, že jsme dělení grafů používali jako nástroj pro vyvažování počtu operací při Choleského rozkladu na jednotlivých oblastech, potřebovali jsme nalézt rozdělení grafu pomocí vrcholového separátoru. Takové rozdělení nám poskytne rutina \texttt{METIS\_ComputeVertexSeparator}, kterou jsme ve Fortranu implementovali pomocí rozhraní \texttt{metis\_interface.f95} a \texttt{metisinclude.c}. \TODO{cite url?}
 
-Zmíněná rutina není zmíněna v oficiální dokumentaci knihovny METIS a není tedy ve své základní verzi kompatibilní s jazykem Fortran. Proto bylo nutné učinit několik změn ve formátu CSR tak, aby bylo možné rutinu použít. Nejprve bylo třeba odebrat z grafu smyčky a poté jej přečíslovat tak, aby byly vrcholy indexovány od 0, jak je požadováno v jazycích C a C++.
+Zmíněná rutina není popsána v oficiální dokumentaci knihovny METIS a není tedy ve své základní verzi kompatibilní s jazykem Fortran. Proto bylo nutné učinit několik změn ve formátu CSR tak, aby bylo možné rutinu použít. Nejprve bylo třeba odebrat z grafu smyčky a poté jej přečíslovat tak, aby byly vrcholy indexovány od 0, jak je požadováno v jazycích C a C++.
 
-Výstupem rutiny \texttt{METIS\_ComputeVertexSeparator} je pole $part$ o délce rovné počtu vrcholů grafu. Na $i$-té pozici tohoto pole je číslo od $1$ do $k+1$ (po převedení do indexování od $1$ používaného v jazyce Fortran). To určuje, ve které části rozdělení se daný vrchol nachází. Pro vrchol s indexem $j$ ve vrcholovém separátoru je \texttt{part}$[j] = k+1$.
+Výstupem rutiny \texttt{METIS\_ComputeVertexSeparator} je pole $part$ o délce rovné počtu vrcholů grafu. Na $i$-té pozici tohoto pole je číslo od $1$ do $3$ (po převedení do indexování od $1$ používaného v jazyce Fortran). To určuje, ve které části rozdělení se daný vrchol nachází. Pro vrchol s indexem $j$ ve vrcholovém separátoru je \texttt{part}$[j] = 3$.
 
 \section{Tvorba podgrafů}
-\TODO{doplnit}
-\
+Pro tvorbu podgrafů při znalosti vstupního rozdělení jsme použili námi napsanou rutinu \texttt{createSubgraphs}. Hlavní princip této rutiny lze popsat následnovně. Jejím vstupem je graf v CSR formátu a vektor \texttt{part} popisující rozdělení tohoto grafu. Výstupem této rutiny jsou jednotlivé podgrafy popsané pomocí vektoru \texttt{part} uložené v CSR formátech. Pro snadnou manipulaci s těmito podgrafy je ukládáme do dvou datových struktur \texttt{iap} a \texttt{jap}. Formát těchto datových struktur je definován v \texttt{raggedmultiarray.f90} a byl převzat z \TODO{cite? odkaz}. $i$-tý podgraf ja pak uložen v polích \texttt{iap\%vectors($i$)\%elements}, \texttt{jap\%vectors($i$)\%elements}.
+
+
 \section{Číslování}
-\TODO{doplnit- jeden graf -> podgrafy}
+V našem programu jsme implementovali 4 způsoby číslování vrcholů,mezi nimiž lze přepínat pomocí argumentu \texttt{-ot} z příkazové řádky.
+
+První metodou, kterou jsme implementovali, je číslování vrcholů grafu v závislosti na vzdálenosti od separátoru popsané v kapitole \ref{sepDistOrdering}. Jedná se o rutinu \texttt{orderByDistance}. Druhou implementovanou metodou je číslování vrcholů pomocí metody minimálního stupně popsané v odstavci \ref{MDordering}. Tuto metodu jsme implementovali jako rutinu \texttt{orderByMD}. Třetí a čtvrtá metoda obsažená v našem programu používá smíšené číslování popsané v kapitole \ref{Mixedordering}. Rutina \texttt{orderMixed} používá pro výběr vrcholu kombinaci kritérií minimálního stupně a maximální vzdálenosti od separátoru. Naproti tomu v rutině \texttt{orderCoefMixed} je zvlášť napočítáno číslování v závislosti na vzdálenosti od separátoru a pomocí metody minimálního stupně. Poté dojde ke konvexní kombinaci těchto očíslování s koeficientem $C \in [0,1]$, který je vstupním parametrem této rutiny.
+
+Výstupem všech výše zmíněných rutin jsou vektory \texttt{ordperm} a \texttt{invordperm} popisující nově získanou permutaci vrcholů.
+
+Číslování vždy aplikujeme na původní graf a poté ho pomocí rutin \texttt{partOrdering} a \texttt{applyOrdering} projektujeme na podgrafy získané dříve. Tím je zajištěno, že metody používající číslování pomocí metody minimálního stupně budou brát v potaz hrany, které spojují vrcholy v jednotlivých částech s vrcholy ve vrcholovém separátoru.
+
+\section{Tvorba eliminačního stromu a výpočet Choleského rozkladu}
+Tvorbu eliminačního stromu a následný výpočet Choleského rozkladu provádíme pro každý podgraf zvlášť. Abychom zjistili počet prvků v Choleského faktoru matice, potřebujeme nejprve pomocí Algoritmu \ref{eltree2Algorithm} popsaného v oddíle \ref{EltreeAlgSection} sestrojit eliminační strom odpovídající matice. Pro tvorbu eliminačního jsme použili rutinu \texttt{eltree2} \TODO{cite z balíku?}. Poté jsme pomocí rutiny \texttt{colcnts} \TODO{cite z balíku?} využívající Algoritmus \ref{nonzerosAlgorithm} vypočítali počet nenulových prvků v jednotlivých sloupích Choleského faktoru matice a sečtením těchto hodnot jsme dostali výsledný počet nenulových prvků. 
+
+Rutina \texttt{colcnts} nezahrnuje do počtu prvků v Choleského faktoru diagonální prvky matice. Ty však pro celkový výsledek nejsou důležité, protože na diagonále nemůže dojít ke vzniku zaplnění.
 
 \section{Přesun vrcholového separátoru}
 
-\section{Tvorba eliminačního stromu a výpočet Choleského rozkladu}
-\TODO{doplnit}
 
 \section{Volání programu z příkazové řádky}
 
@@ -1038,5 +1052,7 @@ Pro úspěšné zkompilování a slinkování projektu je třeba mít nainstalov
 \bibliography{diplomka}
 
 \TODO{udelat poradek v citacich}
+
+\TODO{nemam citovane dva zdroje ze zadani}
 
 \end{document} 

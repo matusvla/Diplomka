@@ -1010,7 +1010,7 @@ Pro tvorbu podgrafů při znalosti vstupního rozdělení jsme použili námi na
 \section{Číslování}
 V našem programu jsme implementovali 4 způsoby číslování vrcholů,mezi nimiž lze přepínat pomocí argumentu \texttt{-ot} z příkazové řádky.
 
-První metodou, kterou jsme implementovali, je číslování vrcholů grafu v závislosti na vzdálenosti od separátoru popsané v kapitole \ref{sepDistOrdering}. Jedná se o rutinu \texttt{orderByDistance}. Druhou implementovanou metodou je číslování vrcholů pomocí metody minimálního stupně popsané v odstavci \ref{MDordering}. Tuto metodu jsme implementovali jako rutinu \texttt{orderByMD}. Třetí a čtvrtá metoda obsažená v našem programu používá smíšené číslování popsané v kapitole \ref{Mixedordering}. Rutina \texttt{orderMixed} používá pro výběr vrcholu kombinaci kritérií minimálního stupně a maximální vzdálenosti od separátoru. Naproti tomu v rutině \texttt{orderCoefMixed} je zvlášť napočítáno číslování v závislosti na vzdálenosti od separátoru a pomocí metody minimálního stupně. Poté dojde ke konvexní kombinaci těchto očíslování s koeficientem $C \in [0,1]$, který je vstupním parametrem této rutiny.
+První metodou, kterou jsme implementovali, je číslování vrcholů grafu v závislosti na vzdálenosti od separátoru popsané v kapitole \ref{sepDistOrdering}. Jedná se o rutinu \texttt{orderByDistance}. Druhou implementovanou metodou je číslování vrcholů pomocí metody minimálního stupně popsané v odstavci \ref{MDordering}. Tuto metodu jsme implementovali jako rutinu \texttt{orderByMD}. Třetí a čtvrtá metoda obsažená v našem programu používá smíšené číslování popsané v kapitole \ref{Mixedordering}. Rutina \texttt{orderMixed} používá pro výběr vrcholu kombinaci kritérií metody minimálního stupně a metody maximální vzdálenosti od separátoru. Naproti tomu v rutině \texttt{orderCoefMixed} je zvlášť napočítáno číslování v závislosti na vzdálenosti od separátoru a pomocí metody minimálního stupně. Poté dojde ke konvexní kombinaci těchto očíslování s koeficientem $C \in [0,1]$, který je vstupním parametrem této rutiny.
 
 Výstupem všech výše zmíněných rutin jsou vektory \texttt{ordperm} a \texttt{invordperm} popisující nově získanou permutaci vrcholů.
 
@@ -1022,9 +1022,37 @@ Tvorbu eliminačního stromu a následný výpočet Choleského rozkladu provád
 Rutina \texttt{colcnts} nezahrnuje do počtu prvků v Choleského faktoru diagonální prvky matice. Ty však pro celkový výsledek nejsou důležité, protože na diagonále nemůže dojít ke vzniku zaplnění.
 
 \section{Přesun vrcholového separátoru}
+K přesunu vrcholového separátoru dojde pouze v případě, že si jej uživatel našeho programu explicitně vyžádá při volání programu z příkazové řádky pomocí argumentu \texttt{-mvs}. Přesun vrcholového separátoru je používán jako nástroj pro vyvážení počtu nenulových prvků v Choleského faktorech jednotlivých částí rozdělení. Proto je vrcholový separátor vždy přesouván směrem do části, v níž je zaplnění nejvyšší.
+
+Označme $G_{max}$ část rozdělení s největším zaplněním v Choleského faktoru. Pro přesun vrcholového separátoru $S$ jsme použili jednoduchý způsob, kdy přidáme k vrcholovému separátoru $(G_{max} \cap\mathrm{adj}(S))$. Následně z něj ubereme vrcholy, které ve vrcholovém separátoru původně byly, ale přidáním $(G_{max} \cap\mathrm{adj}(S))$ v něm ztratily svůj význam.
+
+Zřejmě tímto postupem může dojít u obecného grafu k výraznému zvětšení velikosti vrcholového separátoru. V běžných aplikacích by však toto zvětšení nemělo být natolik výrazné, aby nedávalo smysl přesun vrcholového separátoru prozkoumat.
 
 
 \section{Volání programu z příkazové řádky}
+
+Při volání našeho programu z příkazové řádky je třeba mu poskytnout informace o tom jakou matici a jakým způsobem má program zpracovat. K tomu slouží argumenty, s nimiž může být program volán, které jsou blíže popsány v Tabulce \ref{cmdArgTable}.
+
+\bigskip
+{\noindent
+\footnotesize
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|l|c|p{10cm}|}
+  \hline
+  \multicolumn{1}{|c|}{Argument}    & \multicolumn{1}{c|}{Priorita} & \multicolumn{1}{c|}{Funkce} \\
+  \hline
+  \texttt{-mt [matrixtype]}  & 2 & Používá se pro nastavení typu vstupní matice. Parametr \texttt{matrixtype} je povinný a jeho možné hodnoty jsou \texttt{RSA} pro matici načítanou ze souboru, \texttt{P[number]} pro matici o rozměrech \texttt{number}$\times$\texttt{number} vzniklou při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice, \texttt{T[number]} pro testovací matici s indexem \texttt{number} popsanou v souboru \texttt{testing.f90}. Tento argument je povinný, pokud není použit argument \texttt{-f}. \\
+  \texttt{-f [path]}& 3 & Slouží k nastavení cesty (\texttt{path}) ke vstupnímu souboru matice. Tento argument je ignorován, pokud je použit argument \texttt{-mt} s parametrem \texttt{P[number]} nebo \texttt{T[number]}, v opačném případě je povinný.\\
+  \texttt{-ot [orderingtype]}& 2 & Využívá se pro nastavení typu uspořádání vrcholů v poslední iteraci hlavního cyklu programu. Možné hodnoty povinného parametru \texttt{orderingtype} jsou \texttt{DIST} pro číslování vrcholů grafu v závislosti na vzdálenosti od separátoru, \texttt{MD} pro číslování vrcholů pomocí metody minimálního stupně, \texttt{MIX} pro číslování pomocí smíšeného číslování používajícího současně metodu minimálního stupně a vzdálenost od separátoru a \texttt{MIX[number]} pro konvexní kombinaci těchto očíslování s koeficientem \texttt{number}~$ \in [0,1]$. Pokud není argument \texttt{-ot} uveden, nedojde k žádnému přeuspořádání vrcholů v částech. \\
+  \texttt{-mvs [number]}& 2 & Slouží k nastavení počtu přesunů vrcholového separátoru směrem do části rozdělení s větším zaplněním. Parametr \texttt{number} je povinný a může nabývat hodnot $0 - 20$. Pokud není argument použit, k přesunu vrcholového separátoru nedojde. \\
+  \texttt{-o [path]}& 2 & Užívá se pro vytvoření výstupního souboru ve formátu, který lze zobrazit pomocí softwarové knihovny GraphViz. Parametr \texttt{path} slouží k nastavení cesty k výstupnímu souboru. Pokud soubor již existuje, bude přepsán. Pokud argument není použit, k vypsání výstupu nedojde.\\
+  \texttt{-w}& 2 & Pokud je tento argument použit, program v průběhu svého běhu vypisuje informaci o tom, která jeho část právě probíhá. \\
+  \texttt{-h}& 1 & Pokud je tento argument použit, jsou všechny ostatní argumenty ignorovány a je pouze vypsána nápověda k programu. \\
+  \hline
+\end{tabular}
+\captionof{table}{Popis argumentů programu při volání z příkazové řádky \label{cmdArgTable}}
+}
 
 %----------------------------------------------------------------------
 \chapter{Výsledky}
@@ -1032,7 +1060,7 @@ Rutina \texttt{colcnts} nezahrnuje do počtu prvků v Choleského faktoru diagon
 \section{Informace o systému}
 Náš program byl testován na MacBook Pro (Retina, 15-inch, Mid 2015) s procesorem 2,5 GHz Intel Core i7, operační pamětí 16GB 1600 MHz DDR3 a grafickou kartou Intel Iris Pro 1536 MB.
 
-Pro úspěšné zkompilování a slinkování projektu je třeba mít nainstalovaný GNU Make (testováno na verzi 3.81), gcc a gfortran (testováno pro verzi 6.3.0) a dělič grafů METIS (testováno pro verzi 5.1.0). \TODO{dot-Grapvhiz}
+Pro úspěšné zkompilování a slinkování projektu je třeba mít nainstalovaný GNU Make (testováno na verzi 3.81), gcc a gfortran (testováno pro verzi 6.3.0) a dělič grafů METIS (testováno pro verzi 5.1.0). \TODO{dot-Grapvhiz} \TODO{citovat balik na razeni vrcholu}
 
 \section{Dělení grafu na dvě části}
 \section{Dělení grafu na víc částí}

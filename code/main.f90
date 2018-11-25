@@ -301,7 +301,7 @@
         TESTno = TESTno + 1
 
         deallocate(TESTordperm1, TESTinvordperm1)
-
+        
         j = 0
         do i = 1, parts + 1
           j = j + np(i)
@@ -312,8 +312,33 @@
           write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
         end if
         TESTno = TESTno + 1
+
+        TESTswitch = .true.
+        do i = 1, n
+          if(part(i) == parts+1) cycle
+          do j = ia(i), ia(i+1)-1
+            if (part(i) /= part(ja(j)) .and. part(ja(j)) /= parts + 1) then 
+            TESTswitch = .false.
+          end if
+        end do
+        end do
+        if(TESTswitch) then 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
+        else 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
+        end if
+        TESTno = TESTno + 1
+
+        do i = 1, 4
+          call moveVertSep(ia, ja, n, part, parts, MAXLOC(cholFill,1), sepsize)
+        end do
+        if(COUNT(part==parts+1) == sepsize) then 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": OK"
+        else 
+          write(*,'(A, I2, A)') "TEST ",TESTno,": failed!"
+        end if
+        TESTno = TESTno + 1
       
-        ! TODO test separator moving
 
 
 

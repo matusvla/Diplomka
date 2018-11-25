@@ -5,6 +5,8 @@
       module testing
         use auxroutines
         implicit none
+        private  
+        public :: loadTestGraph
       contains
 !--------------------------------------------------------------------           
       subroutine loadTestGraph(ia, ja, n, graphID)
@@ -42,18 +44,6 @@
             ja = [2, 3, 5, 1, 4, 1, 5, 2, 5, 1, 3, 4]    
         end select
       end subroutine loadTestGraph
-!--------------------------------------------------------------------        
-      subroutine loadTestPart(part, graphID)
-        implicit none
-        integer :: graphID
-        integer, allocatable, dimension(:) :: part        
-        select case (graphID)
-          case (4)
-            part = [1, 1, 1, 2, 1, 1, 1]
-          case default !the same as case 1
-            stop "[testing.f90:loadTestPart] ERROR: Unknown graphID"
-        end select
-      end subroutine loadTestPart
 !--------------------------------------------------------------------                         
       subroutine testUniqueness(arr)
         implicit none        
@@ -69,5 +59,5 @@
           stop "aborting"
         end if
       end subroutine testUniqueness
-!--------------------------------------------------------------------                         
+!-------------------------------------------------------------------- 
     end module testing

@@ -24,6 +24,8 @@
 !code/svrev.f90
 !code/testing.f90
 !code/cmdlineloader.f90
+!code/matrixloader.f90
+!code/metiscaller.f90
 !code/useful_tricks.txt
 !code/volani.f
 !code/nonz.m

@@ -1,6 +1,6 @@
 ! module myroutines90
 ! (c) Vladislav Matus
-! last edit: 21. 09. 2018      
+! last edit: 16. 11. 2018      
 
       module myroutines90
         use auxroutines
@@ -12,109 +12,7 @@
         integer, parameter :: INT_SIZE =  4
       contains
 
-!--------------------------------------------------------------------           
-
-! subroutine metcr
-! (c) Vladislav Matus
-! last edit: 22. 7. 2018
-! TODO: check contents of ia, ja      
-! TODO: fill ierr
-!
-! Purpose:
-!   creating contents of a file suitable for METIS graph partitioner
-! Input:
-!   ia, ja ... matrix in CSR format
-!   n ... size of this matrix
-!   unitn ... nuber of unit of the opened file         
-! Output:
-!   ierr ... error code (0 if succesful, 1 otherwise)  
-! Allocations: none             
-! TODO TEST, changed but not tested!
-
-      subroutine metcr(ia,ja,n,unitn,ierr)
-        implicit none
-!
-! parameters
-!
-      integer :: n, unitn, ierr
-      integer, allocatable, dimension(:) :: ia, ja
-!
-! internals
-!        
-        integer :: i,j,loop
-!
-! start of metcr
-!      
-! -- count number of loops in graph
-!        
-        loop = countloops(n,ia,ja)
-!
-! -- write header for METIS
-!             
-        write(unitn,"(I10.1)",advance="no") n    ! number of vertices
-        write(unitn,"(I10)") (ia(n+1)-1-loop)/2  ! number of edges-loops
-!
-! -- write the rest of the file
-! 
-        do i = 1, n
-          do j = ia(i), ia(i+1)-1
-            if(i/=ja(j)) then
-              write(unitn,"(I12.1)",advance="no") ja(j);
-            end if
-          end do
-          write(unitn,*)
-        end do
-!
-! end of metcr
-!  
-      end subroutine metcr    
-      
-!--------------------------------------------------------------------           
-
-! subroutine loadpartition
-! (c) Vladislav Matus
-! last edit: 16. 03. 2018  
-! TODO error handling      
-! TODO fill ierr  
-! TODO check if nubmer of parts is as it should be
-!
-! Purpose:
-!   Loading of graph partition from input file into an array,
-!   partitions are indexed from 1.
-! Input:
-!   n ... size of this matrix
-!   unitn ... nuber of unit of the opened file         
-! Output:
-!   part ... partitioning of matrix
-!   ierr ... error code (0 if succesful, 1 otherwise)  
-! Allocations: part 
-
-      subroutine loadpartition(part,n,unitn,ierr)
-        implicit none
-!
-! parameters
-!
-      integer :: n, unitn, ierr
-      integer, allocatable :: part(:)
-!
-! internals
-!        
-      integer :: i,j
-!
-! start of loadpartition
-!
-      allocate(part(n),stat=ierr)        
-      do i = 1, n
-        read(unitn,*) part(i)
-        part(i) = part(i) + 1 ! indexing from 1
-      end do       
-!
-! end of loadpartition
-!  
-      end subroutine loadpartition
-
 !--------------------------------------------------------------------
-
 ! subroutine createSubgraphs
 ! (c) Vladislav Matus
 ! last edit: 12. 11. 2018
@@ -142,8 +40,9 @@
 !   invperm ... multidimensional array containing the original indices
 ! Allocations: iap%vectors,iap%vectors%elements(1..parts+1),
 !   jap%vectors, jap%vectors%elements(1..parts+1),
-!   aap%vectors, aap%vectors%elements(1..parts+1),
+!   nextToVertSep%vectors, nextToVertSep%vectors%elements(1..parts+1),
 !   np, perm, invperm%vectors, invperm%vectors%elements(1..parts+1) 
+!   aap%vectors, aap%vectors%elements(1..parts+1),
 
       subroutine createSubgraphs(ia, ja, n, part, parts, iap, jap, np, &
         nextToVertSep, perm, invperm, ierr, aa, aap)
@@ -281,7 +180,6 @@
       end subroutine createSubgraphs
       
 !--------------------------------------------------------------------
-
 ! subroutine subgraphCleanup
 ! (c) Vladislav Matus
 ! last edit: 12. 11. 2018  
@@ -337,7 +235,6 @@
       end subroutine subgraphCleanup
         
 !--------------------------------------------------------------------        
-
 ! subroutine shiftnumbering
 ! (c) Vladislav Matus
 ! last edit: 22. 07. 2018  
@@ -386,7 +283,6 @@
       end subroutine shiftnumbering
         
 !-------------------------------------------------------------------- 
-
 ! function countloops
 ! (c) Vladislav Matus
 ! last edit: 22. 07. 2018  
@@ -438,9 +334,9 @@
 !   This routine removes all loops in the graph
 ! Input:
 !   n ... integer, number of vertices in graph
-!   ia,ja,aa ... graph in CSR format
+!   ia, ja, aa ... graph in CSR format
 ! Output:
-!   iaN,jaN,aaN .. graph without loops in CSR format
+!   iaN, jaN, aaN .. graph without loops in CSR format
 ! Allocations: iaN, jaN, aaN
 ! TODO Error handling
 ! TODO Test after change      
@@ -489,6 +385,56 @@
 ! end of remloops
 !  
       end subroutine remloops
+
+!-------------------------------------------------------------------- 
+! subroutine addDiagonal
+! (c) Vladislav Matus
+! last edit: 19. 11. 2018  
+!
+! Purpose:
+!   This routine adds diagonal entries to the input matrix.
+! Input:
+!   n ... integer, size of graph
+!   ia,ja ... matrix in CSR format
+! Output:
+!   iaNew, jaNew ... new matrix in CSR format
+! Allocations:  iaNew, jaNew
+
+      subroutine addDiagonal(ia, ja, n, iaNew, jaNew)
+        implicit none
+!
+! parameters
+!
+      integer :: n
+      integer, allocatable, dimension(:) :: ia, ja, iaNew, jaNew
+!
+! internals
+!           
+      integer :: i, j, before, added
+      logical :: hasDiagonal
+!
+! start of addDiagonal
+!	      
+      added = 0
+      iaNew(1) = ia(1)
+      jaNew = 0
+      do i = 1, n
+        hasDiagonal = .false.
+        do j = ia(i), ia(i + 1) - 1
+          if (ja(j) == i) hasDiagonal = .true.
+        end do
+        if(.not. hasDiagonal) then
+          jaNew(ia(i) + added) = i
+          added = added + 1
+        end if
+        iaNew(i + 1) = ia(i + 1) + added 
+        jaNew(ia(i) + added : ia(i + 1) + added - 1) = ja(ia(i) : ia(i + 1) - 1)
+      end do
+!
+! end of addDiagonal
+!  
+      end subroutine addDiagonal
+
 !-------------------------------------------------------------------- 
 ! function countDistance
 ! (c) Vladislav Matus
@@ -534,6 +480,8 @@
 !    and fill isOrdered and distFromSep accordingly        
 !       
         ierr = 0
+        distFromSep = n
+
         do i = 1, n          
           if (part(i) == parts + 1) then
             isOrdered(i) = .true.
@@ -570,7 +518,7 @@
         end do 
         if (testVertexNo /= n) then
           ierr = 1
-          write(*,*) "[myroutines90.f90:countDistance] Warning: Partition not continuous", &
+          write(*,*) "[myroutines90.f90:countDistance] WARNING: Partition not continuous", &
             " and therefore not all counted!"
         end if
         countDistance = maxDepth  
@@ -785,7 +733,8 @@
         end do
         ordering(n - 1) = 1 !two vertex graph is symetrical
         ordering(n) = 1
-        call normalizeOrdering(ordering)  
+        call normalizeOrdering(ordering)
+        deallocate(iaIn, jaIn, stat = ierr)
         
 
 !
@@ -846,7 +795,7 @@
         end do        
         ordering(n) = 1
         call normalizeOrdering(ordering)  
-        
+        deallocate(iaIn, jaIn, stat = ierr)
 
 !
 ! end of mixedOrdering
@@ -1227,6 +1176,7 @@
 ! end of applyOrdering
 !  
       end subroutine applyOrdering
+
 !--------------------------------------------------------------------   
 ! function countComponents
 ! (c) Vladislav Matus
@@ -1380,8 +1330,88 @@
 !	 
       end subroutine moveVertSep
 
-      
+!--------------------------------------------------------------------   
+! subroutine orderSubgraphs
+! (c) Vladislav Matus
+! last edit: 17. 11. 2018  
 !
-! end of module
-!      
+! Purpose: 
+!   Interface for running the appropriate ordering on original graph
+!   and applying it to all the subgraphs.
+!   
+! Input:
+!   orderingType ... 'no', 'MD', 'DIST', 'MIX', 'MIX[number]'
+!   mixedCoef ... coeficient for mixed ordering      
+!   ia, ja ... graph in CSR format
+!   n ... number of vertices of the graph
+!   part ... partition of the graph
+!   parts ... number of parts in partition
+!   iap, jap, ... multidimensional ragged arrays containing submatrices in CSR format
+!   np ... vector of sizes of the submatrices
+!   nvs ... logical multidimensional ragged array containig for each vertex info
+!     if it is connected to the vertex separator      
+!   
+! Output:
+!   iap, jap, ... multidimensional ragged arrays containing submatrices in CSR format,
+!     newly ordered       
+!   
+! Allocations: none
+!
+
+      subroutine orderSubgraphs(orderingType, mixedCoef, ia, ja, n, part, &
+        parts, iap, jap, np, nvs, hasOutput)
+        implicit none
+!
+! parameters
+!
+        character(len=*) :: orderingType ! how should the matrix be ordered
+        double precision :: mixedCoef ! coeficient for mixed ordering
+        integer, allocatable, dimension(:) :: ia, ja, np
+        integer, allocatable, dimension(:) :: part 
+        type(intRaggedArr) :: iap, jap
+        type(logicalRaggedArr) :: nvs
+        integer :: parts, n
+        logical :: hasOutput
+!
+! internals
+!
+      integer :: ierr, j
+      ! -- permutations from original to ordered matrix and back
+      integer, allocatable, dimension(:) :: ordperm, invordperm
+      type(intRaggedArr) :: ordpermp, invordpermp
+
+!
+! start of orderSubgraphs
+!
+      if(TRIM(ADJUSTL(orderingType)) /= 'no') then
+        select case(TRIM(ADJUSTL(orderingType)))
+          case ('MD')
+            if(hasOutput) write(*,*) "Ordering graph using MD ordering..."
+            call orderByMD(ia, ja, n, ordperm, invordperm, ierr)
+          case ('DIST')
+            if(hasOutput) write(*,*) "Ordering graph by distance from separator..."
+            call orderByDistance(ia, ja, n, part, parts, ordperm, invordperm, ierr)  
+          case ('MIX')
+            if(hasOutput) write(*,*) "Ordering graph using mixed ordering."
+            call orderMixed(ia, ja, n, part, parts, ordperm, invordperm, ierr) 
+          case default
+            if(hasOutput) write(*,*) "Ordering graph using mixed ordering with coeficients..."
+            call orderCoefMixed(ia, ja, n, part, parts, ordperm, invordperm, mixedCoef, ierr)
+          end select
+        ! -- Apply ordering
+        call partOrdering(ordperm, invordperm, ordpermp, invordpermp, n, np, part, parts, ierr)
+        do j = 1, parts
+          call applyOrdering(iap%vectors(j)%elements, jap%vectors(j)%elements, np(j), &
+            nvs%vectors(j)%elements, ordpermp%vectors(j)%elements, &
+            invordpermp%vectors(j)%elements, ierr)
+        end do
+        call deallocRaggedArr(ordpermp, parts + 1, ierr)
+        call deallocRaggedArr(invordpermp, parts + 1, ierr)
+      end if
+!
+! end of orderSubgraphs
+!	 
+      end subroutine orderSubgraphs
+ 
+!--------------------------------------------------------------------            
       end module myroutines90

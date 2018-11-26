@@ -58,6 +58,7 @@
       integer :: nfull ! one dimension of poisson matrix if matrixtype == 'P'
       logical :: hasGvOutput ! Should a Grapgviz file be created
       character*(CMDARG_MAXLEN) :: gvFilename ! name of output file
+      logical :: orderEveryMove ! when should the ordering be called 
       logical :: writesProgress
 
 ! -- miscelaneous 
@@ -82,7 +83,8 @@
 !	  
       parts = 2
       call getCmdlineArgs(matrixpath, matrixtype, nfull, TESTswitch, testMatrixNumber, & 
-        orderingType, mixedCoef, vertSepMoves, hasGvOutput, gvFilename, writesProgress)
+        orderingType, mixedCoef, vertSepMoves, hasGvOutput, gvFilename, writesProgress, &
+        orderEveryMove)
       write(*,*) "Processing ", TRIM(ADJUSTL(matrixpath)), ":"
 !
 ! -- Matrix loading
@@ -104,7 +106,7 @@
         if(writesProgress) write(*,*) "Creating subgraphs from the original graph..." 
         call createSubgraphs(ia, ja, n, part, parts, iap, jap, np, nvs, perm, invperm, ierr)
         ! -- Find ordering of vertices of the original graph
-        if (i == vertSepMoves) then
+        if (i == vertSepMoves .or. orderEveryMove) then
           call orderSubgraphs(orderingType, mixedCoef, ia, ja, n, part, parts, &
             iap, jap, np, nvs, writesProgress)
         end if
@@ -172,7 +174,7 @@
      ! deallocate(ia, ja, part, ordperm, invordperm, cholFill, stat=ierr) TODO uncomment
 
 !
-! -- final tests in test mode
+! -- final tests in test mode TODO remove
 !            
       if(TESTswitch) then
         write(*,*) "------TEST RESULTS: --------------------------------------------------------------"

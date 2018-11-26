@@ -29,12 +29,12 @@
 
       subroutine getCmdlineArgs(matrixpath, matrixtype, nfull, testSwitch, &
         testGraphNumber, orderingType, mixedCoef, vsMoves, hasGvOutput, outputFile, &
-        writesProgress)
+        writesProgress, orderEveryMove)
         implicit none
 !
 ! parameters
 !
-      logical :: testSwitch, hasGvOutput, writesProgress
+      logical :: testSwitch, hasGvOutput, writesProgress, orderEveryMove
       integer :: nfull, stat, testGraphNumber, vsMoves
       character*(CMDARG_MAXLEN) :: argValue
       character*(CMDARG_MAXLEN) :: matrixpath, matrixtype, outputFile
@@ -61,6 +61,7 @@
       hasGvOutput = .false.
       outputFile = ""
       writesProgress = .false.
+      orderEveryMove = .false.
       !Loop over the arguments
       n = command_argument_count()
       if (n > 0) then
@@ -72,11 +73,11 @@
               write(*,*) "Vladislav Matus's diploma thesis, 2018"
               write(*,*) "  -mt [matrixtype] for choosing input type of matrix. Allowed types: 'RSA', 'P[number]', 'T[number]'."
               write(*,*) "  -f [path] path to matrix file which should be processed. Required when using 'RSA' matrix type."
-              write(*,*) "  -o [path] if specified, graph in graphviz format will be written to file on path."
               write(*,*) "  -ot [type] ordering type, default is no ordering. Allowed types 'MD', 'DIST', 'MIX', 'MIX[number]'."
               write(*,*) "  -mvs [number] how many times vertex separator should be moved to try to improve the partition."
+              write(*,*) "  -oe vertices are ordered in every iteration and not only in the last one."
+              write(*,*) "  -o [path] if specified, graph in graphviz format will be written to file on path."
               write(*,*) "  -w program outputs additional information about its progress when running."
-              write(*,*) "  -t for running development tests."
               write(*,*) "  -h for help."
               stop
             case("-f")
@@ -156,8 +157,10 @@
               i = i + 1
             case("-w")
               writesProgress = .true.
-            case("-t")
+            case("-t") ! TODO remove
               testSwitch = .true.
+            case("-oe") ! TODO remove
+              orderEveryMove = .true.
             case default
               write(*,*) "ERROR: Invalid command line argument '", TRIM(ADJUSTL(argValue)), &
                 "' encountered, use -h for help"

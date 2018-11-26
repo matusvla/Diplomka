@@ -35,4 +35,6 @@
 !text/diplomka.bib
 
 !text/pictures/*
+!text/tabledata/*
+
 text/pictures/.DS_Store

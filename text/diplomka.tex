@@ -16,6 +16,7 @@
     \usepackage{mathtools}
     \usepackage{multirow}
     \usepackage{url}
+    \usepackage{longtable}
     \usetikzlibrary{calc}
     \setcounter{secnumdepth}{3}
 
@@ -1016,6 +1017,8 @@ Výstupem všech výše zmíněných rutin jsou vektory \texttt{ordperm} a \text
 
 Číslování vždy aplikujeme na původní graf a poté ho pomocí rutin \texttt{partOrdering} a \texttt{applyOrdering} projektujeme na podgrafy získané dříve. Tím je zajištěno, že metody používající číslování pomocí metody minimálního stupně budou brát v potaz hrany, které spojují vrcholy v jednotlivých částech s vrcholy ve vrcholovém separátoru.
 
+V rutinách pro číslování vrcholů jsme využívali pro řazení vrcholů rutinu \texttt{MRGRNK} z knihovny Orderpack 2.0 \TODO{cite webovku}
+
 \section{Tvorba eliminačního stromu a výpočet Choleského rozkladu}
 Tvorbu eliminačního stromu a následný výpočet Choleského rozkladu provádíme pro každý podgraf zvlášť. Abychom zjistili počet prvků v Choleského faktoru matice, potřebujeme nejprve pomocí Algoritmu \ref{eltree2Algorithm} popsaného v oddíle \ref{EltreeAlgSection} sestrojit eliminační strom odpovídající matice. Pro tvorbu eliminačního jsme použili rutinu \texttt{eltree2} \TODO{cite z balíku?}. Poté jsme pomocí rutiny \texttt{colcnts} \TODO{cite z balíku?} využívající Algoritmus \ref{nonzerosAlgorithm} vypočítali počet nenulových prvků v jednotlivých sloupích Choleského faktoru matice a sečtením těchto hodnot jsme dostali výsledný počet nenulových prvků. 
 
@@ -1031,7 +1034,7 @@ Zřejmě tímto postupem může dojít u obecného grafu k výraznému zvětšen
 
 \section{Volání programu z příkazové řádky}
 
-Při volání našeho programu z příkazové řádky je třeba mu poskytnout informace o tom jakou matici a jakým způsobem má program zpracovat. K tomu slouží argumenty, s nimiž může být program volán, které jsou blíže popsány v Tabulce \ref{cmdArgTable}.
+Při volání našeho programu z příkazové řádky je třeba mu poskytnout informace o tom jakou matici a jakým způsobem má program zpracovat. K tomu slouží argumenty, s nimiž může být program volán, které jsou blíže popsány v Tabulce \ref{cmdArgTable}. Argument, s nimiž je program volán jsou čteny zleva doprava, pokud tedy program zpracuje argument, který není ve správném tvaru, další argumenty již nezpracovává a vypíše chybové hlášení.
 
 \bigskip
 {\noindent
@@ -1060,11 +1063,45 @@ Při volání našeho programu z příkazové řádky je třeba mu poskytnout in
 \section{Informace o systému}
 Náš program byl testován na MacBook Pro (Retina, 15-inch, Mid 2015) s procesorem 2,5 GHz Intel Core i7, operační pamětí 16GB 1600 MHz DDR3 a grafickou kartou Intel Iris Pro 1536 MB.
 
-Pro úspěšné zkompilování a slinkování projektu je třeba mít nainstalovaný GNU Make (testováno na verzi 3.81), gcc a gfortran (testováno pro verzi 6.3.0) a dělič grafů METIS (testováno pro verzi 5.1.0). \TODO{dot-Grapvhiz} \TODO{citovat balik na razeni vrcholu}
+Pro úspěšné zkompilování a slinkování projektu je třeba mít nainstalovaný GNU Make (testováno na verzi 3.81), gcc a gfortran (testováno pro verzi 6.3.0) a dělič grafů METIS (testováno pro verzi 5.1.0). Pro zobrazování výsledných grafů je třeba mít nainstalovanou knihovnu GraphViz, konkrétně jsme používali dot~-~graphviz version 2.40.1 \TODO{cite dot-Grapvhiz}.
 
-\section{Dělení grafu na dvě části}
-\section{Dělení grafu na víc částí}
-\TODO{bude to?}
+\section{Výsledky pro základní typy číslování}
+V této podkapitole porovnáme počet nenulových prvků v Choleského faktoru v závislosti na zvoleném typu číslování bez toho, aby došlo k přesunu vektorového separátoru. Pro 110 námi testovaných matic jsme spustili program se čtyřmi různými nastaveními. Nejprve bez toho, aby se vrcholy jakkoliv přečíslovávaly, poté jsme vrcholy číslovali podle jejich vzdálenosti od vrcholového separátoru, dále jsme použili číslování pomocí metody minimálního stupně a smíšené číslování používající kritérium kombinující obě předchozí. V Tabulce \ref{resultTable} jsou vypsány výsledky pro reprezentativní podmnožinu matic, které jsme testovali. 
+\TODO{vybrat reprezentativni podmnozinu}
+
+\bigskip
+{\noindent
+\footnotesize
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|l|c|c|c|r|r|r|}
+  \hline
+  \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{$|S|$}    &\multicolumn{1}{|c|}{$|V_1|$} &\multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{1}{|c|}{\texttt{-ot}} & \multicolumn{2}{c|}{Počty nenul} \\
+  \hline
+  \input{tabledata/output.tex}
+  \hline
+\end{longtable}
+\captionof{table}{\TODO{dopsat} \label{resultTable}}
+}
+
+\bigskip
+{\noindent
+\footnotesize
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|l|c|c|c|r|r|r|}
+  \hline
+  \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{$|S|$}    &\multicolumn{1}{|c|}{$|V_1|$} &\multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{1}{|c|}{\texttt{-ot}} & \multicolumn{2}{c|}{Počty nenul} \\
+  \hline
+  \input{tabledata/output2.tex}
+  \hline
+\end{longtable}
+\captionof{table}{\TODO{dopsat} \label{resultTable}}
+}
+
+Z Tabulky \ref{resultTable} je vidět, že ve valné většině případů nám již samotné očíslování vrcholů může výrazně pomoci redukovat zaplnění v Choleského faktoru matice. Ukazuje se, že číslování podle vzdálenosti od separátoru není pro tuto úlohu příliš vhodné, jen v několika případech s jeho pomocí došlo k výraznému zmenšení počtu nenulových prvků v Choleského rozkladech matice. Naproti tomu metoda minimálního stupně a smíšené číslování nám pro většinu matic poskytnou výrazné zlepšení. V případech, kdy pomocí žádného číslování nezískáme lepší výsledky než byly výsledky bez něj, obvykle nedochází k výrazné degradaci.
+
+Můžeme pozorovat, že v některých případech je při použití dvou různých očíslování rozdíl v tom, ve které části rozdělení je větší počet nenulových prvků. Vzhledem k tomu, že na tuto informaci bereme ohled při přesouvání vrcholového separátoru, je vhodné vrcholy graf očíslovat námi zvoleným číslováním před každým přesunutím vrcholového separátoru a ne jen v poslední iteraci. To nám však výrazně přidá na výpočetní náročnosti a proto v další kapitole diskutujeme, zda tento postup přináší lepší výsledky.
 
 %----------------------------------------------------------------------
 

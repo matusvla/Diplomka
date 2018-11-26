@@ -119,8 +119,10 @@
         end do
         if(writesProgress) write(*,*) "Nonzeros in L: ", cholFill
         ! -- Deallocate all fields allocated by createSubgraphs
-        if(writesProgress) write(*,*) "Cleaning up subgraphs..." 
-        call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
+        if (i < vertSepMoves) then
+          if(writesProgress) write(*,*) "Cleaning up subgraphs..." 
+          call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
+        end if
         ! -- If there was no vertex separator after initial partion
         if (metisierr == METIS_NO_SEP) exit
         ! -- Move vertex separator to balace nonzeros in Cholesky factor
@@ -162,7 +164,11 @@
 ! -- Final steps
 !
       write(*,*) "Final size of separator: ", sepsize
+      write(*,*) "Final sizes of parts: ", np(1:parts)
       write(*,*) "Final count of nonzeros in L: ", cholFill
+      if(writesProgress) write(*,*) "Cleaning up subgraphs..." 
+      call subgraphCleanup(iap, jap, np, nvs, perm, invperm, parts, ierr)
+
      ! deallocate(ia, ja, part, ordperm, invordperm, cholFill, stat=ierr) TODO uncomment
 
 !

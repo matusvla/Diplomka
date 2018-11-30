@@ -64,7 +64,7 @@ for matrix in sorted(os.listdir(MATRIX_PATH)):
             # print("Processing " + matrix)
             command = "./prog -f ./" + MATRIX_PATH + \
                 "/" + matrix + " " + \
-                "-ot " + otValue + " -mvs " + str(mvsVal)
+                "-ot " + otValue + " -oe -mvs " + str(mvsVal)
             proc = Popen(command, shell=True, stdout=PIPE)
             (out,err) = proc.communicate()
             # print(out)

@@ -1139,7 +1139,7 @@ Již z podstaty Choleského rozkladu je zřejmé, že přidáním vrcholů ke gr
   \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{\texttt{-ot}}  &\multicolumn{1}{|c|}{\texttt{-mvs}} &\multicolumn{1}{|c|}{$|S|$} & \multicolumn{1}{|c|}{$|V_1|$}& \multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{2}{c|}{Počty nenul} \\
   \hline
     \multirow{10}{*}{bcsstk05.rb}
-      & \multirow{10}{*}{\texttt{-}} & -
+      & \multirow{10}{*}{\texttt{-}} & 0
       & 12	&	69	&	72	& 952 & 999 \\
       & & 1 
       &	12	&	81	&	60	&	1188	&	798	\\
@@ -1161,7 +1161,7 @@ Již z podstaty Choleského rozkladu je zřejmé, že přidáním vrcholů ke gr
       &	12	&	81	&	60	&	1188	&	798	\\
     \hline
     \multirow{10}{*}{bcsstk08.rb}
-      & \multirow{10}{*}{\texttt{-}} & -
+      & \multirow{10}{*}{\texttt{-}} & 0
       & 57  & 564 & 453 &	50962	&	44817 \\
       & & 1 
       &	247	&	159	&	668	&	3189	&	96258	\\
@@ -1188,31 +1188,65 @@ Již z podstaty Choleského rozkladu je zřejmé, že přidáním vrcholů ke gr
 
 Zřejmě při přesouvání vrcholového separátoru dojde od jisté chvíle k zacyklení, protože vrcholový separátor je přesouván vždy směrem do části s vyšším počtem prvků. Pro námi testované matice se periodické chování vyskytlo vždy dříve než v deváté iteraci algoritmu. Perioda nemusí být nutně rovna dvěma, jak by se člověk mohl domnívat. Příklad periodického chování algoritmu můžeme vidět v opět v Tabulce \ref{mvsTable1}.
 
-Námi zvolený algoritmus pro přesouvání vrcholů taktéž není vhodný pro grafy s velmi malým počtem vrcholů, protože u grafů tohoto typu často dojde přesunutím separátoru výrazné změně velikostí jednotlivých částí. To má za následek výraznou nevyváženost v počtu operací potřebných k výpočtu Choleského rozkladu příslušných podmatic.
+Námi zvolený algoritmus pro přesouvání vrcholů taktéž není vhodný pro grafy s velmi malým počtem vrcholů, protože u grafů tohoto typu často dojde přesunutím separátoru výrazné změně velikostí jednotlivých částí. To má za následek výraznou nevyváženost v počtu operací potřebných k výpočtu Choleského rozkladu příslušných podmatic. Tato situace může nastat i pro grafy se separátorem, který je v poměru k jednotlivým částem rozdělení velký. Jako příklad uveďme dva grafy popsané v Tabulce \ref{mvsTable2}
 
-\TODO{příklad = tabulka bcsstk01.rsa}
-
+\bigskip
 {\noindent
   \footnotesize
   \centering
   \renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|l|c|r|r|r|r|r|r|}
+\begin{tabular}{|l|c|c|r|r|r|r|r|}
   \hline
   \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{\texttt{-ot}}  &\multicolumn{1}{|c|}{\texttt{-mvs}} &\multicolumn{1}{|c|}{$|S|$} & \multicolumn{1}{|c|}{$|V_1|$}& \multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{2}{c|}{Počty nenul} \\
   \hline
-  \input{tabledata/output4.tex}
-  \hline
+    \multirow{7}{*}{bcsstk01.rsa}
+      & \multirow{7}{*}{\texttt{-}} & 0
+      & 12 & 18 & 18 & 105 & 113 \\
+      & & 1  
+      &	6	&	41	&	1	&	600	&	0	\\
+      & & 2
+      &	13	&	28	&	7	&	255	&	15	\\
+      & & 3
+      &	15	&	2	&	31	&	0	&	306	\\
+      & & 4
+      &	12	&	20	&	16	&	131	&	81	\\
+      & & 5
+      &	15	&	2	&	31	&	0	&	306	\\
+      & & \vdots
+      &	\vdots	&	\vdots	&	\vdots	&	\vdots	&	\vdots	\\
+    \hline
+    \multirow{4}{*}{bcsstk04.rsa}
+      & \multirow{4}{*}{\texttt{-}} & 0
+      &	24	&	54	&	54	&	1006	&	1100	\\
+      & & 1   
+      &	30	&	90	&	12	&	2138	&	60	\\
+      & & 2
+      &	24	&	54	&	54	&	1006	&	1100	\\
+      & & \vdots
+      &	\vdots	&	\vdots	&	\vdots	&	\vdots	&	\vdots	\\
+    \hline
 \end{tabular}
-\captionof{table}{Počet nenulových prvků v Choleského faktoru při použití smíšeného číslování. \label{mixCoefResultTable}}
+\captionof{table}{Příklad výrazné změny vyváženosti částí při přesunu vrcholového separátoru. \label{mvsTable2}}
 }
 
+Z předchozího textu by se mohlo zdát, že nám tato metoda přesunu separátoru nic nového nepřinese, ale není tomu tak. U matic, v nichž je počet prvků v jednotlivých Choleského faktorech po prvním rozdělení výrazně nevyvážený tato jednooduchá metoda výrazně pomáhá. V Tabulce \ref{mvsTable3} můžeme pozorovat, že ve většině případů dochází k výraznému zlepšení vyvážení rozdělení již po jedné nebo dvou iteracích. Zároveň je míra zvětšení velikosti vrcholového separátoru únosná. 
 
-pro male/ploche to nema cenu
-chce to rovnat v kazdem tahu
-pro vyvazene to nema cenu bcsstk16
-U nevyvazenych to pomaha
-separator se trosku zvetsuje, ale ne moc
-perioda, ne nutne 2
+\bigskip
+{\noindent
+  \footnotesize
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|l|c|c|r|r|r|r|r|}
+  \hline
+  \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{\texttt{-ot}}  &\multicolumn{1}{|c|}{\texttt{-mvs}} &\multicolumn{1}{|c|}{$|S|$} & \multicolumn{1}{|c|}{$|V_1|$}& \multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{2}{c|}{Počty nenul} \\
+  \hline
+  \TODO{doplnit}
+
+\end{tabular}
+\captionof{table}{Výsledky přesunu vrcholového separátoru pro nevyvážené matice. \label{mvsTable3}}
+}
+
+Tento postup je vhodný pro vylepšování rozdělení bez používání číslování vrcholů. Pokud však číslujeme pouze v poslední iteraci hlavního cyklu, tj. spouštíme program bez argumentu \texttt{-oe}, stává se, že část rozdělení s větším počtem nenulových prvků v Choleského faktoru bez použití číslování je jiná než část rozdělení s větším počtem nenulových prvků při použití číslování. V takovémto případě dochází k přesunu separátoru, který nám pomůže vyvážit počet nenulových prvků pro rozdělení bez číslování, ale naopak nám zhorší vyváženost pro očíslované grafy. Pro lepší výsledky je tedy vhodné číslovat v každé iteraci hlavní smyčky, což nám však výrazně přidá na výpočetní náročnosti. Záleží tedy na tom, jaký je problém, který se s pomocí Choleského faktorizace snažíme vyřešit a zda požadujeme co nejlepší vyvážení počtu operací na jednotlivých částech, nebo dáváme přednost rychlejšímu nalezení vhodného rozdělení.
 
 
 

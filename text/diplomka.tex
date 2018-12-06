@@ -954,6 +954,8 @@ Námi implementovaný program se volá z příkazové řádky a jeho funkce záv
 
 Náš program byl implementován v programovacím jazyce Fortran, pro použití knihovny METIS napsané v C++ jsme vytvořili rozhraní pro volání rutin napsaných v C++ z Fortranu. Pro opakované spouštění programu za účelem testování jsme používali skript napsaný v jazyce Python.
 
+\TODO{github?}
+
 \section{Formát a uložení vstupní matice}
 V této podkapitole bude specifikován formát vstupní matice a způsob její reprezentace v programu.
 
@@ -1247,6 +1249,19 @@ Z předchozího textu by se mohlo zdát, že nám tato metoda přesunu separáto
 }
 
 Tento postup je vhodný pro vylepšování rozdělení bez používání číslování vrcholů. Pokud však číslujeme pouze v poslední iteraci hlavního cyklu, tj. spouštíme program bez argumentu \texttt{-oe}, stává se, že část rozdělení s větším počtem nenulových prvků v Choleského faktoru bez použití číslování je jiná než část rozdělení s větším počtem nenulových prvků při použití číslování. V takovémto případě dochází k přesunu separátoru, který nám pomůže vyvážit počet nenulových prvků pro rozdělení bez číslování, ale naopak nám zhorší vyváženost pro očíslované grafy. Pro lepší výsledky je tedy vhodné číslovat v každé iteraci hlavní smyčky, což nám však výrazně přidá na výpočetní náročnosti. Záleží tedy na tom, jaký je problém, který se s pomocí Choleského faktorizace snažíme vyřešit a zda požadujeme co nejlepší vyvážení počtu operací na jednotlivých částech, nebo dáváme přednost rychlejšímu nalezení vhodného rozdělení.
+
+\bigskip
+{\noindent
+\footnotesize
+  \centering
+  \renewcommand{\arraystretch}{1.15}
+\begin{longtable}{|l|r|r|r|r|r|}
+  \hline
+  \input{tabledata/output5.tex}
+  \hline
+\end{longtable}
+\captionof{table}{Počet nenulových prvků v Choleského faktoru při použití smíšeného číslování. \label{mixCoefResultTable}}
+}
 
 
 

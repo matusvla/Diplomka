@@ -20,6 +20,10 @@
     \usetikzlibrary{calc}
     \setcounter{secnumdepth}{3}
 
+    \usepackage{pifont}% http://ctan.org/pkg/pifont
+    \newcommand{\cmark}{\ding{51}}%
+    \newcommand{\xmark}{\ding{55}}%
+
 \theoremstyle{plain}
     \newtheorem{theorem}{Věta}
     \newtheorem{lemma}{Lemma}
@@ -767,7 +771,7 @@ Vzhledem k povaze číslování popsaných v oddílech \ref{MDordering} a \ref{s
 
 Pokud máme rozdělení $G_1, \ldots, G_k$ grafu $G$ s vrcholovým separátorem $G_S$, můžeme pro očíslování části $G_i$ použít číslování vrcholů pomocí metody minimálního stupně, kde při výběru vrcholu ve \ref{mindegloop}. kroku algoritmu popsaného v \ref{MDordering} přidáme kritérium vzdálenosti od separátoru popsané v \ref{sepDistOrdering}. Nejprve tedy nalezneme množinu všech vrcholů grafu $G$, které mají minimální stupeň a poté z nich zvolíme ten, který je nejdál od vrcholového separátoru.
 
-Druhou možností, jak je výše zmíněná očíslování možné kombinovat je použít jejich konvexní kombinaci. Tímto způsobem nemusíme kombinovat pouze očíslování popsaná v oddílech \ref{MDordering} a \ref{sepDistOrdering}, ale můžeme jej použít na libovolná očíslování. Mějme množinu vrcholů $V$, $|V|=n$ a dvě různá očíslování $\varphi,\psi :V \rightarrow \{1,\ldots,n\}$. Nechť dále $\alpha \in [0,1]$. Napočítáme pro každý vrchol $v$ hodnotu výrazu $\varphi(v) + (1-\alpha)\psi(v)$. Smíšené očíslování vytvoříme tak, že vrcholy seřadíme podle této hodnoty od nejmenší po největší. Ač by se mohlo zdát, že tento postup nám nemůže přinést nic nového, nemusí to být pravidlem\cite{slo:89,resc:99}.
+Druhou možností, jak je výše zmíněná očíslování možné kombinovat je použít jejich konvexní kombinaci. Tímto způsobem nemusíme kombinovat pouze očíslování popsaná v oddílech \ref{MDordering} a \ref{sepDistOrdering}, ale můžeme jej použít na libovolná očíslování. Mějme množinu vrcholů $V$, $|V|=n$ a dvě různá očíslování $\varphi,\psi :V \rightarrow \{1,\ldots,n\}$. Nechť dále $\alpha \in [0,1]$. Napočítáme pro každý vrchol $v$ hodnotu výrazu $\alpha\varphi(v) + (1-\alpha)\psi(v)$. Smíšené očíslování vytvoříme tak, že vrcholy seřadíme podle této hodnoty od nejmenší po největší. Ač by se mohlo zdát, že tento postup nám nemůže přinést nic nového, nemusí to být pravidlem\cite{slo:89,resc:99}.
 
 \subsection{Topologické číslování vrcholů stromu}
 Topologické číslování vrcholů stromu je intuitivní způsob pro očíslování vrcholů grafu, který je stromem.
@@ -1069,6 +1073,7 @@ Náš program byl testován na MacBook Pro (Retina, 15-inch, Mid 2015) s proceso
 Pro úspěšné zkompilování a slinkování projektu je třeba mít nainstalovaný GNU Make (testováno na verzi 3.81), gcc a gfortran (testováno pro verzi 6.3.0) a dělič grafů METIS (testováno pro verzi 5.1.0). Pro zobrazování výsledných grafů je třeba mít nainstalovanou knihovnu GraphViz, konkrétně jsme používali dot~-~graphviz version 2.40.1 \TODO{cite dot-Grapvhiz}.
 
 \section{Výsledky pro základní typy číslování}
+\label{numberingResultsSection}
 V této podkapitole porovnáme počet nenulových prvků v Choleského faktoru v závislosti na zvoleném typu číslování bez toho, aby došlo k přesunu vektorového separátoru. Pro 110 námi testovaných matic jsme spustili program se čtyřmi různými nastaveními. Nejprve bez toho, aby se vrcholy jakkoliv přečíslovávaly, poté jsme vrcholy číslovali podle jejich vzdálenosti od vrcholového separátoru. Dále jsme použili číslování pomocí metody minimálního stupně a smíšené číslování používající kritérium kombinující obě předchozí. V Tabulce \ref{resultTable} jsou vypsány výsledky pro reprezentativní podmnožinu matic, které jsme testovali. 
 \TODO{vybrat reprezentativni podmnozinu}
 
@@ -1076,30 +1081,157 @@ V této podkapitole porovnáme počet nenulových prvků v Choleského faktoru v
 {\noindent
 \footnotesize
   \centering
-  \renewcommand{\arraystretch}{1.15}
+  \renewcommand{\arraystretch}{1.1}
 \begin{longtable}{|l|c|c|c|r|r|r|}
   \hline
   \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{$|S|$}    &\multicolumn{1}{|c|}{$|V_1|$} &\multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{1}{|c|}{\texttt{-ot}} & \multicolumn{2}{c|}{Počty nenul} \\
   \hline
-  \input{tabledata/output.tex}
+  \multirow{4}{*}{P50}
+    &	\multirow{4}{*}{50}	&	\multirow{4}{*}{1225}	&	\multirow{4}{*}{1225}	&\texttt{-} &	28718	&	29419	\\
+    &	&	&	&\texttt{DIST} &	50510	&	54393	\\
+    &	&	&	&\texttt{MD} &	15282	&	14367	\\
+    &	&	&	&\texttt{MIX} &	14233	&	14936	\\
+    \hline
+  \multirow{4}{*}{P100}
+    &	\multirow{4}{*}{100}	&	\multirow{4}{*}{4950}	&	\multirow{4}{*}{4950}	&\texttt{-}&	241249	&	240331	\\
+    &	&	&	&\texttt{DIST}&	461142	&	465406	\\
+    &	&	&	&\texttt{MD}&	89757	&	91915	\\
+    &	&	&	&\texttt{MIX}&	91152	&	89384	\\
+    \hline
+  \multirow{4}{*}{1138\_bus.rb}
+    &	\multirow{4}{*}{5}	&	\multirow{4}{*}{653}	&	\multirow{4}{*}{480}	&\texttt{-}    &	14529	&	7876	\\
+    & & & &\texttt{DIST} &	2361	&	1251	\\
+    & & & &\texttt{MD}   &	1215	&	783	\\
+    & & & &\texttt{MIX}  &	1227	&	782	\\
+    \hline
+  \multirow{4}{*}{685\_bus.rb	}
+    &	\multirow{4}{*}{8}	&	\multirow{4}{*}{378}	&	\multirow{4}{*}{299}	&\texttt{-}    &	7418	&	4820	\\
+    & & & &\texttt{DIST} &	5296	&	1802	\\
+    & & & &\texttt{MD}   &	1733	&	1011	\\
+    & & & &\texttt{MIX}  &	1716	&	1013	\\
+    \hline
+  \multirow{4}{*}{bcspwr07.rb	}
+    &	\multirow{4}{*}{6}	&	\multirow{4}{*}{843}	&	\multirow{4}{*}{763}	&\texttt{-}    &	7662	&	10542	\\
+    & & & &\texttt{DIST} &	4178	&	3751	\\
+    & & & &\texttt{MD}   &	1817	&	1716	\\
+    & & & &\texttt{MIX}  &	1833	&	1689	\\
+    \hline
+  \multirow{4}{*}{bcspwr09.rb	}
+    &	\multirow{4}{*}{7}	&	\multirow{4}{*}{858}	&	\multirow{4}{*}{858}	&\texttt{-}    &	2172	&	2756	\\
+    & & & &\texttt{DIST} &	4563	&	6797	\\
+    & & & &\texttt{MD}   &	2041	&	2261	\\
+    & & & &\texttt{MIX}  &	2017	&	2313	\\
+    \hline
+  \multirow{4}{*}{bcsstk01.rsa	}
+    &	\multirow{4}{*}{12}	&	\multirow{4}{*}{18}	&	\multirow{4}{*}{18}	&\texttt{-}    &	105	&	113	\\
+    & & & &\texttt{DIST} &	113	&	115	\\
+    & & & &\texttt{MD}   &	75	&	75	\\
+    & & & &\texttt{MIX}  &	75	&	75	\\
+    \hline
+  \multirow{4}{*}{bcsstk05.rb	}
+    &	\multirow{4}{*}{12}	&	\multirow{4}{*}{69}	&	\multirow{4}{*}{72}	&\texttt{-}    &	952	&	999	\\
+    & & & &\texttt{DIST} &	813	&	1041	\\
+    & & & &\texttt{MD}   &	761	&	1101	\\
+    & & & &\texttt{MIX}  &	761	&	1020	\\
+    \hline
+  \multirow{4}{*}{bcsstk07.rsa	}
+    &	\multirow{4}{*}{36}	&	\multirow{4}{*}{195}	&	\multirow{4}{*}{189}	&\texttt{-}    &	4983	&	5094	\\
+    & & & &\texttt{DIST} &	5372	&	5149	\\
+    & & & &\texttt{MD}   &	3929	&	3764	\\
+    & & & &\texttt{MIX}  &	3975	&	4047	\\
+    \hline
+  \multirow{4}{*}{bcsstk08.rb	}
+    &	\multirow{4}{*}{57}	&	\multirow{4}{*}{564}	&	\multirow{4}{*}{453}	&\texttt{-}    &	50962	&	44817	\\
+    & & & &\texttt{DIST} &	82463	&	43983	\\
+    & & & &\texttt{MD}   &	10735	&	9304	\\
+    & & & &\texttt{MIX}  &	10291	&	8895	\\
+    \hline
+  \multirow{4}{*}{bcsstk09.rb	}
+    &	\multirow{4}{*}{57}	&	\multirow{4}{*}{513}	&	\multirow{4}{*}{513}	&\texttt{-}    &	14989	&	14995	\\
+    & & & &\texttt{DIST} &	27949	&	27955	\\
+    & & & &\texttt{MD}   &	20882	&	21590	\\
+    & & & &\texttt{MIX}  &	20924	&	20793	\\
+    \hline
+  \multirow{4}{*}{bcsstk10.rb	}
+    &	\multirow{4}{*}{3}	&	\multirow{4}{*}{651}	&	\multirow{4}{*}{432}	&\texttt{-}    &	13610	&	5970	\\
+    & & & &\texttt{DIST} &	13736	&	5970	\\
+    & & & &\texttt{MD}   &	15358	&	6758	\\
+    & & & &\texttt{MIX}  &	15331	&	6758	\\
+    \hline
+  \multirow{4}{*}{bcsstk12.rb	}
+    &	\multirow{4}{*}{33}	&	\multirow{4}{*}{704}	&	\multirow{4}{*}{736}	&\texttt{-}    &	30577	&	42640	\\
+    & & & &\texttt{DIST} &	30406	&	33019	\\
+    & & & &\texttt{MD}   &	22193	&	25807	\\
+    & & & &\texttt{MIX}  &	20915	&	24406	\\
+    \hline
+  \multirow{4}{*}{bcsstk13.rb	}
+    &	\multirow{4}{*}{182}	&	\multirow{4}{*}{1173}	&	\multirow{4}{*}{648}	&\texttt{-}    &	145761	&	74093	\\
+    & & & &\texttt{DIST} &	256734	&	76024	\\
+    & & & &\texttt{MD}   &	132352	&	48193	\\
+    & & & &\texttt{MIX}  &	134707	&	45573	\\
+    \hline
+  \multirow{4}{*}{bcsstk14.rsa	}
+    &	\multirow{4}{*}{84}	&	\multirow{4}{*}{862}	&	\multirow{4}{*}{860}	&\texttt{-}    &	50448	&	48812	\\
+    & & & &\texttt{DIST} &	78327	&	76977	\\
+    & & & &\texttt{MD}   &	44011	&	43834	\\
+    & & & &\texttt{MIX}  &	42359	&	41790	\\
+    \hline
+  \multirow{4}{*}{bcsstk15.rb	}
+    &	\multirow{4}{*}{180}	&	\multirow{4}{*}{2027}	&	\multirow{4}{*}{1741}	&\texttt{-}    &	396378	&	267754	\\
+    & & & &\texttt{DIST} &	481233	&	370617	\\
+    & & & &\texttt{MD}   &	294829	&	223494	\\
+    & & & &\texttt{MIX}  &	287343	&	238666	\\
+    \hline
+  \multirow{4}{*}{bcsstk17.rb	}
+    &	\multirow{4}{*}{138}	&	\multirow{4}{*}{4366}	&	\multirow{4}{*}{6470}	&\texttt{-}    &	428589	&	853932	\\
+    & & & &\texttt{DIST} &	493182	&	1302456	\\
+    & & & &\texttt{MD}   &	307119	&	749462	\\
+    & & & &\texttt{MIX}  &	313716	&	666343	\\
+    \hline
+  \multirow{4}{*}{bcsstk18.rb	}
+    &	\multirow{4}{*}{182}	&	\multirow{4}{*}{6283}	&	\multirow{4}{*}{5483}	&\texttt{-}    &	1271033	&	640943	\\
+    & & & &\texttt{DIST} &	1684137	&	864894	\\
+    & & & &\texttt{MD}   &	335191	&	172683	\\
+    & & & &\texttt{MIX}  &	346314	&	187524	\\
+    \hline
+  \multirow{4}{*}{bcsstk21.rb	}
+    &	\multirow{4}{*}{0}	&	\multirow{4}{*}{1800}	&	\multirow{4}{*}{1800}	&\texttt{-}    &	104902	&	105443	\\
+    & & & &\texttt{DIST} &	104902	&	105443	\\
+    & & & &\texttt{MD}   &	45186	&	45186	\\
+    & & & &\texttt{MIX}  &	45186	&	45186	\\
+    \hline
+  \multirow{4}{*}{bcsstk23.rb	}
+    &	\multirow{4}{*}{272}	&	\multirow{4}{*}{1165}	&	\multirow{4}{*}{1697}	&\texttt{-}    &	146117	&	285543	\\
+    & & & &\texttt{DIST} &	207121	&	378605	\\
+    & & & &\texttt{MD}   &	98223	&	177520	\\
+    & & & &\texttt{MIX}  &	85133	&	187168	\\
+    \hline
+  \multirow{4}{*}{bcsstk25.rb	}
+    &	\multirow{4}{*}{162}	&	\multirow{4}{*}{7168}	&	\multirow{4}{*}{8109}	&\texttt{-}    &	1400436	&	1431953	\\
+    & & & &\texttt{DIST} &	1192351	&	1477772	\\
+    & & & &\texttt{MD}   &	757791	&	783610	\\
+    & & & &\texttt{MIX}  &	667338	&	773560	\\
+    \hline
+  \multirow{4}{*}{bcsstk26.rb	}
+    &	\multirow{4}{*}{71}	&	\multirow{4}{*}{924}	&	\multirow{4}{*}{927}	&\texttt{-}    &	36309	&	22181	\\
+    & & & &\texttt{DIST} &	53153	&	40456	\\
+    & & & &\texttt{MD}   &	18159	&	13454	\\
+    & & & &\texttt{MIX}  &	18762	&	13213	\\
+    \hline
+  \multirow{4}{*}{bcsstk28.rb	}
+    &	\multirow{4}{*}{66}	&	\multirow{4}{*}{2571}	&	\multirow{4}{*}{1773}	&\texttt{-}    &	381960	&	150312	\\
+    & & & &\texttt{DIST} &	527473	&	234238	\\
+    & & & &\texttt{MD}   &	207732	&	118908	\\
+    & & & &\texttt{MIX}  &	204384	&	113328	\\
+    \hline
+  \multirow{4}{*}{bcsstk30.rb	}
+    &	\multirow{4}{*}{209}	&	\multirow{4}{*}{16707}	&	\multirow{4}{*}{12008}	&\texttt{-}    &	10846819	&	4571992	\\
+    & & & &\texttt{DIST} 	&	11259063	&	5119425	\\
+    & & & &\texttt{MD}		& 2854234   & 1527204	\\
+    & & & &\texttt{MIX}		&	2690415		& 1545013 \\
   \hline
 \end{longtable}
-\captionof{table}{\TODO{dopsat} \label{resultTable}}
-}
-
-\bigskip
-{\noindent
-\footnotesize
-  \centering
-  \renewcommand{\arraystretch}{1.15}
-\begin{longtable}{|l|c|c|c|r|r|r|}
-  \hline
-  \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{$|S|$}    &\multicolumn{1}{|c|}{$|V_1|$} &\multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{1}{|c|}{\texttt{-ot}} & \multicolumn{2}{c|}{Počty nenul} \\
-  \hline
-  \input{tabledata/output2.tex}
-  \hline
-\end{longtable}
-\captionof{table}{\TODO{dopsat} \label{resultTable2}}
+\captionof{table}{Porovnání počtu nenulových prvků v Choleského faktorech pro různé typy číslování \label{resultTable}}
 }
 
 Z Tabulky \ref{resultTable} je vidět, že ve valné většině případů nám již samotné očíslování vrcholů může výrazně pomoci redukovat zaplnění v Choleského faktoru matice. Ukazuje se, že číslování podle vzdálenosti od separátoru není pro tuto úlohu příliš vhodné, jen v několika případech s jeho pomocí došlo k výraznému zmenšení počtu nenulových prvků v Choleského rozkladech matice. Naproti tomu metoda minimálního stupně a smíšené číslování nám pro většinu matic poskytnou výrazné zlepšení. V případech, kdy pomocí žádného číslování nezískáme lepší výsledky než byly výsledky bez něj, obvykle nedochází k výrazné degradaci.
@@ -1114,16 +1246,63 @@ V Tabulce \ref{mixCoefResultTable} je zanesen pro koeficienty $0, 0.1,\ldots,0.9
 
 \bigskip
 {\noindent
-\tiny
+\scriptsize
   \centering
-  \renewcommand{\arraystretch}{1.15}
-\begin{longtable}{|l|r|r|r|r|r|r|r|r|r|r|r|}
+  \renewcommand{\arraystretch}{1.1}
+  \setlength{\tabcolsep}{0.25em}
+\begin{tabular}{|l|rrrrrrrrrrr|}
   \hline
-  & \texttt{MD} & \texttt{MIX0.1} & \texttt{MIX0.2} & \texttt{MIX0.3} & \texttt{MIX0.4} & \texttt{MIX0.5} & \texttt{MIX0.6} & \texttt{MIX0.7} & \texttt{MIX0.8} & \texttt{MIX0.9} & \texttt{DIST} \\
+  Matice \textbackslash \texttt{-ot}& \texttt{MD} & \texttt{MIX0.1} & \texttt{MIX0.2} & \texttt{MIX0.3} & \texttt{MIX0.4} & \texttt{MIX0.5} & \texttt{MIX0.6} & \texttt{MIX0.7} & \texttt{MIX0.8} & \texttt{MIX0.9} & \texttt{DIST} \\
   \hline
-  \input{tabledata/output3.tex}
+  \multirow{2}{*}{P50}&15282&103234&121152&109359&111812&118094&112497&99655&109074&119051&50510	\\
+  &14367&108575&112733&115630&102834&103356&114932&98437&115937&106708&54393	\\
   \hline
-\end{longtable}
+  \multirow{2}{*}{P100}&89757&1809102&1676651&1710096&1758236&1889922&1710749&1703777&1541943&1842054&461142	\\
+  &91915&1787391&1862763&1873276&1848251&1785686&1788840&1843698&1753333&1828004&465406	\\
+  \hline
+  \multirow{2}{*}{1138\_bus.rb}&1215&11055&16242&13029&13274&14298&16641&11413&12395&7210&2361	\\
+  &783&4387&8274&9067&6301&7359&7563&3642&4449&3490&1251	\\
+  \hline
+  \multirow{2}{*}{685\_bus.rb}&1733&10087&10036&9938&9536&6252&12605&9812&12374&6276&5296	\\
+  &1011&3695&3428&4219&3480&3390&3802&3964&4423&4415&1802	\\
+  \hline
+  \multirow{2}{*}{bcspwr07.rb}&1817&14112&17179&18798&15370&16954&11777&18305&10723&9906&4178	\\
+  &1716&13822&15877&15620&15893&14149&17023&28831&15288&20222&3751	\\
+  \hline
+  \multirow{2}{*}{bcspwr08.rb}&1749&13269&15131&16966&15130&14426&19179&14292&12648&12207&5438	\\
+  &2026&22132&22724&16782&26091&16473&14874&19211&18856&14661&6169	\\
+  \hline
+  \multirow{2}{*}{bcspwr09.rb}&2041&3113&3204&3665&5269&4744&6220&8230&10144&9239&4563	\\
+  &2261&4275&4796&4819&4137&5699&7176&6910&8753&13761&6797	\\
+  \hline
+  \multirow{2}{*}{bcspwr10.rb}&7811&10881&15530&22956&26125&42405&46642&82679&98621&90853&27669	\\
+  &13773&18128&24115&27314&33601&40464&50899&59561&87708&112655&84444	\\
+  \hline
+  \multirow{2}{*}{bcsstk01.rsa}&75&86&91&114&91&86&121&101&100&118&113	\\
+  &75&79&115&96&97&104&98&95&97&98&115	\\
+  \hline
+  \multirow{2}{*}{bcsstk05.rb}&761&1235&1545&1583&1549&1393&1218&1257&1222&1018&813	\\
+  &1101&1572&1818&1893&1814&1875&1801&2184&1867&1556&1041	\\
+  \hline
+  \multirow{2}{*}{bcsstk07.rsa}&3929&12023&10153&11189&10204&10413&11500&11389&11978&11173&5372	\\
+  &3764&10357&10545&10170&10360&10977&10043&10109&9824&9139&5149	\\
+  \hline
+  \multirow{2}{*}{bcsstk08.rb}&10735&65616&67604&67094&60477&70623&63393&59777&61775&58583&82463	\\
+  &9304&49128&40621&48283&52451&54077&53235&51453&56609&53070&43983	\\
+  \hline
+  \multirow{2}{*}{bcsstk09.rb}&20882&74577&79299&79354&70839&82346&79389&76076&73929&81458&27949	\\
+  &21590&72697&83707&75242&78370&74032&82074&77446&82159&69873&27955	\\
+  \hline
+  \multirow{2}{*}{bcsstk10.rb}&15358&141514&86564&118740&119000&119772&122533&111003&126876&123292&13736	\\
+  &6758&48496&36154&41375&28273&39102&40291&35592&26696&34093&5970	\\
+  \hline
+  \multirow{2}{*}{bcsstk11.rsa}&22193&117188&133395&116290&131562&115183&115559&106653&79937&56042&30406	\\
+  &25807&154017&164612&157651&179167&162179&162929&172767&154077&89407&33019	\\
+  \hline
+  \multirow{2}{*}{bcsstk12.rb}&22193&117188&133395&116290&131562&115183&115559&106653&79937&56042&30406	\\
+  &25807&154017&164612&157651&179167&162179&162929&172767&154077&89407&33019	\\
+  \hline
+\end{tabular}
 \captionof{table}{Počet nenulových prvků v Choleského faktoru při použití smíšeného číslování. \label{mixCoefResultTable}}
 }
 
@@ -1135,7 +1314,7 @@ Již z podstaty Choleského rozkladu je zřejmé, že přidáním vrcholů ke gr
 {\noindent
   \footnotesize
   \centering
-  \renewcommand{\arraystretch}{1.15}
+  \renewcommand{\arraystretch}{1.1}
 \begin{tabular}{|l|c|c|r|r|r|r|r|}
   \hline
   \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{\texttt{-ot}}  &\multicolumn{1}{|c|}{\texttt{-mvs}} &\multicolumn{1}{|c|}{$|S|$} & \multicolumn{1}{|c|}{$|V_1|$}& \multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{2}{c|}{Počty nenul} \\
@@ -1187,6 +1366,7 @@ Již z podstaty Choleského rozkladu je zřejmé, že přidáním vrcholů ke gr
 \end{tabular}
 \captionof{table}{Příklad chování pro vyvážená rozdělení. \label{mvsTable1}}
 }
+\bigskip
 
 Zřejmě při přesouvání vrcholového separátoru dojde od jisté chvíle k zacyklení, protože vrcholový separátor je přesouván vždy směrem do části s vyšším počtem prvků. Pro námi testované matice se periodické chování vyskytlo vždy dříve než v deváté iteraci algoritmu. Perioda nemusí být nutně rovna dvěma, jak by se člověk mohl domnívat. Příklad periodického chování algoritmu můžeme vidět v opět v Tabulce \ref{mvsTable1}.
 
@@ -1231,36 +1411,149 @@ Námi zvolený algoritmus pro přesouvání vrcholů taktéž není vhodný pro 
 \captionof{table}{Příklad výrazné změny vyváženosti částí při přesunu vrcholového separátoru. \label{mvsTable2}}
 }
 
-Z předchozího textu by se mohlo zdát, že nám tato metoda přesunu separátoru nic nového nepřinese, ale není tomu tak. U matic, v nichž je počet prvků v jednotlivých Choleského faktorech po prvním rozdělení výrazně nevyvážený tato jednooduchá metoda výrazně pomáhá. V Tabulce \ref{mvsTable3} můžeme pozorovat, že ve většině případů dochází k výraznému zlepšení vyvážení rozdělení již po jedné nebo dvou iteracích. Zároveň je míra zvětšení velikosti vrcholového separátoru únosná. 
+Z předchozího textu by se mohlo zdát, že nám tato metoda přesunu separátoru nic nového nepřinese, ale není tomu tak. U matic, v nichž je počet prvků v jednotlivých Choleského faktorech po prvním rozdělení výrazně nevyvážený tato jednoduchá metoda výrazně pomáhá. V Tabulce \ref{mvsTable3} je pro reprezentativní podmnožinu testovacích matic zanesena informace o nejlepším dosaženém vyvážení počtu nenulových prvků v Choleského faktorech. Vidíme, že u nevyvážených rozdělení dochází v mnoha případech k zásadnímu zlepšení vyvážení rozdělení již po jedné nebo dvou iteracích. Zároveň je míra zvětšení velikosti vrcholového separátoru únosná. Závislost počtu nenulových prvků na použitém číslování popsaná v oddíle \ref{numberingResultsSection} se nemění ani při přesouvání separátoru.
 
 \bigskip
 {\noindent
   \footnotesize
   \centering
-  \renewcommand{\arraystretch}{1.15}
+  \renewcommand{\arraystretch}{1.1}
 \begin{tabular}{|l|c|c|r|r|r|r|r|}
   \hline
   \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{\texttt{-ot}}  &\multicolumn{1}{|c|}{\texttt{-mvs}} &\multicolumn{1}{|c|}{$|S|$} & \multicolumn{1}{|c|}{$|V_1|$}& \multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{2}{c|}{Počty nenul} \\
-  \hline
-  \TODO{doplnit}
+	\hline
+	\multirow{8}{*}{1138\_bus.rb}
+	& \multirow{2}{*}{\texttt{-}}
+  	& -	& 5	  & 653 & 480 & 14529	&	7876	\\
+	& & 2	&	20	&	616	&	502	&	7103	&	9419	\\
 
+  & \multirow{2}{*}{\texttt{DIST}}
+  	& -	& 5	  & 653 & 480 &	2361	&	1251	\\
+	& & 2	&	20	&	616	&	502	&	1645	&	1419	\\
+
+  & \multirow{2}{*}{\texttt{MD}}
+	  & -	& 5	  & 653 & 480 &	1215	&	783 \\
+	& & 2	&	20	&	616	&	502	&	1011	&	860	\\
+
+	& \multirow{2}{*}{\texttt{MIX}}
+  	& -	& 5	  & 653 & 480 &	1227	&	782 \\
+	& & 2	&	20	&	616	&	502	&	1016	&	856	\\
+\hline
+\multirow{8}{*}{685\_bus.rb}
+	& \multirow{2}{*}{\texttt{-}}
+  	& -	&  8	& 378 & 299 & 7418	&	4820	\\
+	& & 3	&	26	&	283	&	376	&	4756	&	5844	\\
+	& \multirow{2}{*}{\texttt{DIST}}
+  	& -	&  8	& 378 & 299 & 5296	&	1802	\\
+	& & 3	&	26	&	283	&	376	&	3732	&	2770	\\
+	& \multirow{2}{*}{\texttt{MD}}
+  	& -	&  8	& 378 & 299 & 1733	&	1011	\\
+	& & 3	&	26	&	283	&	376	&	1126	&	1291	\\
+	& \multirow{2}{*}{\texttt{MIX}}
+  	& -	&  8	& 378 & 299 & 1716	&	1013	\\
+	& & 3	&	26	&	283	&	376	&	1140	&	1268	\\
+\hline
+\multirow{8}{*}{bcspwr07.rb}
+	& \multirow{2}{*}{\texttt{-}}
+  	& -	  & 6	& 843 & 763 & 7662	&	10542	\\
+	& & 4	&	20	&	923	&	669	&	8539	&	7985	\\
+	& \multirow{2}{*}{\texttt{DIST}}
+  	& -	  & 6	& 843 & 763 & 4178	&	3751	\\
+	& & 1 	&	9	&	851	&	752	&	4249	&	3672	\\
+	& \multirow{2}{*}{\texttt{MD}}
+  	& -	  & 6	& 843 & 763 & 1817	&	1716	\\
+	& & 1 	&	9	&	851	&	752	&	1874	&	1671	\\
+	& \multirow{2}{*}{\texttt{MIX}}
+  	& -	  & 6	& 843 & 763 & 1833	&	1689	\\
+	& & 1 	&	9	&	851	&	752	&	1876	&	1638	\\
+\hline
+\multirow{8}{*}{bcsstk13.rb}
+	& \multirow{2}{*}{\texttt{-}}
+  	& -	& 182	& 1173  & 648 & 145761	&	74093	\\
+	& & 2	&	242	&	1071	&	690	&	122127	&	76158	\\
+	& \multirow{2}{*}{\texttt{DIST}}
+  	& -	& 182	& 1173  & 648  & 256734	&	76024	\\
+	& & 1 &	409	&	503	  &	1091 &	65824	&	149162	\\
+	& \multirow{2}{*}{\texttt{MD}}
+  	& -	& 182	& 1173  & 648 & 132352	&	48193	\\
+	& & 2	&	242	&	1071	&	690	&	109882	&	49759	\\
+	& \multirow{2}{*}{\texttt{MIX}}
+  	& -	& 182	& 1173  & 648  & 134707	&	45573	\\
+	& & 1 &	409	&	503	  &	1091 &	31396	&	107946	\\
+\hline
+\multirow{8}{*}{bcsstk15.rb}
+	& \multirow{2}{*}{\texttt{-}}
+  	& -	  & 180	& 2027  & 1741 & 396378	&	267754	\\
+	& & 1 	&	213	&	1814	&	1921	&	341006	&	322118	\\
+	& \multirow{2}{*}{\texttt{DIST}}
+  	& -	  & 180	& 2027  & 1741 & 481233	&	370617	\\
+	& & 1 	&	213	&	1814	&	1921	&	429113	&	408744	\\
+	& \multirow{2}{*}{\texttt{MD}}
+  	& -	  & 180	& 2027  & 1741 & 294829	&	223494	\\
+	& & 1 	&	213	&	1814	&	1921	&	250865	&	252787	\\
+	& \multirow{2}{*}{\texttt{MIX}}
+  	& -	  & 180	& 2027  & 1741 & 287343	&	238666	\\
+	& & 1 	&	213	&	1814	&	1921	&	247304	&	253784	\\
+\hline
+\multirow{8}{*}{bcsstk17.rb}
+	& \multirow{2}{*}{\texttt{-}}
+  	& -	& 138	& 4366  & 6470  &  428589	&	853932	\\
+	& & 5	&	336	&	5230	&	5408	&	586863	&	605433	\\
+	& \multirow{2}{*}{\texttt{DIST}}
+  	& -	& 138	& 4366  & 6470  & 493182	&	1302456	\\
+	& & 4	&	378	&	5566	&	5030	&	841620	&	776253	\\
+	& \multirow{2}{*}{\texttt{MD}}
+  	& -	& 138	& 4366  & 6470  & 307119	&	749462	\\
+	& & 4	&	378	&	5566	&	5030	&	416741	&	561724	\\
+	& \multirow{2}{*}{\texttt{MIX}}
+  	& -	& 138	& 4366  & 6470  & 313716	&	666343	\\
+	& & 4	&	378	&	5566	&	5030	&	422073	&	482792	\\
+\hline
+\multirow{8}{*}{bcsstk18.rb}
+	& \multirow{2}{*}{\texttt{-}}
+    & -	& 182	& 6283  & 5483  & 1271033	&	640943	\\
+	& & 2	&	504	&	5168	&	6276	&	762822	&	825365	\\
+	& \multirow{2}{*}{\texttt{DIST}}
+  	& -	& 182	& 6283  & 5483  & 1684137	&	864894	\\
+	& & 2	&	504	&	5168	&	6276	&	1165838	&	1030540	\\
+	& \multirow{2}{*}{\texttt{MD}}
+  	& -	& 182	& 6283  & 5483  & 335191	&	172683	\\
+	& & 2	&	504	&	5168	&	6276	&	209333	&	237071	\\
+	& \multirow{2}{*}{\texttt{MIX}}
+  	& -	& 182	& 6283  & 5483  & 346314	&	187524	\\
+	& & 2	&	504	&	5168	&	6276	&	211226	&	242109	\\
+\hline
 \end{tabular}
 \captionof{table}{Výsledky přesunu vrcholového separátoru pro nevyvážené matice. \label{mvsTable3}}
 }
+\bigskip
 
-Tento postup je vhodný pro vylepšování rozdělení bez používání číslování vrcholů. Pokud však číslujeme pouze v poslední iteraci hlavního cyklu, tj. spouštíme program bez argumentu \texttt{-oe}, stává se, že část rozdělení s větším počtem nenulových prvků v Choleského faktoru bez použití číslování je jiná než část rozdělení s větším počtem nenulových prvků při použití číslování. V takovémto případě dochází k přesunu separátoru, který nám pomůže vyvážit počet nenulových prvků pro rozdělení bez číslování, ale naopak nám zhorší vyváženost pro očíslované grafy. Pro lepší výsledky je tedy vhodné číslovat v každé iteraci hlavní smyčky, což nám však výrazně přidá na výpočetní náročnosti. Záleží tedy na tom, jaký je problém, který se s pomocí Choleského faktorizace snažíme vyřešit a zda požadujeme co nejlepší vyvážení počtu operací na jednotlivých částech, nebo dáváme přednost rychlejšímu nalezení vhodného rozdělení.
+Tento postup je vhodný pro vylepšování rozdělení bez používání číslování vrcholů. Pokud však číslujeme pouze v poslední iteraci hlavního cyklu, tj. spouštíme program bez argumentu \texttt{-oe}, může se stát, že část rozdělení s větším počtem nenulových prvků v Choleského faktoru bez použití číslování je jiná než část rozdělení s větším počtem nenulových prvků při použití číslování. V takovémto případě dochází k přesunu separátoru, který nám pomůže vyvážit počet nenulových prvků pro rozdělení bez číslování, ale naopak nám zhorší vyváženost pro očíslované grafy (viz například matice bcspwr07.rb v Tabulce \ref{mvsTable3}). Pro lepší výsledky v takovýchto případech je tedy vhodné číslovat v každé iteraci hlavní smyčky, což nám však výrazně přidá na výpočetní náročnosti. Záleží tedy na tom, jaký je problém, který se s pomocí Choleského faktorizace snažíme vyřešit a zda požadujeme co nejlepší vyvážení počtu operací na jednotlivých částech, nebo dáváme přednost rychlejšímu nalezení vhodného rozdělení. V tabulce \ref{oeArgumentTable} je uvedeno několik příkladů matic u kterých jsme tímto postupem dosáhli zlepšení vyváženosti počtu nenulových prvků v Choleského faktorech oproti předchozím výsledkům. Ve většině příkladů jsme však lepší rozdělení nezískali, lze tedy konstatovat, že pro obecné úlohy není třeba číslovat vrcholy podgrafů v každé iteraci.
 
 \bigskip
 {\noindent
 \footnotesize
   \centering
   \renewcommand{\arraystretch}{1.15}
-\begin{longtable}{|l|r|r|r|r|r|}
+\begin{tabular}{|l|c|c|c|r|r|r|r|r|}
   \hline
-  \input{tabledata/output5.tex}
+  \multicolumn{1}{|c|}{Matice} & \multicolumn{1}{|c|}{\texttt{-oe}} & \multicolumn{1}{|c|}{\texttt{-ot}}  &\multicolumn{1}{|c|}{\texttt{-mvs}} &\multicolumn{1}{|c|}{$|S|$} & \multicolumn{1}{|c|}{$|V_1|$}& \multicolumn{1}{|c|}{$|V_2|$} & \multicolumn{2}{c|}{Počty nenul} \\
   \hline
-\end{longtable}
-\captionof{table}{Počet nenulových prvků v Choleského faktoru při použití smíšeného číslování. \label{mixCoefResultTable}}
+  \multirow{2}{*}{1138\_bus.rb} 
+  & -  &  \texttt{MD}   & 2  &	20	&	616	&	502	&	1011 &	860	\\
+  & \cmark &  \texttt{MIX}  & 3  &	38	&	563	&	537	&	815	 &	934	\\
+  \hline
+  \multirow{2}{*}{bcspwr07.rb} 
+  & -  &  \texttt{MD}   & 0 &	6	 &	843	&	763	&	1817	&	1716	\\
+  & \cmark &  \texttt{MIX}  & 1 &	12	&	828	&	772	&	1763	&	1754	\\
+  \hline
+  \multirow{2}{*}{bcsstk17.rb} 
+  & -  &  \texttt{MIX}  & 4 &	387	&	5566	&	5030	&	422073	&	482792	\\
+  & \cmark &  \texttt{MIX}  & 5 &	417	&	5959	&	4598	&	467527	&	416845	\\
+  \hline
+
+\end{tabular}
+\captionof{table}{Zlepšování vyvážení nenulových prvků v Choleského faktorech pomocí číslování v každé iteraci. \label{oeArgumentTable}}
 }
 
 

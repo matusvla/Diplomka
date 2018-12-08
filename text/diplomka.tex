@@ -43,6 +43,17 @@
 
 \begin{document}
 
+Choleského rozklad je často používaným zástupcem úplných rozkladů matice. Jeho hledání lze paralelizovat pomocí dělení grafů, při použití základních kritérií pro dělení však narážíme na problém nevyváženosti počtu nenulových prvků v Choleského faktorech matic sousednosti jednotlivých podgrafů. V této práci analyzujeme metody, jak globálně snížit počet nenulových prvků v Choleského faktoru pomocí číslování příslušného grafu a jak aposteriorně modifikovat rozdělení grafu, aby Choleského faktory matic sousednosti odpovídajících jeho jednotlivým částem obsahovaly vyvážený počet nenulových prvků.
+
+\medskip
+Dělení grafů, Grafové algoritmy, Řídké matice, Choleského rozklad, Číslování grafu, Eliminační stromy
+
+\medskip
+Cholesky decomposition is a well-known and popular scheme for a complete matrix decomposition. It can be parallelized by using a graph partitioning theory. However, using the basic criteria of graph partitioning may be insufficient as they do not cover the inballance in number of nonzerzos in Cholesky factors of adjacency matrices of resulting subgraphs. In this thesis we analyse the methods for numbering the vertices of the graph and thereby reducing the number of nonzeros in the Cholesky factors. We modify the graph partition using a posteriori approach and elucidate its impact on the ballance of number of nonzeros in Cholesky factors.
+
+\medskip
+Graph partitioning, Graph algorithms, Sparse matrices, Cholesky decomposition, Graph numbering, Elimination trees
+
 \chapter*{Úvod}
 
 V této diplomové práci se budeme zabývat využitím dělení grafů jakožto nástroje pro paralelizaci Choleského rozkladu řídké matice. Nejprve ukážeme, že základní kritéria pro dělení grafů nepokrývají počet nenulových prvků v Choleského rozkladu matic sousednosti jednotlivých podgrafů. Dále z analytického hlediska prozkoumáme vliv číslování vrcholů grafu na počet nenulových prvků v Choleského rozkladu matice.  Poté se pomocí aposteriorního přístupu úpravy rozdělení grafu pokusíme analyzovat, zda je možné jednoduchým způsobem vylepšit rozdělení grafu tak, aby byl počet nenulových prvků v Choleského faktorech na jednotlivých oblastech vyvážený.

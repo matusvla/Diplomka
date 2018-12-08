@@ -1580,9 +1580,16 @@ Tento postup je vhodný pro vylepšování rozdělení bez používání číslo
 %----------------------------------------------------------------------
 
 \chapter*{Závěr}
-\TODO{doplnit}
-\TODO{motivace: nelineární problém viz Tumovy stranky}
-\TODO{radkovy vs. sloupcovy algoritmus}
+
+V této práci jsme se zaměřili na analýzu problému paralelizace Choleského rozkladu pomocí dělení grafů. Popsali jsme základní pojmy týkající se grafů a problém dělení grafu. Zmínili jsme základní algoritmy pro dělení grafu s důrazem na víceúrovňové schéma dělení grafu. Dále jsme se zabývali rozklady matic, především úplným Choleského rozkladem. Popsali jsme souvislost mezi dělením grafu a Choleského rozkladem a zmínili, že základní kritéria nepokrývají vyváženost Choleského rozkladu. Zabývali jsme se číslováním vrcholů grafu jakožto nástrojem pro snížení počtu nenulových prvků v Choleského rozkladu a eliminačními stromy s jejichž pomocí lze efektivně zjistit počet nenulových prvků v Choleského faktoru matice. V praktické implementaci jsme se zaměřili na analýzu problému vyvážení počtu nenulových prvků v Choleského faktorech matic sousednosti jednotlivých podgrafů vzniklých rozdělením grafu odpovídajícího původní matici.
+
+Z námi získaných výsledků vyplývá, že pro zvýšení efektivity Choleského rozkladu je zásadní, jak jsou řádky a sloupce vstupní matice permutovány. Tato permutace totiž přímo souvisí s očíslováním odpovídajícího grafu. Z námi naměřených dat vyplývá, že volbou správného očíslování můžeme snížit počet nenulových prvků až o jeden řád. Nejlépe se nám ověřilo očíslování vrcholů metodou minimálního stupně a očíslování podle smíšeného kritéria minimálního stupně a vzdálenosti vrcholu od separátoru. Tato dvě očíslování dávají řádově stejné výsledky. Naproti tomu očíslování podle vzdálenosti od separátoru a konvexní kombinace očíslování podle vzdálenosti od separátoru a očíslování získaného metodou minimálního stupně se ukázala jako nevhodná.
+
+Další možností, jak zlepšit vyváženost rozdělení grafu vzhledem k počtu nenulových prvků v Choleského faktoru matice, je modifikovat samotné rozdělení. Námi navržená metoda přesunu vrcholového separátoru toto potvrdila, k vyvážení počtu nenulových prvků dochází již po několika málo modifikacích vektorového separátoru. Pozorovaná zvětšení velikosti vektorového separátoru nebyla ve většině případů dostatečně výrazná na to, aby převážila výhody získané přesunem separátoru.
+
+Mohlo by se zdát, že z časového hlediska není výhodné zabývat se tímto způsobem paralelizace, není tomu však tak. Choleského rozklad matice nemusí být potřebný pouze pro řešení jedné konkrétní úlohy, ale můžeme se setkat s případy, kdy řešíme více soustav rovnic s maticemi, které jsou si velice blízké nebo se jedná dokonce o tutéž matici \cite{dutu:10}. V takových případech se nám vyplatí paralelizovat Choleského rozklad, protože při použití vhodného očíslování vrcholů odpovídajícího grafu nám stačí v Choleského rozkladu matice přepočítávat pomocí sloupcového algoritmu popsaného výše pouze několik posledních \TODO{sloupců?} Choleského faktoru. 
+
+Vzhledem k analytickému charakteru práce není naše implementace efektivní. Dalším logickým krokem by tedy bylo navrhnout a vytvořit program, který by námi získané výsledky byl schopen získat v lepším čase. Při implementaci takového programu by se dalo uvažovat i nad implementací očíslování založených na metodě minimálního stupně, ale rychlejších \cite{amdadu:04}.
 
 
 %----------------------------------------------------------------------
@@ -1592,7 +1599,7 @@ Tento postup je vhodný pro vylepšování rozdělení bez používání číslo
 
 \TODO{udelat poradek v citacich}
 
-\TODO{nemam citovane dva zdroje ze zadani}
+\TODO{nemam citovane dva zdroje ze zadani - moka:01, poth:97}
 
 \TODO{poladit citovani odkazu}
 

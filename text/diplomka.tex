@@ -38,10 +38,28 @@
 
 \DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
-%\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}\PackageWarning{TODO:}{TODO: #1!}}
-\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
+\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}\PackageWarning{TODO:}{TODO: #1!}}
+%\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
 
 \begin{document}
+
+\chapter*{Úvod}
+
+V této diplomové práci se budeme zabývat využitím dělení grafů jakožto nástroje pro paralelizaci Choleského rozkladu řídké matice. Nejprve ukážeme, že základní kritéria pro dělení grafů nepokrývají počet nenulových prvků v Choleského rozkladu matic sousednosti jednotlivých podgrafů. Dále z analytického hlediska prozkoumáme vliv číslování vrcholů grafu na počet nenulových prvků v Choleského rozkladu matice.  Poté se pomocí aposteriorního přístupu úpravy rozdělení grafu pokusíme analyzovat, zda je možné jednoduchým způsobem vylepšit rozdělení grafu tak, aby byl počet nenulových prvků v Choleského faktorech na jednotlivých oblastech vyvážený.
+
+Tato diplomová práce je strukturována následovně. V první kapitole je zaveden pojem grafu a s ním související základní pojmy. Dále je zavedena speciální třída grafů nazývaných stromy. Také jsou nastíněny možné reprezentace matice pomocí grafu a grafu pomocí matice, které hrají v této práci klíčovou roli.
+
+Ve druhé kapitole popisujeme problém dělení grafu s ohledem na základní kritéria a zavádíme základní pojmy s ním spojené. Dále popisujeme metody pro dělení grafů s důrazem na víceúrovňové schéma dělení grafu. Vzhledem k povaze tohoto schématu uvádíme matematický popis spektrálního dělení grafu jakožto algoritmu, který je běžně využíván jako jeho součást. Dále zmiňujeme algoritmus podle Kernighana a Lina, jakožto příklad vylepšovacího algoritmu, jehož modifikace jsou standardně využívány v zjemňovací fázi víceúrovňového dělení grafu. Na závěr kapitoly je popsána metoda vnořených řezů jakožto příklad algoritmu, který je ze své podstaty zaveden jako víceúrovňový.
+
+Třetí kapitola se věnuje rozkladům matic. V této kapitole jsou blíže popsány dva zástupci úplných rozkladů, konkrétně symetrická eliminace a Choleského rozklad jakožto její speciální případ. Pro Choleského rozklad je popsáno teoretické odvození tří metod pro jeho výpočet a vysloveny věto popisující vlastnosti Choleského rozkladu řídkých matic.
+
+Ve čtvrté kapitole blíže popisujeme souvislost dělení grafů a výpočet Choleského rozkladu matice. Je objasněn postup, jakým vypočítat Choleského rozklad matice, pokud známe Choleského rozklady jejích podmatic odpovídajících podgrafům vzniklým pomocí dělení grafu odpovídajícího vstupní matici. Dále se budeme zabývat algoritmy pro očíslování vrcholů grafu jakožto nástrojem pro snížení počtu nenulových prvků v Choleského rozkladu matice. Popíšeme dva základní způsoby číslování vrcholů grafu a dva způsoby založené na kombinaci předchozích. Dalším tématem, kterým se v této kapitole zabýváme jsou eliminační stromy. Ty lze využít pro rychlý výpočet počtu nenulových prvků v Choleského rozkladu matice bez znalosti konkrétních hodnot v tomto rozkladu. Definujeme eliminační strom obecné matice a vysvětlíme jeho vztah s Choleského rozkladem. Dále uvádíme algoritmus pro výpočet počtu nenulových prvků v Choleského rozkladu matice při znalosti tvaru eliminačního stromu a dva algoritmy pro tvorbu eliminačního stromu matice.
+
+Pátá kapitola je zaměřena na popis implementace námi vytvořeného programu. Jsou zde popsány námi využité základní datové struktury a detailně vysvětleny metody implementace jednotlivých kroků programu. Na závěr kapitoly jsou popsány způsoby volání výsledného programu z příkazové řádky.
+
+Šestá kapitola se již věnuje samotným výsledkům našeho programu. Popisujeme námi naměřenou závislost mezi číslováním vrcholů grafu a počtem nenulových prvků v Choleského faktoru odpovídající matice. Na základě dat konstatujeme, které metody číslování se ukázaly jako nejvhodnější. Ve druhé části kapitoly diskutujeme možnost vylepšování rozdělení grafu vzhledem k vyváženosti počtu nenulových prvků v Choleského rozkladu matice pomocí přesouvání vrcholového separátoru. Ukazujeme, že v mnoha případech lze vyváženost výrazně zlepšit, zároveň však poukazujeme na možné nedostatky tohoto postupu pro konkrétní typy matic. Na závěr kapitoly je demonstrován postup, jak jeden z těchto nedostatků eliminovat.
+
+
 
 %----------------------------------------------------------------------
 

@@ -27,14 +27,14 @@
 ! Allocations: none
 !
 
-      subroutine getCmdlineArgs(matrixpath, matrixtype, nfull, testSwitch, &
-        testGraphNumber, orderingType, mixedCoef, vsMoves, hasGvOutput, outputFile, &
+      subroutine getCmdlineArgs(matrixpath, matrixtype, nfull, testGraphNumber, &
+        orderingType, mixedCoef, vsMoves, hasGvOutput, outputFile, &
         writesProgress, orderEveryMove)
         implicit none
 !
 ! parameters
 !
-      logical :: testSwitch, hasGvOutput, writesProgress, orderEveryMove
+      logical :: hasGvOutput, writesProgress, orderEveryMove
       integer :: nfull, stat, testGraphNumber, vsMoves
       character*(CMDARG_MAXLEN) :: argValue
       character*(CMDARG_MAXLEN) :: matrixpath, matrixtype, outputFile
@@ -53,7 +53,6 @@
       matrixpath = ""
       matrixtype = "RSA"
       nfull = 5
-      testSwitch = .false.
       testGraphNumber = 1
       orderingType = "no"
       mixedCoef = 0.0
@@ -157,9 +156,7 @@
               i = i + 1
             case("-w")
               writesProgress = .true.
-            case("-t") ! TODO remove
-              testSwitch = .true.
-            case("-oe") ! TODO remove
+            case("-oe")
               orderEveryMove = .true.
             case default
               write(*,*) "ERROR: Invalid command line argument '", TRIM(ADJUSTL(argValue)), &

@@ -11,8 +11,6 @@
 ! subroutine graphvizcr
 ! (c) Vladislav Matus
 ! last edit: 19. 09. 2018
-! TODO: check contents of ia, ja
-! TODO: fill ierr      
 !
 ! Purpose:
 !   The most advanced routine simplified by the routines following it

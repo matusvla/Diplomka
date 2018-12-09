@@ -8,7 +8,6 @@
 !
 ! multidimensional "ragged" array construction
 ! new types: intRaggedArr, dpRaggedArr
-! TODO is there a way how to not repeat myself? i.e. templates or something similar?
 ! source: https://stackoverflow.com/questions/18316592/
 !         multidimensional-array-with-different-lengths (13.03.2018)
 !

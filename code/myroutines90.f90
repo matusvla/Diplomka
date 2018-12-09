@@ -16,8 +16,6 @@
 ! subroutine createSubgraphs
 ! (c) Vladislav Matus
 ! last edit: 12. 11. 2018
-! TODO error handling      
-! TODO fill ierr  
 !
 ! Purpose:
 !   This routine takes a matrix in arrays ia, ja, aa and the partitioning
@@ -295,7 +293,6 @@
 ! Returns:
 !   integer, number of loops
 ! Allocations: none
-! TODO Test after change
 
       integer function countloops(n,ia,ja)
         implicit none
@@ -337,9 +334,7 @@
 !   ia, ja, aa ... graph in CSR format
 ! Output:
 !   iaN, jaN, aaN .. graph without loops in CSR format
-! Allocations: iaN, jaN, aaN
-! TODO Error handling
-! TODO Test after change      
+! Allocations: iaN, jaN, aaN  
 
       subroutine remloops(n, ia, ja, iaN, jaN, ierr, aa, aaN)
         implicit none
@@ -1407,6 +1402,7 @@
         end do
         call deallocRaggedArr(ordpermp, parts + 1, ierr)
         call deallocRaggedArr(invordpermp, parts + 1, ierr)
+        deallocate(ordperm, invordperm, stat=ierr)
       end if
 !
 ! end of orderSubgraphs

@@ -70,6 +70,7 @@
 
 \begin{document}
 \TODO{oneside?}
+\TODO{tahle sablona, nebo jina?}
 
 \maketitle
 
@@ -1625,7 +1626,7 @@ Další možností, jak zlepšit vyváženost rozdělení grafu vzhledem k počt
 
 Mohlo by se zdát, že z časového hlediska není výhodné zabývat se tímto způsobem paralelizace, není tomu však tak. Choleského rozklad matice nemusí být potřebný pouze pro řešení jedné konkrétní úlohy, ale můžeme se setkat s případy, kdy řešíme více soustav rovnic s maticemi, které jsou si velice blízké nebo se jedná dokonce o tutéž matici \cite{dutu:10}. V takových případech se nám vyplatí paralelizovat Choleského rozklad, protože při použití vhodného očíslování vrcholů odpovídajícího grafu nám stačí v Choleského rozkladu matice přepočítávat pomocí sloupcového algoritmu popsaného výše pouze několik posledních \TODO{sloupců?} Choleského faktoru. 
 
-Vzhledem k analytickému charakteru práce není naše implementace efektivní. Dalším logickým krokem by tedy bylo navrhnout a vytvořit program, který by námi získané výsledky byl schopen získat v lepším čase. Při implementaci takového programu by se dalo uvažovat i nad implementací očíslování založených na metodě minimálního stupně, ale rychlejších \cite{amdadu:04}.
+Vzhledem k analytickému charakteru práce není naše implementace efektivní. Dalším logickým krokem by tedy bylo navrhnout a vytvořit program, který by námi získané výsledky byl schopen získat v lepším čase. Při implementaci takového programu by se dalo uvažovat i nad implementací očíslování založených na metodě minimálního stupně, ale rychlejších \cite{amdadu:96}.
 
 
 %----------------------------------------------------------------------

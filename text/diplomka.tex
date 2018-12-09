@@ -54,46 +54,51 @@
   front-specification=true,
   specification-file={zadani.pdf},
   department-czech = {Katedra Matematiky},
+  keywords-czech = {Dělení grafů, Grafové algoritmy, Řídké matice, Choleského rozklad, Číslování grafu, Eliminační stromy},
+  keywords-english = {Graph partitioning, Graph algorithms, Sparse matrices, Cholesky decomposition, Graph numbering, Elimination trees},
+  fieldofstudy-czech = {Matematická informatika},
+  fieldofstudy-english = {Mathematical informatics},
 }
 
 \ctuprocess
 
 
 \begin{abstract-czech}
-  Choleského rozklad je často používaným zástupcem úplných rozkladů matice. Jeho hledání lze paralelizovat pomocí dělení grafů, při použití základních kritérií pro dělení však narážíme na problém nevyváženosti počtu nenulových prvků v Choleského faktorech matic sousednosti jednotlivých podgrafů. V této práci analyzujeme metody, jak globálně snížit počet nenulových prvků v Choleského faktoru pomocí číslování příslušného grafu a jak aposteriorně modifikovat rozdělení grafu, aby Choleského faktory matic sousednosti odpovídajících jeho jednotlivým částem obsahovaly vyvážený počet nenulových prvků.
+  Choleského rozklad je často používaným zástupcem úplných rozkladů matice. Jeho hledání lze paralelizovat pomocí dělení grafů. Při použití základních kritérií však narážíme na problém nevyváženosti počtu nenulových prvků v Choleského faktorech matic sousednosti jednotlivých podgrafů. V této práci analyzujeme metody, jak globálně snížit počet nenulových prvků v Choleského faktoru pomocí číslování příslušného grafu a jak aposteriorně modifikovat rozdělení grafu, aby Choleského faktory matic sousednosti odpovídajících jeho jednotlivým částem obsahovaly vyvážený počet nenulových prvků.
 \end{abstract-czech}
 
+\begin{declaration}
+  Prohlašuji, že jsem tuto práci vypracoval samostatně a uvedl jsem všechnu použitou literaturu.
+
+  \medskip
+  V Praze dne 9. prosince 2018
+\end{declaration}
+
+\begin{thanks}
+  Rád bych poděkoval především svému školiteli prof.~Ing.~Miroslavu Tůmovi, CSc., za jeho ochotu, pečlivost, vstřícnost a odborné i lidské zázemí při vedení mé diplomové práce.
+\end{thanks}
+
 \begin{abstract-english}
-  Cholesky decomposition is a well-known and popular scheme for a complete matrix decomposition. It can be parallelized by using a graph partitioning theory. However, using the basic criteria of graph partitioning may be insufficient as they do not cover the inballance in number of nonzerzos in Cholesky factors of adjacency matrices of resulting subgraphs. In this thesis we analyse the methods for numbering the vertices of the graph and thereby reducing the number of nonzeros in the Cholesky factors. We modify the graph partition using a posteriori approach and elucidate its impact on the ballance of number of nonzeros in Cholesky factors.
+  Cholesky decomposition is a well-known and popular scheme for a complete matrix decomposition. It can be parallelized by using a graph partitioning theory. However, using the basic criteria of graph partitioning may be insufficient, as they do not cover the inballance in number of nonzerzos in Cholesky factors of adjacency matrices of resulting subgraphs. In this thesis we analyse the methods for numbering the vertices of the graph and thereby reducing the number of nonzeros in the Cholesky factors. We modify the graph partition using a posteriori approach and elucidate its impact on the ballance of number of nonzeros in Cholesky factors.
 \end{abstract-english}
 
 
 \begin{document}
 \TODO{oneside?}
 \TODO{tahle sablona, nebo jina?}
+\TODO{udelat poradek s tabulkama}
 
 \maketitle
-
-\medskip
-Dělení grafů, Grafové algoritmy, Řídké matice, Choleského rozklad, Číslování grafu, Eliminační stromy
-
-\medskip
-Graph partitioning, Graph algorithms, Sparse matrices, Cholesky decomposition, Graph numbering, Elimination trees
 
 \chapter*{Úvod}
 
 V této diplomové práci se budeme zabývat využitím dělení grafů jakožto nástroje pro paralelizaci Choleského rozkladu řídké matice. Nejprve ukážeme, že základní kritéria pro dělení grafů nepokrývají počet nenulových prvků v Choleského rozkladu matic sousednosti jednotlivých podgrafů. Dále z analytického hlediska prozkoumáme vliv číslování vrcholů grafu na počet nenulových prvků v Choleského rozkladu matice.  Poté se pomocí aposteriorního přístupu úpravy rozdělení grafu pokusíme analyzovat, zda je možné jednoduchým způsobem vylepšit rozdělení grafu tak, aby byl počet nenulových prvků v Choleského faktorech na jednotlivých oblastech vyvážený.
 
 Tato diplomová práce je strukturována následovně. V první kapitole je zaveden pojem grafu a s ním související základní pojmy. Dále je zavedena speciální třída grafů nazývaných stromy. Také jsou nastíněny možné reprezentace matice pomocí grafu a grafu pomocí matice, které hrají v této práci klíčovou roli.
-
-Ve druhé kapitole popisujeme problém dělení grafu s ohledem na základní kritéria a zavádíme základní pojmy s ním spojené. Dále popisujeme metody pro dělení grafů s důrazem na víceúrovňové schéma dělení grafu. Vzhledem k povaze tohoto schématu uvádíme matematický popis spektrálního dělení grafu jakožto algoritmu, který je běžně využíván jako jeho součást. Dále zmiňujeme algoritmus podle Kernighana a Lina, jakožto příklad vylepšovacího algoritmu, jehož modifikace jsou standardně využívány v zjemňovací fázi víceúrovňového dělení grafu. Na závěr kapitoly je popsána metoda vnořených řezů jakožto příklad algoritmu, který je ze své podstaty zaveden jako víceúrovňový.
-
-Třetí kapitola se věnuje rozkladům matic. V této kapitole jsou blíže popsány dva zástupci úplných rozkladů, konkrétně symetrická eliminace a Choleského rozklad jakožto její speciální případ. Pro Choleského rozklad je popsáno teoretické odvození tří metod pro jeho výpočet a vysloveny věto popisující vlastnosti Choleského rozkladu řídkých matic.
-
-Ve čtvrté kapitole blíže popisujeme souvislost dělení grafů a výpočet Choleského rozkladu matice. Je objasněn postup, jakým vypočítat Choleského rozklad matice, pokud známe Choleského rozklady jejích podmatic odpovídajících podgrafům vzniklým pomocí dělení grafu odpovídajícího vstupní matici. Dále se budeme zabývat algoritmy pro očíslování vrcholů grafu jakožto nástrojem pro snížení počtu nenulových prvků v Choleského rozkladu matice. Popíšeme dva základní způsoby číslování vrcholů grafu a dva způsoby založené na kombinaci předchozích. Dalším tématem, kterým se v této kapitole zabýváme jsou eliminační stromy. Ty lze využít pro rychlý výpočet počtu nenulových prvků v Choleského rozkladu matice bez znalosti konkrétních hodnot v tomto rozkladu. Definujeme eliminační strom obecné matice a vysvětlíme jeho vztah s Choleského rozkladem. Dále uvádíme algoritmus pro výpočet počtu nenulových prvků v Choleského rozkladu matice při znalosti tvaru eliminačního stromu a dva algoritmy pro tvorbu eliminačního stromu matice.
-
+Ve druhé kapitole popisujeme problém dělení grafu s ohledem na základní kritéria a zavádíme základní pojmy s ním spojené. Dále popisujeme metody pro dělení grafů s důrazem na víceúrovňové schéma dělení grafu. Vzhledem k povaze tohoto schématu uvádíme matematický popis Spektrálního dělení grafu jakožto algoritmu, který je běžně využíván jako jeho součást. Dále zmiňujeme algoritmus podle Kernighana a Lina, jakožto příklad vylepšovacího algoritmu, jehož modifikace jsou standardně využívány v zjemňovací fázi víceúrovňového dělení grafu. Na závěr kapitoly je popsána Metoda vnořených řezů jakožto příklad algoritmu, který je ze své podstaty zaveden jako víceúrovňový.
+Třetí kapitola se věnuje rozkladům matic. V této kapitole jsou blíže popsáni dva zástupci úplných rozkladů, konkrétně Symetrická eliminace a Choleského rozklad jakožto její speciální případ. Pro Choleského rozklad je popsáno teoretické odvození tří metod pro jeho výpočet a vysloveny věty popisující vlastnosti Choleského rozkladu řídkých matic.
+Ve čtvrté kapitole blíže popisujeme souvislost dělení grafů a výpočtu Choleského rozkladu matice. Je objasněn postup, jakým vypočítat Choleského rozklad matice, pokud známe Choleského rozklady jejích podmatic odpovídajících podgrafům vzniklým pomocí dělení grafu odpovídajícího vstupní matici. Dále se budeme zabývat algoritmy pro očíslování vrcholů grafu jakožto nástrojem pro snížení počtu nenulových prvků v Choleského rozkladu matice. Popíšeme dva základní způsoby číslování vrcholů grafu a dva způsoby založené na kombinaci předchozích. Dalším tématem, kterým se v této kapitole zabýváme jsou eliminační stromy. Ty lze využít pro rychlý výpočet počtu nenulových prvků v Choleského rozkladu matice bez znalosti konkrétních hodnot v tomto rozkladu. Obecně definujeme eliminační strom matice a vysvětlíme jeho vztah s Choleského rozkladem. Dále uvádíme algoritmus pro výpočet počtu nenulových prvků v Choleského rozkladu matice při znalosti tvaru eliminačního stromu a dva algoritmy pro tvorbu eliminačního stromu matice.
 Pátá kapitola je zaměřena na popis implementace námi vytvořeného programu. Jsou zde popsány námi využité základní datové struktury a detailně vysvětleny metody implementace jednotlivých kroků programu. Na závěr kapitoly jsou popsány způsoby volání výsledného programu z příkazové řádky.
-
 Šestá kapitola se již věnuje samotným výsledkům našeho programu. Popisujeme námi naměřenou závislost mezi číslováním vrcholů grafu a počtem nenulových prvků v Choleského faktoru odpovídající matice. Na základě dat konstatujeme, které metody číslování se ukázaly jako nejvhodnější. Ve druhé části kapitoly diskutujeme možnost vylepšování rozdělení grafu vzhledem k vyváženosti počtu nenulových prvků v Choleského rozkladu matice pomocí přesouvání vrcholového separátoru. Ukazujeme, že v mnoha případech lze vyváženost výrazně zlepšit, zároveň však poukazujeme na možné nedostatky tohoto postupu pro konkrétní typy matic. Na závěr kapitoly je demonstrován postup, jak jeden z těchto nedostatků eliminovat.
 
 
@@ -1007,11 +1012,13 @@ Algoritmy uvedené v této kapitole jsou popsány tak, aby byly dostatečně ná
 
 Cílem programu, který jsme implementovali, je analyzovat rozdělení grafu získané za pomoci profesionální numerické knihovny pro dělení grafů METIS a ukázat, že nemusí být vyvážené vzhledem k výpočtu Choleského rozkladu na vzniklých oblastech. Dále jsme testovali závislost kvality rozdělení vzhledem k Choleského rozkladu na očíslování grafu. Prozkoumali jsme, zda lze lehkou modifikací vrcholového separátoru dosáhnout zlepšení vyváženosti počtu operací potřebných pro Choleského rozklad na jednotlivých oblastech. Vzhledem k analytickému charakteru této práce jsme zvolili implementaci, která si neklade za cíl používat co nejefektivnější algoritmy, ale dává přednost dobré přehlednosti a názornosti programu.
 
-V naší implementaci jsme se omezili na dělení grafu na dvě části pomocí vrcholového separátoru. Toto omezení nám přirozeně vyplynulo z implementace, jelikož knihovna METIS neposkytuje podprogram pro dělení grafu pomocí vrcholového separátoru na více než dvě části. Námi implementovaný kód je napsán obecně pro graf rozdělený na $n$ částí. Implementací jiného grafového děliče nebo použitím algoritmů pro převod hranového separátoru na vrcholový by tedy bylo možné výsledky rozšířit i pro dělení grafu na $n>2$ částí.
+V naší implementaci jsme se omezili na dělení grafu na dvě části pomocí vrcholového separátoru. Toto omezení nám přirozeně vyplynulo z implementace, jelikož knihovna METIS neposkytuje podprogram pro dělení grafu pomocí vrcholového separátoru na více než dvě části. Námi implementovaný kód je napsán obecně pro graf rozdělený na $k$ částí. Implementací jiného grafového děliče nebo použitím algoritmů pro převod hranového separátoru na vrcholový by tedy bylo možné výsledky rozšířit i pro dělení grafu na $k>2$ částí.
 
-Námi implementovaný program se volá z příkazové řádky a jeho funkce závisí na argumentech, s nimiž je zavolán. Tyto argumenty budou popsány níže v odstavci \ref{cmdlineSection}. Základní struktura programu, která je nezávislá na tom, s jakými argumenty je zavolán, je následující. Nejprve dojde k načtení matice. Datová struktura, v níž je tato matice uložena, popisuje zároveň i jí odpovídající graf. Ten je poté za použití profesionální knihovny pro dělení grafů METIS pomocí vrcholového separátoru rozdělen na dva podgrafy. Následně v hlavní smyčce programu probíhá samotné zpracování matice. Nejprve jsou za použití rozdělení získaného pomocí knihovny METIS vytvořeny CSR reprezentace podgrafů. Následně dojde k přečíslování vrcholů jednotlivých podgrafů, pokud se jedná o poslední iteraci hlavní smyčky a je to požadováno. Poté je zkonstruován eliminační strom a s jeho pomocí určen počet nenulových prvků v jednotlivých Choleského faktorech matic odpovídajících jednotlivým podgrafům. Pokud je to požadováno, je posunutím vrcholového separátoru vytvořeno nové rozdělení grafu odpovídajícího vstupní matici a hlavní smyčka spuštěna znovu. Dále náš program podporuje výstup v jazyce DOT, který může být použit pro zobrazení grafu a jeho výsledného rozdělení pomocí knihovny Graphviz.
+Námi implementovaný program se volá z příkazové řádky a jeho funkce závisí na argumentech, s nimiž je zavolán. Tyto argumenty budou popsány níže v odstavci \ref{cmdlineSection}. Základní struktura programu, která je nezávislá na tom, s jakými argumenty je zavolán, je následující. Nejprve dojde k načtení matice; datová struktura, v níž je tato matice uložena, popisuje zároveň i jí odpovídající graf. Ten je poté za použití profesionální knihovny pro dělení grafů METIS rozdělen na dva podgrafy pomocí vrcholového separátoru . Následně v hlavní smyčce programu probíhá samotné zpracování matice. Nejprve jsou za použití rozdělení získaného pomocí knihovny METIS vytvořeny CSR reprezentace podgrafů. Následně, pokud se jedná o poslední iteraci hlavní smyčky a je to požadováno, dojde k přečíslování vrcholů jednotlivých podgrafů. Dále je zkonstruován eliminační strom a s jeho pomocí určen počet nenulových prvků v Choleského faktorech matic odpovídajících jednotlivým podgrafům. Pokud je to požadováno, je přesunutím vrcholového separátoru vytvořeno nové rozdělení grafu odpovídajícího vstupní matici a hlavní smyčka spuštěna znovu. 
 
-Náš program byl implementován v programovacím jazyce Fortran, pro použití knihovny METIS napsané v C++ jsme vytvořili rozhraní pro volání podprogramů napsaných v C++ z Fortranu. Pro opakované spouštění programu za účelem testování jsme používali skript napsaný v jazyce Python.
+Náš program podporuje grafický výstup, který je vypsán v jazyce DOT a může být použit pro zobrazení grafu a jeho výsledného rozdělení pomocí knihovny Graphviz.
+
+Program byl implementován v programovacím jazyce Fortran, pro použití knihovny METIS napsané v C++ jsme vytvořili rozhraní pro volání podprogramů napsaných v C++ z Fortranu. Pro opakované spouštění programu za účelem testování jsme používali skript napsaný v jazyce Python.
 
 \TODO{github?}
 
@@ -1022,7 +1029,7 @@ V této podkapitole bude specifikován formát vstupní matice a způsob její r
 
 Náš program pracuje s maticemi uloženými v souborech ve formátu Harwell-Boeing \cite{bopo:97}. Konkrétně je schopen zpracovat reálné symetrické matice ve formátech RSA a PSA. Tyto dva formáty mají navzájem si podobnou strukturu, ve formátu RSA jsou navíc uloženy i numerické hodnoty matice. Ty však v našem programu nebereme v úvahu, protože se nezabýváme výpočtem numerických hodnot v Choleského faktoru zpracovávané matice, ale pouze jeho strukturou. Popis kolekcí matic, z nichž jsme čerpali při testování našeho programu, lze nalézt například v \cite{ssmcol} a \cite{hbcol}. Tyto matice bývají standardně uloženy v souborech s příponou \texttt{.rsa} nebo \texttt{.rb}.
 
-Pro testování jsme dále používali matice vygenerované při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice (podprogram \texttt{poisson}) a několik jednoduchých testovacích matic, které jsme si ručně vytvořili v souboru \texttt{testing.f90}. Všechny tyto matice jsou uloženy nebo generovány v programu a jejich zpracování zve vyvolat pomocí argumentu \texttt{-mt} z příkazové řádky.
+Pro testování jsme dále používali matice vygenerované při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice (podprogram \texttt{poisson}) a několik jednoduchých testovacích matic, které jsme si ručně vytvořili v souboru \texttt{testing.f90}. Tyto matice jsou uloženy nebo generovány v programu a jejich zpracování lze vyvolat pomocí argumentu \texttt{-mt} z příkazové řádky.
 
 \subsection{Reprezentace matice v programu}
 \label{matrixProgReprez}
@@ -1059,11 +1066,11 @@ Vzhledem k tomu, že v našem programu pracujeme pouze se strukturou matice, mů
 
 \section{Knihovna METIS pro dělení grafu}
 
-Pro samotné dělení grafu na $k$ částí jsme využili knihovnu pro dělení grafů METIS \cite{kary:13} verze 5.1.0. Vzhledem k tomu, že jsme dělení grafů používali jako nástroj pro vyvažování počtu operací při Choleského rozkladu na jednotlivých oblastech, potřebovali jsme nalézt rozdělení grafu pomocí vrcholového separátoru. Takové rozdělení nám poskytne podprogram \texttt{METIS\_ComputeVertexSeparator}, který jsme ve Fortranu implementovali pomocí rozhraní \texttt{metis\_interface.f95} a \texttt{metisinclude.c} převzatých z \cite{klforum1}
+Pro samotné dělení grafu na dvě části jsme využili knihovnu pro dělení grafů METIS \cite{kary:13} verze 5.1.0. Vzhledem k tomu, že jsme dělení grafů používali jako nástroj pro vyvažování počtu operací při Choleského rozkladu na jednotlivých oblastech, potřebovali jsme nalézt rozdělení grafu pomocí vrcholového separátoru. Takové rozdělení nám poskytne podprogram \texttt{METIS\_ComputeVertexSeparator}, který jsme ve Fortranu implementovali pomocí rozhraní \texttt{metis\_interface.f95} a \texttt{metisinclude.c} převzatých z \cite{klforum1}
 
 Zmíněný podprogram není popsán v oficiální dokumentaci knihovny METIS a není tedy ve své základní verzi kompatibilní s jazykem Fortran. Proto bylo nutné učinit několik změn ve formátu CSR tak, aby bylo možné podprogram použít. Nejprve bylo třeba odebrat z grafu smyčky a poté jej přečíslovat tak, aby byly vrcholy indexovány od 0, jak je požadováno v jazycích C a C++.
 
-Výstupem podprogramu \texttt{METIS\_ComputeVertexSeparator} je pole \texttt{part} o délce rovné počtu vrcholů grafu. Na $i$-té pozici tohoto pole je číslo od $1$ do $3$ (po převedení do indexování od $1$ používaného v jazyce Fortran). To určuje, ve které části rozdělení se daný vrchol nachází. Pro vrchol s indexem $j$ ve vrcholovém separátoru je \texttt{part}$[j] = 3$.
+Výstupem podprogramu \texttt{METIS\_ComputeVertexSeparator} je pole \texttt{part} o délce rovné počtu vrcholů grafu. Na $i$-té pozici tohoto pole je číslo od $1$ do $3$ (po převedení do indexování od $1$ používaného v jazyce Fortran). To určuje, ve které části rozdělení se daný vrchol nachází. Pro vrchol s indexem $j$, který náleží do vrcholového separátoru, je \texttt{part}$[j] = 3$.
 
 \section{Tvorba podgrafů}
 Pro tvorbu podgrafů při znalosti vstupního rozdělení jsme použili námi napsaný podprogram \texttt{createSubgraphs}. Hlavní princip tohoto podprogramu lze popsat následovně. Jejho vstupem je graf v CSR formátu a vektor \texttt{part} popisující rozdělení tohoto grafu. Výstupem tohoto podprogramu jsou jednotlivé podgrafy popsané pomocí vektoru \texttt{part} uložené v CSR formátech. Pro snadnou manipulaci s těmito podgrafy je ukládáme do dvou datových struktur \texttt{iap} a \texttt{jap}. Formát těchto datových struktur je definován v \texttt{raggedmultiarray.f90} a byl převzat z \cite{ragmult}. $i$-tý podgraf ja pak uložen v polích \texttt{iap\%vectors($i$)\%elements}, \texttt{jap\%vectors($i$)\%elements}.
@@ -1072,7 +1079,7 @@ Pro tvorbu podgrafů při znalosti vstupního rozdělení jsme použili námi na
 \section{Číslování}
 V našem programu jsme implementovali 4 způsoby číslování vrcholů,mezi nimiž lze přepínat pomocí argumentu \texttt{-ot} z příkazové řádky.
 
-První metodou, kterou jsme implementovali, je číslování vrcholů grafu v závislosti na vzdálenosti od separátoru popsané v kapitole \ref{sepDistOrdering}. Jedná se o podprogram \texttt{orderByDistance}. Druhou implementovanou metodou je číslování vrcholů pomocí metody minimálního stupně popsané v odstavci \ref{MDordering}. Tuto metodu jsme implementovali jako podprogram \texttt{orderByMD}. Třetí a čtvrtá metoda obsažená v našem programu používá smíšené číslování popsané v kapitole \ref{Mixedordering}. Podprogram \texttt{orderMixed} používá pro výběr vrcholu kombinaci kritérií metody minimálního stupně a metody maximální vzdálenosti od separátoru. Naproti tomu v podprogramu \texttt{orderCoefMixed} je zvlášť napočítáno číslování v závislosti na vzdálenosti od separátoru a pomocí metody minimálního stupně. Poté dojde ke konvexní kombinaci těchto očíslování s koeficientem $C \in [0,1]$, který je vstupním parametrem tohoto podprogramu.
+První metodou, kterou jsme implementovali, je číslování vrcholů grafu v závislosti na vzdálenosti od separátoru popsané v kapitole \ref{sepDistOrdering}. Jedná se o podprogram \texttt{orderByDistance}. Druhou implementovanou metodou je číslování vrcholů pomocí metody minimálního stupně popsané v odstavci \ref{MDordering}. Tuto metodu jsme implementovali jako podprogram \texttt{orderByMD}. Třetí a čtvrtá metoda obsažená v našem programu používá smíšené číslování popsané v kapitole \ref{Mixedordering}. Podprogram \texttt{orderMixed} čísluje vrcholy na základě kombinace kritérií metody minimálního stupně a metody maximální vzdálenosti od separátoru. Naproti tomu v podprogramu \texttt{orderCoefMixed} je zvlášť napočítáno číslování v závislosti na vzdálenosti od separátoru a číslování pomocí metody minimálního stupně. Poté dojde k jejich konvexní kombinaci s koeficientem $C \in [0,1]$, který je vstupním parametrem tohoto podprogramu.
 
 Výstupem všech výše zmíněných podprogramů jsou vektory \texttt{ordperm} a \texttt{invordperm} popisující nově získanou permutaci vrcholů.
 
@@ -1103,16 +1110,16 @@ Při volání našeho programu z příkazové řádky je třeba mu poskytnout in
 \footnotesize
   \centering
   \renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|l|c|p{10cm}|}
+\begin{tabular}{|l|c|p{8cm}|}
   \hline
   \multicolumn{1}{|c|}{Argument}    & \multicolumn{1}{c|}{Priorita} & \multicolumn{1}{c|}{Funkce} \\
   \hline
   \texttt{-mt [matrixtype]}  & 2 & Používá se pro nastavení typu vstupní matice. Parametr \texttt{matrixtype} je povinný a jeho možné hodnoty jsou \texttt{RSA} pro matici načítanou ze souboru, \texttt{P[number]} pro matici o rozměrech \texttt{number}$\times$\texttt{number} vzniklou při jednoduché pětibodové diskretizaci dvojrozměrné Poissonovy rovnice, \texttt{T[number]} pro testovací matici s indexem \texttt{number} popsanou v souboru \texttt{testing.f90}. Tento argument je povinný, pokud není použit argument \texttt{-f}. \\
   \texttt{-f [path]}& 3 & Slouží k nastavení cesty (\texttt{path}) ke vstupnímu souboru matice. Tento argument je ignorován, pokud je použit argument \texttt{-mt} s parametrem \texttt{P[number]} nebo \texttt{T[number]}, v opačném případě je povinný.\\
-  \texttt{-ot [orderingtype]}& 2 & Využívá se pro nastavení typu uspořádání vrcholů v poslední iteraci hlavního cyklu programu. Možné hodnoty povinného parametru \texttt{orderingtype} jsou \texttt{DIST} pro číslování vrcholů grafu v závislosti na vzdálenosti od separátoru, \texttt{MD} pro číslování vrcholů pomocí metody minimálního stupně, \texttt{MIX} pro číslování pomocí smíšeného číslování používajícího současně metodu minimálního stupně a vzdálenost od separátoru a \texttt{MIX[number]} pro konvexní kombinaci těchto očíslování s koeficientem \texttt{number}~$ \in [0,1]$. Pokud není argument \texttt{-ot} uveden, nedojde k žádnému přeuspořádání vrcholů v částech. \\
+  \texttt{-ot [orderingtype]}& 2 & Využívá se pro nastavení metody číslování vrcholů. Možné hodnoty povinného parametru \texttt{orderingtype} jsou \texttt{DIST} pro číslování vrcholů grafu v závislosti na vzdálenosti od separátoru, \texttt{MD} pro číslování vrcholů pomocí metody minimálního stupně, \texttt{MIX} pro číslování pomocí smíšeného číslování používajícího současně metodu minimálního stupně a vzdálenost od separátoru a \texttt{MIX[number]} pro konvexní kombinaci těchto očíslování s koeficientem \texttt{number}~$ \in [0,1]$. Pokud není argument \texttt{-ot} uveden, nedojde k žádnému přeuspořádání vrcholů v částech. \\
   \texttt{-mvs [number]}& 2 & Slouží k nastavení počtu přesunů vrcholového separátoru směrem do části rozdělení s větším zaplněním. Parametr \texttt{number} je povinný a může nabývat hodnot $0 - 20$. Pokud není argument použit, k přesunu vrcholového separátoru nedojde. \\
-  \texttt{-oe}& 2 & Pokud je tento argument uveden, dochází k číslování vrcholů číslováním nastaveným pomocí argumentu \texttt{-ot} v každé iteraci hlavní smyčky a ne jen v poslední.\\
-  \texttt{-o [path]}& 2 & Užívá se pro vytvoření výstupního souboru ve formátu, který lze zobrazit pomocí softwarové knihovny Graphviz. Parametr \texttt{path} slouží k nastavení cesty k výstupnímu souboru. Pokud soubor již existuje, bude přepsán. Pokud argument není použit, k vypsání výstupu nedojde.\\
+  \texttt{-oe}& 3 & Pokud je tento argument uveden, dochází k číslování vrcholů pomocí číslování nastaveného za pomoci argumentu \texttt{-ot} v každé iteraci hlavní smyčky, v opačném případě pouze v poslední. Pokud nejsou použity zárověň argumenty \texttt{-ot} a \texttt{-mvs}, nemá tento argument žádný vliv na běh programu.\\
+  \texttt{-o [path]}& 2 & Slouží se pro vytvoření výstupního souboru ve formátu, který lze zobrazit pomocí softwarové knihovny Graphviz. Parametr \texttt{path} slouží k nastavení cesty k výstupnímu souboru. Pokud soubor již existuje, bude přepsán. Pokud argument není použit, k vypsání výstupu nedojde.\\
   \texttt{-w}& 2 & Pokud je tento argument použit, program v průběhu svého běhu vypisuje informaci o tom, která jeho část právě probíhá. \\
   \texttt{-h}& 1 & Pokud je tento argument použit, jsou všechny ostatní argumenty ignorovány a je pouze vypsána nápověda k programu. \\
   \hline
@@ -1130,7 +1137,7 @@ Pro úspěšné zkompilování a zlinkování projektu je třeba mít nainstalov
 
 \section{Výsledky pro základní typy číslování}
 \label{numberingResultsSection}
-V této podkapitole porovnáme počet nenulových prvků v Choleského faktoru v závislosti na zvoleném typu číslování bez toho, aby došlo k přesunu vektorového separátoru. Pro 110 námi testovaných matic jsme spustili program se čtyřmi různými nastaveními. Nejprve bez toho, aby se vrcholy jakkoliv přečíslovávaly, poté jsme vrcholy číslovali podle jejich vzdálenosti od vrcholového separátoru. Dále jsme použili číslování pomocí metody minimálního stupně a smíšené číslování používající kritérium kombinující obě předchozí. V Tabulce \ref{resultTable} jsou vypsány výsledky pro reprezentativní podmnožinu matic, které jsme testovali. 
+V této podkapitole porovnáme počet nenulových prvků v Choleského faktoru v závislosti na zvoleném typu číslování bez toho, aby došlo k přesunu vektorového separátoru. Pro soubor 110 námi testovaných matic jsme spustili program se čtyřmi různými nastaveními. Nejprve bez toho, aby se vrcholy jakkoliv přečíslovávaly, poté jsme vrcholy číslovali podle jejich vzdálenosti od vrcholového separátoru. Dále jsme použili číslování pomocí metody minimálního stupně a smíšené číslování používající kritérium kombinující obě předchozí. V Tabulce \ref{resultTable} jsou vypsány výsledky pro reprezentativní podmnožinu matic, které jsme testovali. 
 
 \bigskip
 {\noindent
@@ -1288,16 +1295,17 @@ V této podkapitole porovnáme počet nenulových prvků v Choleského faktoru v
 \end{longtable}
 \captionof{table}{Porovnání počtu nenulových prvků v Choleského faktorech pro různé typy číslování \label{resultTable}}
 }
+\bigskip
 
 Z Tabulky \ref{resultTable} je vidět, že ve valné většině případů nám již samotné očíslování vrcholů může výrazně pomoci redukovat zaplnění v Choleského faktoru matice. Ukazuje se, že číslování podle vzdálenosti od separátoru není pro tuto úlohu příliš vhodné, jen v několika případech s jeho pomocí došlo k výraznému zmenšení počtu nenulových prvků v Choleského rozkladech matice. Naproti tomu metoda minimálního stupně a smíšené číslování nám pro většinu matic poskytnou výrazné zlepšení. V případech, kdy pomocí žádného číslování nezískáme lepší výsledky než byly výsledky bez něj, obvykle nedochází k výrazné degradaci.
 
-Můžeme pozorovat, že v některých případech je při použití dvou různých očíslování rozdíl v tom, ve které části rozdělení je větší počet nenulových prvků. Vzhledem k tomu, že na tuto informaci bereme ohled při přesouvání vrcholového separátoru, je vhodné vrcholy graf očíslovat námi zvoleným číslováním před každým přesunutím vrcholového separátoru a ne jen v poslední iteraci. To nám však výrazně přidá na výpočetní náročnosti a proto v kapitole \ref{mvswithNumbering} diskutujeme, zda tento postup přináší lepší výsledky.
+Můžeme pozorovat, že v některých případech je při použití dvou různých očíslování rozdíl v tom, ve které části rozdělení je větší počet nenulových prvků. Vzhledem k tomu, že na tuto informaci bereme ohled při přesouvání vrcholového separátoru, je vhodné vrcholy grafu očíslovat námi zvoleným číslováním před každým přesunutím vrcholového separátoru a ne jen v poslední iteraci. To nám však výrazně přidá na výpočetní náročnosti, a proto v kapitole \ref{mvswithNumbering} diskutujeme, zda tento postup přináší lepší výsledky.
 
 \subsection{Výsledky pro smíšené číslování s konvexní kombinací}
 
 Popišme nyní smíšené číslování, kdy je zvlášť napočítáno číslování v závislosti na vzdálenosti od separátoru a pomocí metody minimálního stupně a poté dojde ke konvexní kombinaci těchto očíslování s koeficientem z intervalu $[0,1]$. Pro koeficient $0$ je výsledek tohoto číslování roven výsledku metody minimálního stupně, pro koeficient $1$ výsledku číslování podle vzdálenosti od separátoru.
 
-V Tabulce \ref{mixCoefResultTable} je zanesen pro koeficienty $0, 0.1,\ldots,0.9, 1$ počet nenulových prvků v Choleského faktoru. Je vidět, že tato metoda číslování nám nic nového nepřinese. Oproti číslování podle vzdálenosti od separátoru dojde ke zlepšení pouze ve výjimečných případech, oproti číslování pomocí metody minimálního stupně jsme zlepšení nepozorovali ani jednou. Testy byly z důvodu výpočetní náročnosti prováděny pro matice menších rozměrů. Lze však předpokládat, že pro velké matice by dopadly obdobně.
+V Tabulce \ref{mixCoefResultTable} je pro koeficienty $0, 0.1,\ldots,0.9, 1$ zanesen počet nenulových prvků v Choleského faktoru. Je vidět, že tato metoda číslování nám nic nového nepřinese. Oproti číslování podle vzdálenosti od separátoru dojde ke zlepšení pouze ve výjimečných případech, oproti číslování pomocí metody minimálního stupně jsme zlepšení nepozorovali ani jednou. Testy byly z důvodu výpočetní náročnosti prováděny pro matice menších rozměrů. Lze však předpokládat, že pro velké matice by dopadly obdobně.
 
 \bigskip
 {\noindent
@@ -1423,7 +1431,7 @@ Již z podstaty Choleského rozkladu je zřejmé, že přidáním vrcholů ke gr
 }
 \bigskip
 
-Zřejmě při přesouvání vrcholového separátoru dojde od jisté chvíle k zacyklení, protože vrcholový separátor je přesouván vždy směrem do části s vyšším počtem prvků. Pro námi testované matice se periodické chování vyskytlo vždy dříve než v deváté iteraci algoritmu. Perioda nemusí být nutně rovna dvěma, jak by se člověk mohl domnívat. Příklad periodického chování algoritmu můžeme vidět v opět v Tabulce \ref{mvsTable1}.
+Zřejmě při přesouvání vrcholového separátoru dojde od jisté chvíle k zacyklení, protože vrcholový separátor je přesouván vždy směrem do části s vyšším počtem prvků. Pro námi testované matice se periodické chování vyskytlo vždy dříve než v deváté iteraci algoritmu. Perioda nemusí být nutně rovna dvěma, jak by se člověk mohl domnívat. Příklad periodického chování algoritmu můžeme opět vidět v Tabulce \ref{mvsTable1}.
 
 Námi zvolený algoritmus pro přesouvání vrcholů taktéž není vhodný pro grafy s velmi malým počtem vrcholů, protože u grafů tohoto typu často dojde přesunutím separátoru výrazné změně velikostí jednotlivých částí. To má za následek výraznou nevyváženost v počtu operací potřebných k výpočtu Choleského rozkladu příslušných podmatic. Tato situace může nastat i pro grafy se separátorem, který je v poměru k jednotlivým částem rozdělení velký. Jako příklad uveďme dva grafy popsané v Tabulce \ref{mvsTable2}
 
@@ -1584,7 +1592,7 @@ Z předchozího textu by se mohlo zdát, že nám tato metoda přesunu separáto
 \bigskip
 
 \label{mvswithNumbering}
-Tento postup je vhodný pro vylepšování rozdělení bez používání číslování vrcholů. Pokud však číslujeme pouze v poslední iteraci hlavního cyklu, tj. spouštíme program bez argumentu \texttt{-oe}, může se stát, že část rozdělení s větším počtem nenulových prvků v Choleského faktoru bez použití číslování je jiná než část rozdělení s větším počtem nenulových prvků při použití číslování. V takovémto případě dochází k přesunu separátoru, který nám pomůže vyvážit počet nenulových prvků pro rozdělení bez číslování, ale naopak nám zhorší vyváženost pro očíslované grafy (viz například matice bcspwr07.rb v Tabulce \ref{mvsTable3}). Pro lepší výsledky v takovýchto případech je tedy vhodné číslovat v každé iteraci hlavní smyčky, což nám však výrazně přidá na výpočetní náročnosti. Záleží tedy na tom, jaký je problém, který se s pomocí Choleského faktorizace snažíme vyřešit a zda požadujeme co nejlepší vyvážení počtu operací na jednotlivých částech, nebo dáváme přednost rychlejšímu nalezení vhodného rozdělení. V tabulce \ref{oeArgumentTable} je uvedeno několik příkladů matic u kterých jsme tímto postupem dosáhli zlepšení vyváženosti počtu nenulových prvků v Choleského faktorech oproti předchozím výsledkům. Ve většině příkladů jsme však lepší rozdělení nezískali, lze tedy konstatovat, že pro obecné úlohy není třeba číslovat vrcholy podgrafů v každé iteraci.
+Tento postup je vhodný pro vylepšování rozdělení bez používání číslování vrcholů. Pokud však číslujeme pouze v poslední iteraci hlavního cyklu, tj. spouštíme program bez argumentu \texttt{-oe}, může se stát, že část rozdělení s větším počtem nenulových prvků v Choleského faktoru bez použití číslování je jiná než část rozdělení s větším počtem nenulových prvků při použití číslování. V takovémto případě dochází k přesunu separátoru, který nám pomůže vyvážit počet nenulových prvků pro rozdělení bez číslování, ale naopak nám zhorší vyváženost pro očíslované grafy (viz například matice bcspwr07.rb v Tabulce \ref{mvsTable3}). Pro lepší výsledky v takovýchto případech je tedy vhodné číslovat v každé iteraci hlavní smyčky, což nám však výrazně přidá na výpočetní náročnosti. Záleží tedy na tom, jaký je problém, který se s pomocí Choleského faktorizace snažíme vyřešit a zda požadujeme co nejlepší vyvážení počtu operací na jednotlivých částech, nebo dáváme přednost rychlejšímu nalezení vhodného rozdělení. V tabulce \ref{oeArgumentTable} je uvedeno několik příkladů matic u kterých jsme tímto postupem dosáhli globálního zlepšení vyváženosti počtu nenulových prvků v Choleského faktorech oproti nejlepšímu předchozímu výsledku. Ve většině příkladů jsme však lepší rozdělení nezískali, lze tedy konstatovat, že pro obecné úlohy není třeba číslovat vrcholy podgrafů v každé iteraci.
 
 \bigskip
 {\noindent
@@ -1620,13 +1628,13 @@ Tento postup je vhodný pro vylepšování rozdělení bez používání číslo
 
 V této práci jsme se zaměřili na analýzu problému paralelizace Choleského rozkladu pomocí dělení grafů. Popsali jsme základní pojmy týkající se grafů a problém dělení grafu. Zmínili jsme základní algoritmy pro dělení grafu s důrazem na víceúrovňové schéma dělení grafu. Dále jsme se zabývali rozklady matic, především úplným Choleského rozkladem. Popsali jsme souvislost mezi dělením grafu a Choleského rozkladem a zmínili, že základní kritéria nepokrývají vyváženost Choleského rozkladu. Zabývali jsme se číslováním vrcholů grafu jakožto nástrojem pro snížení počtu nenulových prvků v Choleského rozkladu a eliminačními stromy s jejichž pomocí lze efektivně zjistit počet nenulových prvků v Choleského faktoru matice. V praktické implementaci jsme se zaměřili na analýzu problému vyvážení počtu nenulových prvků v Choleského faktorech matic sousednosti jednotlivých podgrafů vzniklých rozdělením grafu odpovídajícího původní matici.
 
-Z námi získaných výsledků vyplývá, že pro zvýšení efektivity Choleského rozkladu je zásadní, jak jsou řádky a sloupce vstupní matice permutovány. Tato permutace totiž přímo souvisí s očíslováním odpovídajícího grafu. Z námi naměřených dat vyplývá, že volbou správného očíslování můžeme snížit počet nenulových prvků až o jeden řád. Nejlépe se nám ověřilo očíslování vrcholů metodou minimálního stupně a očíslování podle smíšeného kritéria minimálního stupně a vzdálenosti vrcholu od separátoru. Tato dvě očíslování dávají řádově stejné výsledky. Naproti tomu očíslování podle vzdálenosti od separátoru a konvexní kombinace očíslování podle vzdálenosti od separátoru a očíslování získaného metodou minimálního stupně se ukázala jako nevhodná.
+Z námi získaných výsledků vyplývá, že pro zvýšení efektivity Choleského rozkladu je zásadní, jak jsou řádky a sloupce vstupní matice permutovány. Tato permutace totiž přímo souvisí s očíslováním odpovídajícího grafu. Ukazuje se, že volbou správného očíslování můžeme snížit počet nenulových prvků až o jeden řád. Nejlépe se nám ověřilo očíslování vrcholů metodou minimálního stupně a očíslování podle smíšeného kritéria minimálního stupně a vzdálenosti vrcholu od separátoru. Tato dvě očíslování dávají řádově stejné výsledky. Naproti tomu očíslování podle vzdálenosti od separátoru a konvexní kombinace očíslování podle vzdálenosti od separátoru a očíslování získaného metodou minimálního stupně se ukázala jako nevhodná.
 
 Další možností, jak zlepšit vyváženost rozdělení grafu vzhledem k počtu nenulových prvků v Choleského faktoru matice, je modifikovat samotné rozdělení. Námi navržená metoda přesunu vrcholového separátoru toto potvrdila, k vyvážení počtu nenulových prvků dochází již po několika málo modifikacích vektorového separátoru. Pozorovaná zvětšení velikosti vektorového separátoru nebyla ve většině případů dostatečně výrazná na to, aby převážila výhody získané přesunem separátoru.
 
 Mohlo by se zdát, že z časového hlediska není výhodné zabývat se tímto způsobem paralelizace, není tomu však tak. Choleského rozklad matice nemusí být potřebný pouze pro řešení jedné konkrétní úlohy, ale můžeme se setkat s případy, kdy řešíme více soustav rovnic s maticemi, které jsou si velice blízké nebo se jedná dokonce o tutéž matici \cite{dutu:10}. V takových případech se nám vyplatí paralelizovat Choleského rozklad, protože při použití vhodného očíslování vrcholů odpovídajícího grafu nám stačí v Choleského rozkladu matice přepočítávat pomocí sloupcového algoritmu popsaného výše pouze několik posledních \TODO{sloupců?} Choleského faktoru. 
 
-Vzhledem k analytickému charakteru práce není naše implementace efektivní. Dalším logickým krokem by tedy bylo navrhnout a vytvořit program, který by námi získané výsledky byl schopen získat v lepším čase. Při implementaci takového programu by se dalo uvažovat i nad implementací očíslování založených na metodě minimálního stupně, ale rychlejších \cite{amdadu:96}.
+Vzhledem k analytickému charakteru práce není naše implementace efektivní. Dalším logickým krokem by tedy bylo navrhnout a vytvořit program, který by námi získané výsledky byl schopen získat v lepším čase. Při implementaci takového programu by se dalo uvažovat i nad implementací očíslování založených na metodě minimálního stupně, ale rychlejších \cite{amdadu:96}, což již ale přesahuje nad rámec této práce.
 
 
 %----------------------------------------------------------------------

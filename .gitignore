@@ -11,10 +11,8 @@
 !zadani.pdf
 !.gitignore
 
-!code/SVREV.F
 !code/auxroutines.f90
 !code/gvroutines.f90
-!code/im_mtx.f90
 !code/main.f90
 !code/makefile
 !code/metis_interface.f95
@@ -24,7 +22,6 @@
 !code/mydepend90.f90
 !code/myroutines90.f90
 !code/raggedmultiarray.f90
-!code/svrev.f90
 !code/testing.f90
 !code/cmdlineloader.f90
 !code/matrixloader.f90

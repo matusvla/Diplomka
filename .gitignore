@@ -26,7 +26,6 @@
 !code/cmdlineloader.f90
 !code/matrixloader.f90
 !code/metiscaller.f90
-!code/nonz.m
 !code/runprog.py
 
 !text/diplomka.tex

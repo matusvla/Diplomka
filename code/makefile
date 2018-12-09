@@ -43,3 +43,6 @@ $(OBJDIR)/%.o: %.f95
 # Clean target
 clean :
 	rm -f  *.o ./${MODDIR}/*.mod ./${OBJDIR}/*.o prog.exe
+
+#If objects and modules folders do not exist, create them
+$(shell mkdir -p $(OBJDIR) $(MODDIR))

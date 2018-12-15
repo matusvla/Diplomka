@@ -18,6 +18,10 @@
 \usepackage{multirow}
 \usetikzlibrary{calc}
 
+\usepackage{newunicodechar}
+\newunicodechar{ď}{\hbox{d\kern-1pt'}\hspace{-2px}}
+\newunicodechar{ť}{\hbox{t\kern-1pt'}\hspace{-2px}}
+
 \usepackage{longtable}
 \setcounter{secnumdepth}{3}
 \usepackage[boxed]{algorithm2e}
@@ -210,7 +214,7 @@
 
 \noindent \emph{\Large{}Poděkování:}{\Large \par}
 
-\noindent Rád bych poděkoval především svému školiteli prof.~Ing.~Miroslavu Tůmovi, CSc. za jeho ochotu, pečlivost, vstřícnost a~odborné i~lidské zázemí při vedení mé diplomové práce.
+\noindent Rád bych poděkoval především svému školiteli prof.~Ing.~Miroslavu Tůmovi, CSc., za jeho ochotu, pečlivost, vstřícnost a~odborné i~lidské zázemí při vedení mé diplomové práce.
 
 \vfill
 
@@ -380,7 +384,6 @@ Proces vytváření faktorgrafu $G / \mathcal{P}$ z~grafu $G$ je znázorněn na~
 }
 
 \section{Strom}
-
 Nyní zaveďme základní pojmy týkající speciální třídy grafů nazývané stromy \cite{koub:11}.
 
 \begin{definition}
@@ -648,7 +651,7 @@ Popišme metodu vnořených řezů nejprve pro~speciální třídu grafů nazýv
 
 Mějme čtvercovou síť $N = (V,E)$ o~rozměrech $n \times n$ a~nechť $S_0 \subset V$. Nechť dále vrcholy z~množiny $S_0$ leží v~síti na~jedné přímce a~$S_0$ je vrcholovým separátorem sítě $N$, jehož odebráním dojde k rozpadnutí sítě $N$ na~dva podgrafy s~množinami vrcholů $V_1$ a~$V_2$ s~pokud možno stejným počtem prvků. Z~konstrukce $S$ jsou tyto podgrafy zřejmě také čtvercovými sítěmi. Očíslujme nyní postupně po řádcích vrcholy z~množin $V_1$ a~$V_2$ a~nakonec očíslujme vrcholy $S_0$. Toto očíslování nazýváme jednoúrovňově-dělicím (one-level dissection ordering) a~vidíme, že zřejmě splňuje podmínky kladené výše na~zobrazení $\varphi$.
 
-\paragraph{Vnořené řezy pro~čtvercovou síť: }
+\paragraph{Vnořené řezy pro~čtvercovou síť\hspace{1px}: }
 
 Abychom získali očíslování pro~metodu vnořených řezů, pokračujeme v~dělení komponent s~množinami vrcholů $V_1$, $V_2$. Obdobným způsobem jako v~prvním kroku vybereme $S_1$, resp. $S_2$ tak, aby byla vhodným vrcholovým separátorem $G(V_1)$, resp. $G(V_2)$. Nyní opět každou část přečíslujeme tak, aby vrcholy v~separátoru měly nejvyšší čísla.
 Tím se nám podaří docílit toho, že nejen matice sousednosti, ale i~její libovolný diagonální blok má rekurzivně tvar (\ref{AG nested}).

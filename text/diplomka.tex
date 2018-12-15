@@ -1,26 +1,31 @@
-\documentclass{ctuthesis}
+%% LyX 2.1.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[11pt,a4paper,american,czech,oneside]{book}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=4cm,bmargin=3cm,lmargin=3cm,rmargin=2cm,headheight=0.8cm,headsep=1cm,footskip=1cm}
+\pagestyle{headings}
+\setcounter{secnumdepth}{3}
+\usepackage{url}
+\usepackage{amsmath,amssymb,amsfonts,amsthm}
+\usepackage{graphicx}
+\usepackage{setspace}
+\usepackage{tikz}
+\usepackage{caption,lipsum}
+\usepackage{listings}
+\usepackage{mathtools}
+\usepackage{multirow}
+\usetikzlibrary{calc}
 
-    \usepackage[T1]{fontenc}
-    \usepackage[utf8]{inputenc}
-    \usepackage{amsmath,amssymb,amsfonts,amsthm}
-    \usepackage{indentfirst}
-    \usepackage{graphicx}
-    \usepackage[boxed]{algorithm2e}
-    \SetKwArray{Marker}{marker}
+\usepackage{longtable}
+\setcounter{secnumdepth}{3}
+\usepackage[boxed]{algorithm2e}
+\SetKwArray{Marker}{marker}
 
-    \usepackage{tikz}
-    \usepackage{caption,lipsum}
-    \usepackage{listings}
-    \usepackage{mathtools}
-    \usepackage{multirow}
-    \usepackage{url}
-    \usepackage{longtable}
-    \usetikzlibrary{calc}
-    \setcounter{secnumdepth}{3}
-
-    \usepackage{pifont}% http://ctan.org/pkg/pifont
-    \newcommand{\cmark}{\ding{51}}%
-    \newcommand{\xmark}{\ding{55}}%
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
 
 \theoremstyle{plain}
     \newtheorem{theorem}{Věta}
@@ -34,63 +39,278 @@
     \newtheorem{observation}{Pozorování}
 \renewcommand*{\proofname}{Důkaz}
 
-\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
-
 \newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}\PackageWarning{TODO:}{TODO: #1!}}
 %\newcommand{\TODO}[1]{\textcolor{red}{TODO: #1}}
 
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 
-\ctusetup{
-  author = {Bc. Vladislav Matúš},
-  supervisor = {prof. Ing. Miroslav Tůma, CSc.},supervisor-address = {Charles University in Prague, Faculty of Mathematics and Physics, Sokolovská 83, 186 75, Praha 8},
-  titlelanguage = czech,
-  mainlanguage = czech,
-  year = 2018,
-  month = 12,
-  title-english = {Graph repartitioning based on sparse matrix factorization techniques},
-  title-czech = {Přerozdělení oblastí v grafu založené na technikách rozkladu řídkých matic},
-  xdoctype = M,
-  xfaculty = F4,
-  front-specification=true,
-  specification-file={zadani.pdf},
-  department-czech = {Katedra Matematiky},
-  keywords-czech = {Dělení grafů, Grafové algoritmy, Řídké matice, Choleského rozklad, Číslování grafu, Eliminační stromy},
-  keywords-english = {Graph partitioning, Graph algorithms, Sparse matrices, Cholesky decomposition, Graph numbering, Elimination trees},
-  fieldofstudy-czech = {Matematická informatika},
-  fieldofstudy-english = {Mathematical informatics},
-}
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Textclass specific LaTeX commands.
+\newenvironment{lyxlist}[1]
+{\begin{list}{}
+{\settowidth{\labelwidth}{#1}
+ \setlength{\leftmargin}{\labelwidth}
+ \addtolength{\leftmargin}{\labelsep}
+ \renewcommand{\makelabel}[1]{##1\hfil}}}
+{\end{list}}
 
-\ctuprocess
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+%% Font setup: please leave the LyX font settings all set to 'default'
+%% if you want to use any of these packages:
+
+%% Use Times New Roman font for text and Belleek font for math
+%% Please make sure that the 'esint' package is turned off in the
+%% 'Math options' page.
+\usepackage[varg]{txfonts}
+
+%% Use Utopia text with Fourier-GUTenberg math
+%\usepackage{fourier}
+
+%% Bitstream Charter text with Math Design math
+%\usepackage[charter]{mathdesign}
+
+%%---------------------------------------------------------------------
+
+%% Make the multiline figure/table captions indent so that the second
+%% line "hangs" right below the first one.
+%\usepackage[format=hang]{caption}
+
+%% Indent even the first paragraph in each section
+\usepackage{indentfirst}
+
+%%---------------------------------------------------------------------
+
+%% Disable page numbers in the TOC. LOF, LOT (TOC automatically
+%% adds \thispagestyle{chapter} if not overriden
+%\addtocontents{toc}{\protect\thispagestyle{empty}}
+%\addtocontents{lof}{\protect\thispagestyle{empty}}
+%\addtocontents{lot}{\protect\thispagestyle{empty}}
+
+%% Shifts the top line of the TOC (not the title) 1cm upwards
+%% so that the whole TOC fits on 1 page. Additional page size
+%% adjustment is performed at the point where the TOC
+%% is inserted.
+%\addtocontents{toc}{\protect\vspace{-1cm}}
+
+%%---------------------------------------------------------------------
+
+% completely avoid orphans (first lines of a new paragraph on the bottom of a page)
+\clubpenalty=9500
+
+% completely avoid widows (last lines of paragraph on a new page)
+\widowpenalty=9500
+
+% disable hyphenation of acronyms
+\hyphenation{CDFA HARDI HiPPIES IKEM InterTrack MEGIDDO MIMD MPFA DICOM ASCLEPIOS MedInria}
+
+%%---------------------------------------------------------------------
+
+%% Print out all vectors in bold type instead of printing an arrow above them
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+
+% Replace standard \cite by the parenthetical variant \citep
+%\renewcommand{\cite}{\citep}
 
 
-\begin{abstract-czech}
-  Choleského rozklad je často používanou metodou pro řešení soustav lineárních rovnic se symetrickou  a pozitivně definitní maticí. Jeho hledání lze paralelizovat pomocí algoritmů dělení grafů. Při použití standardních postupů však narážíme na problém nevyváženosti počtu nenulových prvků v Choleského faktorech podmatic jednotlivých oddělených oblastí. V této práci analyzujeme metody, jak globálně snížit počet nenulových prvků v Choleského faktoru pomocí číslování příslušného grafu a jak aposteriorně modifikovat rozdělení grafu tak, aby Choleského faktory podmatic odpovídajících těmto odděleným oblastem obsahovaly co nejpodobnější počet nenulových prvků.
-\end{abstract-czech}
+\makeatother
 
-\begin{declaration}
-  Prohlašuji, že jsem tuto práci vypracoval samostatně a uvedl jsem všechnu použitou literaturu.
+\usepackage{babel}
 
-  \medskip
-  V Praze dne 9. prosince 2018
-\end{declaration}
-
-\begin{thanks}
-  Rád bych poděkoval především svému školiteli prof.~Ing.~Miroslavu Tůmovi, CSc., za jeho ochotu, pečlivost, vstřícnost a odborné i lidské zázemí při vedení mé diplomové práce.
-\end{thanks}
-
-\begin{abstract-english}
-  Cholesky decomposition is a well-known and popular scheme for solving linear systems with symmetric and positive definite matrices. It can be parallelized by using graph partitioning algorithms. However, using standard criteria of graph partitioning may be insufficient, as they do not cover the imbalance in number of nonzeros in Cholesky factors of of resulting separated subgraphs. In this thesis we analyze the methods for numbering the vertices of the graph and thereby reducing the number of nonzeros in the Cholesky factors of the subgraphs. We modify the graph partition using a posteriori approach and elucidate its impact on the balance of number of nonzeros in Cholesky factors.
-\end{abstract-english}
-
+%Ceske uvozovky
+%\newcommand{\uv}[1]{\quotedblbase #1\textquotedblleft}
 
 \begin{document}
+
 \TODO{oneside?}
 \TODO{tahle sablona, nebo jina?}
 \TODO{udelat poradek s tabulkama}
 
-\maketitle
+\def\documentdate{15. prosince 2018}
+
+%%\def\documentdate{\today}
+\pagestyle{empty}
+{\centering
+
+\noindent %
+\begin{minipage}[c]{3cm}%
+\noindent \begin{center}
+\includegraphics[width=3cm,height=3cm,keepaspectratio]{pictures/ctulogos/cvut}
+\par\end{center}%
+\end{minipage}%
+\begin{minipage}[c]{0.6\linewidth}%
+\begin{center}
+\textsc{\large{}České vysoké učení technické v Praze}{\large{}}\\
+{\large{}Fakulta jaderná a fyzikálně inženýrská}
+\par\end{center}%
+\end{minipage}%
+\begin{minipage}[c]{3cm}%
+\noindent \begin{center}
+\includegraphics[width=3cm,height=3cm,keepaspectratio]{pictures/ctulogos/fjfi}
+\par\end{center}%
+\end{minipage}
+
+\vspace{3cm}
+
+
+\textbf{\huge{}Přerozdělení oblastí v grafu založené na technikách rozkladu řídkých matic}{\huge \par}
+
+\vspace{1cm}
+
+
+\selectlanguage{american}%
+\textbf{\huge{}Graph repartitioning based on sparse matrix factorization techniques}
+{\huge \par}
+
+\selectlanguage{czech}%
+\vspace{2cm}
+
+
+{\large{}Diplomová práce}{\large \par}
+
+}
+
+\vfill{}
+
+\begin{lyxlist}{MMMMMMMMM}
+\begin{singlespace}
+\item [{Autor:}] \textbf{Bc. Vladislav Matúš}
+\item [{Vedoucí~práce:}] \textbf{prof. Ing. Miroslav Tůma, CSc.}
+\item [{Akademický~rok:}] 2018 / 2019\end{singlespace}
+
+\end{lyxlist}
+
+\newpage{}
+
+~\newpage{}
+
+~
+
+\vfill{}
+
+
+\begin{center}
+- Zadání práce -
+\par\end{center}
+
+\vfill{}
+
+
+~\newpage{}
+
+~
+
+\vfill{}
+
+
+\begin{center}
+- Zadání práce (zadní strana) -
+\par\end{center}
+
+\vfill{}
+
+
+~\newpage{}
+
+\noindent \emph{\Large{}Poděkování:}{\Large \par}
+
+\noindent Rád bych poděkoval především svému školiteli prof.~Ing.~Miroslavu Tůmovi, CSc. za jeho ochotu, pečlivost, vstřícnost a odborné i lidské zázemí při vedení mé diplomové práce.
+
+\vfill
+
+\noindent \emph{\Large{}Čestné prohlášení:}{\Large \par}
+
+\noindent Prohlašuji, že jsem tuto práci vypracoval samostatně a uvedl jsem všechnu použitou literaturu.
+
+\bigskip{}
+
+
+\noindent V Praze dne \documentdate\hfill{}Bc. Vladislav Matúš
+
+\vspace{2cm}
+
+\newpage{}
+
+~\newpage{}
+
+\begin{onehalfspace}
+\noindent \emph{Název práce:}
+
+\noindent \textbf{Přerozdělení oblastí v grafu založené na technikách rozkladu řídkých matic}
+\end{onehalfspace}
+
+\bigskip{}
+
+
+\noindent \emph{Autor:} Bc. Vladislav Matúš
+
+\bigskip{}
+
+\noindent \emph{Obor:} Matematická informatika
+
+\bigskip{}
+
+\noindent \emph{Druh práce:} Diplomová práce
+
+\bigskip{}
+
+
+\noindent \emph{Vedoucí práce:} prof. Ing. Miroslav Tůma, CSc.,
+Charles University in Prague, Faculty of Mathematics and Physics, Sokolovská 83, 186 75, Praha 8
+
+\bigskip{}
+
+\noindent \emph{Abstrakt:}
+  Choleského rozklad je často používanou metodou pro řešení soustav lineárních rovnic se symetrickou a pozitivně definitní maticí. Jeho hledání lze paralelizovat pomocí algoritmů dělení grafů. Při použití standardních postupů však narážíme na problém nevyváženosti počtu nenulových prvků v Choleského faktorech podmatic jednotlivých oddělených oblastí. V této práci analyzujeme metody, jak globálně snížit počet nenulových prvků v Choleského faktoru pomocí číslování příslušného grafu a jak aposteriorně modifikovat rozdělení grafu tak, aby Choleského faktory podmatic odpovídajících těmto odděleným oblastem obsahovaly co nejpodobnější počet nenulových prvků.
+
+\bigskip{}
+
+
+\noindent \emph{Klíčová slova:}
+  Dělení grafů, Grafové algoritmy, Řídké matice, Choleského rozklad, Číslování grafu, Eliminační stromy
+
+\vfill{}
+~
+
+\selectlanguage{american}%
+\begin{onehalfspace}
+\noindent \emph{Title:}
+
+\noindent \textbf{Graph repartitioning based on sparse matrix factorization techniques}
+\end{onehalfspace}
+
+\bigskip{}
+
+
+\noindent \emph{Author:} Bc. Vladislav Matúš
+
+\bigskip{}
+
+
+\noindent \emph{Abstract:}
+  Cholesky decomposition is a well-known and popular scheme for solving linear systems with symmetric and positive definite matrices. It can be parallelized by using graph partitioning algorithms. However, using standard criteria of graph partitioning may be insufficient, as they do not cover the imbalance in number of nonzeros in Cholesky factors of of resulting separated subgraphs. In this thesis we analyze the methods for numbering the vertices of the graph and thereby reducing the number of nonzeros in the Cholesky factors of the subgraphs. We modify the graph partition using a posteriori approach and elucidate its impact on the balance of number of nonzeros in Cholesky factors.
+
+\bigskip{}
+
+\noindent \emph{Key words:}
+  Graph partitioning, Graph algorithms, Sparse matrices, Cholesky decomposition, Graph numbering, Elimination trees
+
+\selectlanguage{czech}%
+\newpage{}
+
+~\newpage{}
+
+\pagestyle{plain}
+
+\tableofcontents{}
+
+\newpage{}
+\restoregeometry
+
 
 \chapter*{Úvod}
+
+\addcontentsline{toc}{chapter}{Úvod}
 
 V této diplomové práci se budeme zabývat využitím dělení grafů jakožto nástroje pro paralelizaci Choleského rozkladu řídké matice. Nejprve ukážeme, že základní kritéria pro dělení grafů nepokrývají počet nenulových prvků v Choleského rozkladu matic sousednosti jednotlivých podgrafů. Dále z analytického hlediska prozkoumáme vliv číslování vrcholů grafu na počet nenulových prvků v Choleského rozkladu matice.  Poté se pomocí aposteriorního přístupu úpravy rozdělení grafu pokusíme analyzovat, zda je možné jednoduchým způsobem vylepšit rozdělení grafu tak, aby byl počet nenulových prvků v Choleského faktorech na jednotlivých oblastech vyvážený.
 
@@ -1626,6 +1846,8 @@ Tento postup je vhodný pro vylepšování rozdělení bez používání číslo
 
 \chapter*{Závěr}
 
+\addcontentsline{toc}{chapter}{Závěr}
+
 V této práci jsme se zaměřili na analýzu problému paralelizace Choleského rozkladu pomocí dělení grafů. Popsali jsme základní pojmy týkající se grafů a problém dělení grafu. Zmínili jsme základní algoritmy pro dělení grafu s důrazem na víceúrovňové schéma dělení grafu. Dále jsme se zabývali rozklady matic, především úplným Choleského rozkladem. Popsali jsme souvislost mezi dělením grafu a Choleského rozkladem a zmínili, že základní kritéria nepokrývají vyváženost Choleského rozkladu. Zabývali jsme se číslováním vrcholů grafu jakožto nástrojem pro snížení počtu nenulových prvků v Choleského rozkladu a eliminačními stromy s jejichž pomocí lze efektivně zjistit počet nenulových prvků v Choleského faktoru matice. V praktické implementaci jsme se zaměřili na analýzu problému vyvážení počtu nenulových prvků v Choleského faktorech matic sousednosti jednotlivých podgrafů vzniklých rozdělením grafu odpovídajícího původní matici.
 
 Z námi získaných výsledků vyplývá, že pro zvýšení efektivity Choleského rozkladu je zásadní, jak jsou řádky a sloupce vstupní matice permutovány. Tato permutace totiž přímo souvisí s očíslováním odpovídajícího grafu. Ukazuje se, že volbou správného očíslování můžeme snížit počet nenulových prvků až o jeden řád. Nejlépe se nám ověřilo očíslování vrcholů metodou minimálního stupně a očíslování podle smíšeného kritéria minimálního stupně a vzdálenosti vrcholu od separátoru. Tato dvě očíslování dávají řádově stejné výsledky. Naproti tomu očíslování podle vzdálenosti od separátoru a konvexní kombinace očíslování podle vzdálenosti od separátoru a očíslování získaného metodou minimálního stupně se ukázala jako nevhodná.
@@ -1646,4 +1868,4 @@ Vzhledem k analytickému charakteru práce není naše implementace efektivní. 
 
 \TODO{poladit citovani odkazu}
 
-\end{document} 
+\end{document}

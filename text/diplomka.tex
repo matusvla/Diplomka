@@ -122,7 +122,7 @@
 \usepackage{babel}
 
 %Ceske uvozovky
-%\newcommand{\uv}[1]{\quotedblbase #1\textquotedblleft}
+\newcommand{\uvoz}[1]{\quotedblbase #1\textquotedblleft}
 
 \begin{document}
 
@@ -459,7 +459,7 @@ Pro reprezentaci ne nutně čtvercové matice $A$ o~rozměrech $m\times n$ můž
   Graf $G=(V,E)$ nazveme bipartitním, pokud existuje rozklad množiny $V$ na~podmnožiny $R$, $B$ takové, že ${R \choose 2} \cap E = {B \choose 2} \cap E = \emptyset$.
 \end{definition}
 
-Jinými slovy se jedná o~graf, který lze rozdělit na~dvě části tak, že v~žádné z~částí není ani jedna hrana. Takovýto bipartitní graf se standardně značí $G=(R,B,E)$ a~pokud chceme s~jeho pomocí reprezentovat matici $A$, pokládáme $|R|=m$, $|B|=n$ a~$E = \bigl\{(v_i,v_j) \ | \ v_i \in R, v_j \in B, a_{ij} \neq 0 \bigr\}$. Příklad reprezentace struktury matice pomocí bipartitního grafu je znázorněn na~obrázku \ref{bipartMat}.
+Jinými slovy se jedná o~graf, který lze rozdělit na~dvě části tak, že v~žádné z~částí není ani jedna hrana. Takovýto bipartitní graf se standardně značí $G=(R,B,E)$, a~pokud chceme s~jeho pomocí reprezentovat matici $A$, pokládáme $|R|=m$, $|B|=n$ a~$E = \bigl\{(v_i,v_j) \ | \ v_i \in R, v_j \in B, a_{ij} \neq 0 \bigr\}$. Příklad reprezentace struktury matice pomocí bipartitního grafu je znázorněn na~obrázku \ref{bipartMat}.
 
 \bigskip
 {
@@ -472,9 +472,9 @@ Jinými slovy se jedná o~graf, který lze rozdělit na~dvě části tak, že v~
 
 \chapter{Dělení grafů}
 
-V této kapitole formálně popíšeme problém dělení grafu na~$k$ podgrafů a~definujeme pojmy s~ním spojené. Vzhledem k tomu, že v~naší implementaci používáme pro~dělení grafů profesionální softwarovou knihovnu METIS \cite{kary:13}, zaměříme se nejprve na~schéma víceúrovňového dělení grafu jakožto algoritmus používaný při profesionálních implementacích dělení grafů. Dále se budeme věnovat některým technikám, které tvoří součást víceúrovňového dělení grafů, konkrétně spektrálnímu dělení grafu a~vylepšovacímu algoritmu podle Kernighana a~Lina \cite{keli:70}. Na~závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jakožto příklad víceúrovňového algoritmu pro~dělení grafů.
+V této kapitole formálně popíšeme problém dělení grafu na~$k$ podgrafů a~definujeme pojmy s~ním spojené. Vzhledem k tomu, že v~naší implementaci používáme pro~dělení grafů profesionální softwarovou knihovnu METIS \cite{kary:13}, zaměříme se nejprve na~schéma víceúrovňového dělení grafu jakožto algoritmus používaný při profesionálních implementacích dělení grafů. Dále se budeme věnovat některým technikám, které tvoří součást víceúrovňového dělení grafů, konkrétně spektrálnímu dělení grafu a~vylepšovacímu algoritmu podle Kernighana a~Lina \cite{keli:70}. Na~závěr kapitoly zmíníme algoritmus metody vnořených řezů (Nested Dissection) jako příklad víceúrovňového algoritmu pro~dělení grafů.
 
-Dělení grafů na~$k$ podgrafů je praktický problém s~bohatým teoretickým zázemím a~mnoha aplikacemi \cite{poth:96}. Může nám pomoci při~řešení parciálních diferenciálních rovnic na~moderních počítačových architekturách \cite{posl:90} a~nezanedbatelnou roli hraje také při výrobě mikroprocesorů metodou VLSI nebo při~řešení velkých systémů lineárních rovnic \cite{keli:70, pis:84}. Často dochází k omezení se na~dělení grafu na~dva podgrafy, v~této práce se však pokusíme prozkoumat i~dělení grafu na~více částí.
+Dělení grafů na~$k$ podgrafů je praktický problém s~bohatým teoretickým zázemím a~mnoha aplikacemi \cite{poth:96}. Může nám pomoci při~řešení parciálních diferenciálních rovnic na~moderních počítačových architekturách \cite{posl:90}. Nezanedbatelnou roli hraje také při výrobě mikroprocesorů metodou VLSI nebo při~řešení velkých systémů lineárních rovnic \cite{keli:70, pis:84}. Autoři se často omezují na~dělení grafu na~dva podgrafy.
 
 Podmínky, které jsou na~výsledné rozdělení grafu kladeny, se mohou lišit v~závislosti na~daném použití. V~této kapitole popíšeme klasická kritéria, která se používají pro~určování kvality rozdělení grafu. V~kapitole \ref{dalsiParametry} poté bude popsán problém dělení grafů s~použitím dodatečných kritérií s~důrazem na~rozklady matic.
 
@@ -491,42 +491,42 @@ Jako dělení grafu na~$k$ částí označujeme hledání rozkladu množiny vrch
 
 Řekneme, že rozdělení je \textbf{optimální} vzhledem k základním kritériím, pokud splňuje:
 \begin{enumerate}
-  \item $\forall i \in \{1, \ldots, k \} \ |V_i|=n/k$.
+  \item $\bigl(\,\forall i \in \{1, \ldots, k \}\,\bigr)\bigl(\,|V_i|=n/k\,\bigr)$.
   \item Počet hran spojujících vrcholy ležící v~různých podmnožinách je minimální možný.
 \end{enumerate}
 
 Pokud má graf $G$ sudý počet vrcholů a~rozdělíme ho na~dvě části s~množinami vrcholů $V_1, V_2$, které mají stejný počet prvků, nazveme toto rozdělení \textbf{bisekcí} a~velikost hranového separátoru nazýváme \textbf{šířkou bisekce}.
 
-Mějme graf $G=(V,E)$ a~jeho rozdělení na~$k$ podgrafů s~množinami vrcholů $V_1, V_2, \ldots, V_k$. Množinu hran, jejichž jeden koncový bod náleží do $V_i$ a~druhý do $V_j$ pro~$i \neq j$ nazveme \textbf{hranovým separátorem}, značíme $\delta(V_1,\ldots,V_k)$. Jinou variantou je hledat rozdělení grafu pomocí vrcholového separátoru.
-\textbf{Vrcholovým separátorem} $S_G$ grafu $G$ nazveme podmnožinu množiny vrcholů $V$ takovou, že odstraněním všech vrcholů náležících do $S_G$ z~grafu $G$ dojde k jeho rozpadu na~nejméně $k$ komponent odpovídajících jednotlivým částem rozdělení. Řešení problému optimální transformace mezi hranovým a~vrcholovým separátorem, známe-li jeden z~nich, můžeme naleznout v~\cite{pofa:90}. To nám ale nic neříká o~řešení problému nalezení optimálního hranového nebo vrcholového separátoru \cite{liu:89}.
+Mějme graf $G=(V,E)$ a~jeho rozdělení na~$k$ podgrafů s~množinami vrcholů $V_1, V_2, \ldots, V_k$. Množinu hran, jejichž jeden koncový bod náleží do $V_i$ a~druhý do $V_j$ pro~$i \neq j$, nazveme \textbf{hranovým separátorem}, značíme $\delta(V_1,\ldots,V_k)$. Jinou variantou je hledat rozdělení grafu pomocí vrcholového separátoru.
+\textbf{Vrcholovým separátorem} $S_G$ grafu $G$ nazveme podmnožinu množiny vrcholů $V$ takovou, že odstraněním všech vrcholů náležících do $S_G$ z~grafu $G$ dojde k jeho rozpadu na~nejméně $k$ komponent odpovídajících jednotlivým částem rozdělení. Řešení problému optimální transformace mezi hranovým a~vrcholovým separátorem, známe-li jeden z~nich, můžeme nalézt v~\cite{pofa:90}. To nám ale nic neříká o~řešení problému nalezení optimálního hranového nebo vrcholového separátoru \cite{liu:89}.
 
-Ukazuje se, že rozhodovací problém pro~optimální rozdělení grafu, pokud je možné, je NP-úplný \cite{gajo:79}. Existují však algoritmy, které rozdělí graf v~rozumném čase, přičemž kvalita jimi nalezeného rozdělení bude poměrně dobrá \cite{lita:79} vzhledem k povaze úlohy.
+Ukazuje se, že rozhodovací problém pro~optimální rozdělení grafu, pokud je možné, je NP-úplný \cite{gajo:79}. Existují však algoritmy, které rozdělí graf v~rozumném čase, přičemž kvalita jimi nalezeného rozdělení bude poměrně dobrá vzhledem k povaze úlohy \cite{lita:79}.
 
 \section{Obecné schéma víceúrovňového dělení grafů}
 \label{multilevel}
 
 Víceúrovňové dělení grafů slouží k převedení problému dělení grafu s~velkým počtem vrcholů na~problém dělení grafu s~počtem vrcholů výrazně menším. Tím může dojít k výraznému zkrácení času potřebného pro~celkovou dobu běhu algoritmu \cite{kaku:98}, proto je tento postup využíván v~profesionálních softwarových nástrojích pro~dělení grafů \cite{lehe:95, hele:95}. Nejobecnější popis tohoto schématu sestává ze~tří základních fází: zhrubovací fáze (coarsening phase), rozdělení vzniklého grafu a~projekce tohoto rozdělení zpět na~původní graf (refinement phase).
 
-\paragraph{Zhrubovací fáze}
+\subsection{Zhrubovací fáze}
 Základní myšlenkou zhrubovací fáze víceúrovňového schématu dělení grafů je vytvořit z~původního grafu $G$ graf $G_m$ s~menším počtem vrcholů. Jinými slovy jde o~konstrukci posloupnosti grafů $(G_i)_0^m$ takové, že $G_0 := G$ a~pro každé dva po sobě jdoucí členy této posloupnosti platí, že $G_{i+1}$ je faktorgrafem $G_i$ s~menším počtem vrcholů. 
 
-Pro konstrukci posloupnosti $(G_i)_0^m$ existuje několik možných postupů \cite{lehe:95,lehe:94}. Ve~většině schémat pro~tvorbu grafu s~méně vrcholy jsou podmnožiny množiny vrcholů grafu $G_i$ spojovány v~jeden vrchol, čímž vznikne hrubší graf $G_{i+1}$ splňující výše uvedené podmínky kladené na~posloupnost $(G_i)_0^m$, který je formálně faktorgrafem. Při konstrukci členu $G_{i+1}$ z~členu $G_i$ je pro~udržení strukturálních informací o~původním grafu nutné, abychom použili ohodnocený graf, kde ohodnocení vrcholů a~hran při tvorbě faktorgrafu pokládáme pro~každý vrchol (resp. hranu) roven součtu vah všech vrcholů (resp. hran) spojením kterých daný vrchol (resp. hrana) vznikl. 
+Pro konstrukci posloupnosti $(G_i)_0^m$ existuje několik možných postupů \cite{lehe:94, lehe:95}. Ve~většině schémat pro~tvorbu grafu s~méně vrcholy jsou podmnožiny množiny vrcholů grafu $G_i$ spojovány v~jeden vrchol, čímž vznikne hrubší graf $G_{i+1}$ splňující výše uvedené podmínky kladené na~posloupnost $(G_i)_0^m$, který je formálně faktorgrafem. Při konstrukci členu $G_{i+1}$ z~členu $G_i$ je pro~udržení strukturálních informací o~původním grafu nutné, abychom použili ohodnocený graf, kde ohodnocení vrcholů a~hran při tvorbě faktorgrafu pokládáme pro~každý vrchol (resp. hranu) roven součtu vah všech vrcholů (resp. hran), jejichž spojením daný vrchol (resp. hrana) vznikl. 
 
 \begin{definition}
   Mějme graf $G = (V, E)$. \textbf{Párováním} grafu $G$ nazveme podmnožinu množiny hran $E$, pro~kterou platí, že žádné dvě hrany z~této množiny nemají společný koncový bod. \textbf{Maximálním párováním} grafu $G$ nazveme párování grafu $G$ obsahující nejvyšší možný počet hran. Pokud je graf $G$ vážený reálným ohodnocením $c$, nazveme maximálním párováním grafu $G$ párování grafu $G$ takové, že součet vah hran, které jsou v~tomto párování grafu obsaženy, je nejvyšší možný.
 \end{definition}
 
-Pro získání hrubšího grafu byly popsány dva hlavní postupy. První z~nich je založen na~nalezení vhodného párování a~následném spojení každé dvojice vrcholů spojených hranou náležící do párování do jednoho \cite{edmo:65,lawl:76}. Aby došlo k rychlému zmenšení počtu vrcholů grafu, je vhodné volit maximální párování \cite{hele:95}. Druhý postup hledání vhodných množin vrcholů pro~sloučení je založen na~spojování skupin vrcholů, v~nichž je vysoká hustota hran \cite{lehe:94}.
+Pro získání hrubšího grafu byly popsány dva hlavní postupy. První z~nich je založen na~nalezení vhodného párování a~následném sloučení každé dvojice vrcholů spojených hranou náležící do párování do jednoho vrcholu \cite{edmo:65,lawl:76}. Aby došlo k rychlému zmenšení počtu vrcholů grafu, je vhodné volit maximální párování \cite{hele:95}. Druhý postup hledání vhodných množin vrcholů pro~sloučení je založen na~spojování skupin vrcholů, v~nichž je vysoká hustota hran \cite{lehe:94}.
 
-\paragraph{Dělení získaného grafu}
-V této fázi dochází k rozdělení grafu $H$ libovolným algoritmem pro~dělení grafů, například lze použít spektrální dělení popsané níže v~kapitole \ref{spektral}. Pomocí tohoto algoritmu získáme rozdělení $P_m$ grafu $G_m$.
+\subsection{Dělení získaného grafu}
+V této fázi dochází k rozdělení grafu $G_m$ libovolným algoritmem pro~dělení grafů, například lze použít spektrální dělení popsané níže v~kapitole \ref{spektral}. Pomocí tohoto algoritmu získáme rozdělení $P_m$ grafu $G_m$.
 
-Tato fáze víceúrovňového dělení grafu může být vynechána \cite{kaku:95}. V~takovém případě ve~zhrubovací fázi víceúrovňového dělení pokračujeme až do té doby než má výsledný graf $G_m$ počet vrcholů roven počtu částí, na~které chceme graf $G$ rozdělit. Každý z~vrcholů grafu $G_m$ pak přiřadíme do jiné části rozdělení $P_m$ a~můžeme přímo přistoupit k projekci tohoto rozdělení na~původní graf.
+Tato fáze víceúrovňového dělení grafu může být vynechána \cite{kaku:95}. V~takovém případě ve~zhrubovací fázi víceúrovňového dělení pokračujeme až do té doby, než má výsledný graf $G_m$ počet vrcholů roven počtu částí, na~které chceme graf $G$ rozdělit. Každý z~vrcholů grafu $G_m$ pak přiřadíme do jiné části rozdělení $P_m$ a~můžeme přímo přistoupit k projekci tohoto rozdělení na~původní graf.
 
-\paragraph{Projekce rozdělení na~původní graf}
+\subsection{Projekce rozdělení na~původní graf}
 Cílem této fáze je převést získané rozdělení $P_m$ grafu $G_m$ na~rozdělení $P_0$ vstupního grafu $G$. Toho dosáhneme postupnou tvorbou posloupnosti rozdělení $P_{m-1}, \ldots, P_1$ grafů $G_{m-1}, \ldots, G_1$. Nejjednodušším způsobem projekce rozdělení grafu $G_{i+1}$ na~rozdělení grafu $G_i$ je umístit všechny vrcholy grafu $G_i$, jejichž spojením vznikl vrchol $v$ grafu $G_{i+1}$ do části rozdělení, v~níž leží vrchol $v$.
 
-Tento postup však není optimální, protože graf $G_i$ má větší počet vrcholů než $G_{i+1}$ a~má tedy více stupňů volnosti vzhledem k optimalitě rozdělení. Díky tomu může nastat situace, kdy rozdělení $P_i$ získané z~rozdělení $P_{i+1}$ lze dále vylepšit. Nejběžněji využívaným algoritmem pro~vylepšování rozdělení grafu je algoritmus podle Kernighana a~Lina \cite{keli:70}, který bude popsán v~kapitole \ref{KLalgorithm}. Kvůli snížení časové náročnosti aplikace tohoto algoritmu se častěji setkáme s~jeho aplikací pouze na~části jednotlivých podgrafů ležící v~blízkosti hranového či vrcholového separátoru než s~jeho aplikací na~celý graf \cite{kaku:98}.
+Tento postup však není optimální, protože graf $G_i$ má větší počet vrcholů než $G_{i+1}$, a~má tedy více stupňů volnosti vzhledem k optimalitě rozdělení. Díky tomu může nastat situace, kdy rozdělení $P_i$ získané z~rozdělení $P_{i+1}$ lze dále vylepšit. Nejběžněji využívaným algoritmem pro~vylepšování rozdělení grafu je algoritmus podle Kernighana a~Lina \cite{keli:70}, který bude popsán v~kapitole \ref{KLalgorithm}. Kvůli snížení časové náročnosti tohoto algoritmu se častěji setkáme s~jeho aplikací pouze na~části jednotlivých podgrafů ležící v~blízkosti hranového či vrcholového separátoru než s~jeho aplikací na~celý graf \cite{kaku:98}.
 
 \section{Spektrální dělení}
 \label{spektral}
@@ -560,7 +560,7 @@ Tento problém dále relaxujeme následovně:
 \begin{equation}\label{spektralaprox}
 \min_{\substack{x_i = \pm 1 \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x} \geq \min_{\substack{\sum_{i=1}^{n}x_i^2 = n \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x}
 \end{equation}
-Označme $\vec{v_2}$ vlastní vektor matice $Q$ příslušný druhému nejmenšímu vlastnímu číslu matice $Q$. Pak můžeme pomocí Courantovy-Fischerovy věty \cite{hojo:85} výraz na~pravé stran nerovnosti \ref{spektralaprox} přepsat jako
+Označme $\vec{v_2}$ vlastní vektor matice $Q$ příslušný druhému nejmenšímu vlastnímu číslu matice $Q$. Pak můžeme pomocí Courantovy-Fischerovy věty \cite{hojo:85} výraz na~pravé straně nerovnosti \ref{spektralaprox} přepsat jako
 \[
 \min_{\substack{\sum_{i=1}^{n}x_i^2 = n \\ \sum_{i=1 }^{n}x_i = 0}} \vec{x}^T Q \vec{x} = \vec{v_2}^T Q \vec{v_2} = \lambda_2 \vec{v_2}^T \vec{v_2} = n \lambda_2.
 \]
@@ -570,22 +570,22 @@ Hlavní myšlenkou spektrálního algoritmu je tedy převést problém dělení 
 
 \section{Algoritmus podle Kernighana a~Lina}
 \label{KLalgorithm}
-Algoritmus podle Kernighana a~Lina (KL algoritmus) vznikl v~roce 1970 s~cílem dělit elektrické obvody na~plošných spojích \cite{keli:70}. V~jeho základní podobě se jedná o~algoritmus pro~vylepšování již získaného rozdělení grafu, pro~jeho funkci je tedy nutné poskytnout mu vstupní rozdělení grafu. Pokud používáme KL algoritmus přímo jako dělicí algoritmus, lze vstupní rozdělení zvolit libovolně. Jeho výsledky pro~různá počáteční rozdělení se však mohou lišit. Proto je v~praxi je výhodné, aby představovalo vstupní rozdělení rozumnou aproximaci optimálního rozdělení. Kvůli tomu se KL algoritmus obvykle používá v~kombinaci s~jiným algoritmem pro~dělení grafů, případně jako součást většího celku - například víceúrovňového dělení grafu ve~fázi projekce hrubého rozdělení na~vstupní graf (viz kapitola \ref{multilevel}). V~tomto případě je vzhledem ke specifickému charakteru úlohy běžně využívána modifikace tohoto algoritmu, která bere v~úvahu pouze vrcholy blízko separátoru.
+Algoritmus podle Kernighana a~Lina (KL algoritmus) vznikl v~roce 1970 s~cílem dělit elektrické obvody na~plošných spojích \cite{keli:70}. V~jeho základní podobě se jedná o~algoritmus pro~vylepšování již získaného rozdělení grafu, pro~jeho funkci je tedy nutné poskytnout mu vstupní rozdělení grafu. Pokud používáme KL algoritmus přímo jako dělicí algoritmus, lze vstupní rozdělení zvolit libovolně. Jeho výsledky pro~různá počáteční rozdělení se však mohou lišit. Proto je v~praxi výhodné, aby představovalo vstupní rozdělení rozumnou aproximaci optimálního rozdělení. Kvůli tomu se KL algoritmus obvykle používá v~kombinaci s~jiným algoritmem pro~dělení grafů, případně jako součást většího celku -- například víceúrovňového dělení grafu ve~fázi projekce hrubého rozdělení na~vstupní graf (viz kapitola \ref{multilevel}). V~tomto případě je vzhledem ke specifickému charakteru úlohy běžně využívána modifikace tohoto algoritmu, která bere v~úvahu pouze vrcholy blízko separátoru.
 
 Popišme KL algoritmus pro~graf rozdělený na~dva podgrafy. Kdyby byl graf obecně rozdělen na~$k$ částí, mohli bychom použít tento algoritmus na~jednotlivé dvojice podgrafů. Existují i~algoritmy založené na~KL algoritmu, které přerozdělují graf rozdělený na~více než dvě části. Například v~\cite{suke:88} najdeme algoritmus pro~přerozdělování grafu rozděleného na~4 části.
 
 Mějme graf $G=(V,E)$ rozdělený na~dva podgrafy $G_1=(V_1,E_1)$ a~$G_2=(V_2,E_2)$. Základním principem KL algoritmu je, že v~každé jeho iteraci dojde k výměně určitého počtu vrcholů z~množiny $V_1$ za stejný počet vrcholů z~množiny $V_2$ tak, aby byla snížena velikost hranového separátoru.
 
-Vrcholy vhodné pro~výměnu vybíráme tak, aby při jejich přesunu z~části rozdělení, v~níž se daný vrchol nachází, do části druhé došlo k maximálnímu zmenšení velikosti hranového separátoru. Tento rozdíl ve~velikosti hranového separátoru při přesunu vrcholu $v$ nazveme \textbf{ziskem} $D(v)$ a~zřejmě jde o~rozdíl počtu hran (případně vah hran) spojujících vrchol $v$ s~vrcholy v~podgrafu, v~němž se vrchol $v$ nachází, a~počtu hran spojujících vrchol $v$ s~vrcholy v~druhém podgrafu. Formálně můžeme zisk pro~graf $G=(V,E)$ s~rozdělením $P$ a~hranovým ohodnocením $c$ zapsat následovně:
+Vrcholy vhodné pro~výměnu vybíráme takové, aby při jejich přesunu z~části rozdělení, v~níž se daný vrchol nachází, do části druhé došlo k maximálnímu zmenšení velikosti hranového separátoru. Tento rozdíl ve~velikosti hranového separátoru při přesunu vrcholu $v$ nazveme \textbf{ziskem} $D(v)$. Zřejmě jde o~rozdíl počtu hran (případně vah hran) spojujících vrchol $v$ s~vrcholy v~podgrafu, v~němž se vrchol $v$ nachází, a~počtu hran spojujících vrchol $v$ s~vrcholy v~druhém podgrafu. Formálně můžeme zisk pro~graf $G=(V,E)$ s~rozdělením $P$ a~hranovým ohodnocením $c$ zapsat následovně:
 \[
 D(v) := \sum\limits_{\substack{(u,v) \in E \\ P[u] \neq P[v]}}c(u,v) - \sum\limits_{\substack{(u,v) \in E \\ P[u] = P[v]}}c(u,v).
 \]
-Pokud přesuneme vrchol s~kladným ziskem, dojde ke zmenšení velikosti hranového separátoru.Abychom mohli popsat reálný zisk při výměně vrcholů, je vhodné ještě zavést pro~$u,v \in V$ veličinu $C_{uv}$.
+Pokud přesuneme vrchol s~kladným ziskem, dojde ke zmenšení velikosti hranového separátoru. Abychom mohli popsat reálný zisk při výměně vrcholů, je vhodné ještě zavést pro~$u,v \in V$ veličinu $C_{uv}$.
 \[
 C_{uv}=
     \left\{
     \begin{array}{@{\,}ll}
-		1  & \mbox{} {u,v} \in E,\\
+		1  & \mbox{pro } \{u,v\} \in E,\\
 		0 & \mbox{jinak.}
 	\end{array}
 \right.
@@ -594,11 +594,11 @@ C_{uv}=
 \[
 g_{uv}=D(u)+D(v)-2C_{uv}.
 \]
-Základní varianta KL algoritmu se skládá ze~dvou do sebe vnořených cyklů, z~nichž vnější běží do té doby, dokud se velikost hranového separátoru zmenšuje a~obsahuje tyto kroky:
+Základní varianta KL algoritmu se skládá ze~dvou do sebe vnořených cyklů, z~nichž vnější běží do té doby, dokud se velikost hranového separátoru zmenšuje, a~obsahuje tyto kroky:
 \begin{enumerate}
-  \item Vypočítáme zisk jednotlivých vrcholů.
+  \item Vypočítáme zisk pro jednotlivé vrcholy.
   \item Postupně spárujeme všechny vrcholy $v_i \in V_1$ s~vrcholy $w_j \in V_2$ tak, aby reálný zisk $g_i$ při výměně dvojice vrcholů $(v_k,w_k)$ pro~$k \in \bigl\{1,\ldots,\min\bigl\{|V_1|,|V_2|\bigr\}\bigr\}$ za předpokladu, že by všechny dvojice vrcholů $(v_1,w_1),\ldots,(v_{k-1},w_{k-1})$ byly vyměněné, byl maximální.
-  \item Nalezneme takové $N \in \bigl\{1,\ldots,\min\bigl\{|V_1|,|V_2|\bigr\}\bigr\}$, aby $\sum_{j=1}^{N}g_i$ byla maximální.
+  \item Nalezneme takové $N \in \bigl\{1,\ldots,\min\bigl\{|V_1|,|V_2|\bigr\}\bigr\}$, aby hodnota $\sum_{j=1}^{N}g_i$ byla maximální.
   \item Vyměníme vrcholy $v_1,\ldots,v_N$ s~vrcholy $w_1,\ldots,w_N$.
 \end{enumerate}
 
@@ -606,37 +606,37 @@ Nejjednodušším vylepšením tohoto algoritmu je nechat vnější cyklus běž
 
 \section{Metoda vnořených řezů}
 
-Metoda vnořených řezů byla navržena a~publikována v~roce 1973 Alanem Georgem \cite{geo:73}. Jedná se o~analyticky dobře popsaný algoritmus využívající metodu rozděl a~panuj pro~řešení problémů na~řídkých maticích pomocí jejich převedení na~grafy a~dělení těchto grafů. V~této práci jej uvádíme pro~úplnost jakožto příklad algoritmu, který je již ze~své podstaty zaveden jako víceúrovňový i~přestože se striktně nedrží víceúrovňového schématu. Toto schéma z~něj však převzalo myšlenku jak vytvářet hierarchii ale samotná metoda dělení na~jednotlivých úrovních a~techniky jak hledat oblasti byly nahrazeny. Dalším specifikem metody vnořených řezů je, že se tento algoritmus omezil na~dělení grafu na~dvě části, zatímco výše popsané víceúrovňové schéma toto omezení nemá.
+Metoda vnořených řezů byla navržena a~publikována v~roce 1973 Alanem Georgem \cite{geo:73}. Jedná se o~analyticky dobře popsaný algoritmus využívající metodu \uvoz{rozděl a~panuj} pro~řešení problémů na~řídkých maticích pomocí jejich převedení na~grafy a~dělení těchto grafů. V~této práci jej uvádíme pro~úplnost jakožto příklad algoritmu, který je již ze~své podstaty zaveden jako víceúrovňový i~přesto, že se striktně nedrží víceúrovňového schématu. Toto schéma z~něj však převzalo myšlenku jak vytvářet hierarchii, ale samotná metoda dělení na~jednotlivých úrovních a~techniky jak hledat oblasti byly nahrazeny. Dalším specifikem metody vnořených řezů je, že se tento algoritmus omezil na~dělení grafu na~dvě části, zatímco výše popsané víceúrovňové schéma toto omezení nemá.
 Metodu vnořených řezů můžeme dále vnímat i~jako algoritmus pro~hledání vhodného očíslování vrcholů grafu.
 
 Metoda vnořených řezů je teoreticky velmi dobře popsána pro~některé speciální typy grafů, například pro~čtvercové sítě. Pro~obecné grafy bylo navrženo několik heuristických algoritmů, z~nichž jeden popíšeme.
 
 \subsection{Jeden řez grafu}
 
-Mějme graf $G = (V,E)$ s~maticí sousednosti $A_G$ a~nechť $|V| = n$. Nechť $S \subset V$ je vrcholovým separátorem grafu $G$, jehož odebráním dostaneme dva podgrafy grafu $G$ s~množinami vrcholů $C_1$, $C_2$. Mějme dále zobrazení $\varphi: V \rightarrow \{1, 2, \ldots, n\}$, které každému vrcholu $v_i \in V$ přiřadí index $i$. Pokud pro~zobrazení $\varphi$ platí
+Mějme graf $G = (V,E)$ s~maticí sousednosti $A_G$ a~nechť $|V| = n$. Nechť $S \subset V$ je vrcholovým separátorem grafu $G$, jehož odebráním dostaneme dva podgrafy grafu $G$ s~množinami vrcholů $V_1$, $V_2$. Mějme dále zobrazení $\varphi: V \rightarrow \{1, 2, \ldots, n\}$, které každému vrcholu $v_i \in V$ přiřadí index $i$. Pokud pro~zobrazení $\varphi$ platí
 \begin{enumerate}
-  \item $\varphi^{-1}\Bigl(\bigl\{1,\ldots,|C_1|\bigr\} \Bigr)=C_1$
-  \item $\varphi^{-1}\Bigl(\bigl\{|C_1|+1,\ldots,|C_1|+|C_2|\bigr\} \Bigr)=C_2$
-  \item $\varphi^{-1}\Bigl(\bigl\{|C_1|+|C_2|+1,\ldots,n\bigr\} \Bigr)=S$,
+  \item $\varphi^{-1}\Bigl(\bigl\{1,\ldots,|V_1|\bigr\} \Bigr)=V_1$
+  \item $\varphi^{-1}\Bigl(\bigl\{|V_1|+1,\ldots,|V_1|+|V_2|\bigr\} \Bigr)=V_2$
+  \item $\varphi^{-1}\Bigl(\bigl\{|V_1|+|V_2|+1,\ldots,n\bigr\} \Bigr)=S$,
 \end{enumerate}
 pak matici sousednosti $A_G$ grafu $G$ lze blokově zapsat ve~tvaru
 \begin{equation}\label{AG nested}
     A_G =
     \left(
         \begin{matrix}
-          A_1   & O     & V_1 \\
-          O     & A_2   & V_2 \\
-          V_1^T & V_2^T & A_S
+          A_1   & O     & S_1 \\
+          O     & A_2   & S_2 \\
+          S_1^T & S_2^T & A_S
         \end{matrix}
     \right),
 \end{equation}
-kde $A_1$, $A_2$ jsou matice sousednosti podgrafů $G(C_1)$, $G(C_2)$, dále $V_1$, resp. $V_2$ jsou matice charakterizující propojení vrcholů z~množiny $C_1$, resp.$C_2$ s~vrcholy ze~separátoru $S$ a~matice $O$ značí nulovou matici. Pro~následnou manipulaci s~maticí sousednosti $A_G$ je výhodné, aby nulové matice $O$ měly co nejvíce prvků.
+kde $A_1$, $A_2$ jsou matice sousednosti podgrafů $G(V_1)$, $G(V_2)$. Dále $S_1$, resp. $S_2$ jsou matice charakterizující propojení vrcholů z~množiny $V_1$, resp. $V_2$ s~vrcholy ze~separátoru $S$ a~matice $O$ značí nulovou matici. Pro~následnou manipulaci s~maticí sousednosti $A_G$ je výhodné, aby nulové matice $O$ měly co nejvíce prvků.
 
 Cílem jednoho řezu v~metodě vnořených řezů je najít vrcholový separátor $S$ a~zobrazení $\varphi$ splňující podmínky výše.
 
 \subsection{Metoda vnořených řezů pro~čtvercové sítě}
 
-Popišme metodu vnořených řezů nejprve pro~speciální třídu grafů nazývaných čtvercové sítě, se kterými se v~praxi můžeme často setkat při diskretizaci složitých systémů.
+Popišme metodu vnořených řezů nejprve pro~speciální třídu grafů nazývaných čtvercové sítě, se~kterými se v~praxi můžeme často setkat při diskretizaci složitých systémů.
 
 \textbf{Čtvercovou sítí} o~rozměrech $m \times l$, kde $m \leq l$ rozumíme graf o~$N = ml$  vrcholech, jehož příklad můžeme vidět zobrazený na~obrázku \ref{ctvsit}.
 
@@ -659,26 +659,26 @@ Tím se nám podaří docílit toho, že nejen matice sousednosti, ale i~její l
 \subsection{Dělení obecných grafů metodou vnořených řezů}
 \label{NDobecne}
 
-Pro použití metody vnořených řezů pro~obecné grafy existují různé přístupy \cite{litaro:79}. V~této kapitole popíšeme jeden z~nich. Jedná se o~heuristický algoritmus fungující na~principu hledání struktury úrovní daného grafu a~následného rozdělení grafu podle úrovně "uprostřed".
+Pro použití metody vnořených řezů pro~obecné grafy existují různé přístupy \cite{litaro:79}. V~této kapitole popíšeme jeden z~nich. Jedná se o~heuristický algoritmus fungující na~principu hledání struktury úrovní daného grafu a~následného rozdělení grafu podle úrovně \uvoz{uprostřed}.
 
 Mějme souvislý graf $G=(V,E)$. Algoritmus pro~jeho rozdělení využívající metodu vnořených řezů pak vypadá následovně.
 
 \begin{enumerate}
   \item Položíme $W=V$ a~$N=|V|$.
   \item \label{forloop} Nalezneme souvislou komponentu $G(C)$ grafu $G(W)$.
-  \item Vezmeme libovolný vrchol $v\in C$. Vrchol $v$ je vhodné jej volit tak, aby byl daleko od centra grafu \cite{lew:82} $G(C)$. Takový vrchol se nazývá periferní.
+  \item Vezmeme libovolný vrchol $v\in C$. Vrchol $v$ je vhodné volit tak, aby byl daleko od centra grafu \cite{lew:82} $G(C)$. Takový vrchol se nazývá periferní.
   \item Vytvoříme strukturu úrovní $\mathcal{L}=\{L_0, \ldots ,L_l\}$ grafu $G(C)$ vycházející z~vrcholu $v$, tj. rozdělíme množinu vrcholů $C$ grafu $G(C)$ na~vzájemně disjunktní množiny $L_1, \ldots, L_l$ definované následovně:
       \begin{align*}
-        L_0 & := v \\
-        L_i & := \mathrm{adj}_{G(C)}(L_{i-1}) \setminus \bigcup_{k=0}^{i-1} L_k \quad {\rm pro} \ i \in \{2,\ldots,l\}
+        L_0 & := \{v\}, \\
+        L_i & := \mathrm{adj}_{G(C)}(L_{i-1}) \setminus \bigcup_{k=0}^{i-1} L_k \quad {\rm pro} \ i \in \{2,\ldots,l\}.
       \end{align*}
-  \item Separátor $S$ grafu $G(C)$ volíme následovně. Pokud $l \leq 2$ položíme separátor roven $C$. Jinak definujeme $j := \floor*{\frac{l+1}{2}}$ a~separátor položíme roven
+  \item Separátor $S$ grafu $G(C)$ volíme následovně. Pokud $l \leq 2$, položíme separátor roven $C$. Jinak definujeme $j := \floor*{\frac{l+1}{2}}$ a~separátor položíme roven
       \[
-        S = \left\{\,y \in L_j \mid \mathrm{adj}_{G(C)}(y) \cap L_{j+1} \neq \emptyset \,\right\}
+        S = \left\{\,y \in L_j \mid \mathrm{adj}_{G(C)}(y) \cap L_{j+1} \neq \emptyset \,\right\}.
       \]
-  \item Očíslujeme vrcholy separátoru čísly $N-|S|+1,\ldots,N$
+  \item Očíslujeme vrcholy separátoru čísly $N-|S|+1,\ldots,N$.
   \item Položíme $W:=W \setminus S$ a~$N := N-|S|$.
-  \item Pokud $W \neq \emptyset$ vrátíme se na~krok \ref{forloop}, jinak skončíme.
+  \item Pokud $W \neq \emptyset$, vrátíme se na~krok \ref{forloop}, jinak skončíme.
 \end{enumerate}
 
 %----------------------------------------------------------------------

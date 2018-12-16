@@ -685,11 +685,11 @@ Mějme souvislý graf $G=(V,E)$. Algoritmus pro~jeho rozdělení využívající
 
 \chapter{Rozklady matic}
 
-Při řešení maticových úloh velkých rozměrů je často výhodné danou matici rozložit na~součin dvou nebo více matic a~díky tomu původní problém převést na~sérii výpočetně jednodušších problémů. Jako klasické příklady úloh z~numerické lineární algebry, při jejichž řešení nám mohou rozklady matic pomoci, uveďme hledání řešení soustav lineárních algebraických rovnic či problém nalezení vlastních či singulárních čísel a~příslušných vektorů. Rozklady matic navíc hrají nezanedbatelnou roli například v~QR algoritmu, LR algoritmu \cite{govl:83} nebo Lanczosově algoritmu \cite{lanc:50,paig:72}. Rozklady matic nám mohou pomoci odhalit i~teoretické vlastnosti a~strukturu matic a~odpovídajících maticových problémů. Příkladem takového rozkladu je singulární rozklad (SVD decomposition) \cite{govl:83}.
+Při řešení maticových úloh velkých rozměrů je často výhodné danou matici rozložit na~součin dvou, nebo více matic a~díky tomu původní problém převést na~sérii výpočetně jednodušších problémů. Jako klasické příklady úloh z~numerické lineární algebry, při jejichž řešení nám mohou rozklady matic pomoci, uveďme hledání řešení soustav lineárních algebraických rovnic nebo problém nalezení vlastních či singulárních čísel a~příslušných vektorů. Rozklady matic navíc hrají nezanedbatelnou roli například v~QR algoritmu, LR algoritmu \cite{govl:83} nebo Lanczosově algoritmu \cite{lanc:50,paig:72}. Rozklady matic nám mohou pomoci odhalit i~teoretické vlastnosti a~strukturu matic a~odpovídajících maticových problémů. Příkladem takového rozkladu je singulární rozklad (SVD decomposition) \cite{govl:83}.
 
-Rozklady matic můžeme rozdělit na~dvě základní skupiny - úplné rozklady a~neúplné rozklady. Úplné rozklady dokážou nalézt z~teoretického hlediska přesný výsledek v~konečně mnoha krocích (v praxi při výpočtech v~konečné počítačové aritmetice tento výsledek přesný být nemusí). Naopak neúplné rozklady jsou iterativními metodami, tj. algoritmy, které získávají v~každém svém kroku přesnější aproximaci řešení s~použitím výsledku předchozí aproximace a~k přesnému výsledku konvergují. Pro~získání celkového řešení soustavy je pak třeba je kombinovat s~nějakou iterační metodou \cite{temp94}. Vzhledem k našemu cíli zkoumat Choleského rozklad, jakožto zástupce úplných rozkladů, se v~dalším textu nebudeme neúplnými rozklady hlouběji zabývat. 
+Rozklady matic můžeme rozdělit na~dvě základní skupiny -- úplné rozklady a~neúplné rozklady. Úplné rozklady dokážou nalézt z~teoretického hlediska přesný výsledek v~konečně mnoha krocích (v praxi při výpočtech v~konečné počítačové aritmetice tento výsledek přesný být nemusí). Naopak neúplné rozklady jsou iterativními metodami, tj. algoritmy, které získávají v~každém svém kroku přesnější aproximaci řešení s~použitím výsledku předchozí aproximace a~k přesnému výsledku konvergují. Pro~získání celkového řešení soustavy je pak třeba je kombinovat s~některou iterační metodou \cite{temp94}. Vzhledem k našemu cíli zkoumat Choleského rozklad jakožto zástupce úplných rozkladů se v~dalším textu nebudeme neúplnými rozklady hlouběji zabývat. 
 
-V této práci nás budou zajímat především rozklady, které se týkají řídkých matic, tedy matic, které obsahují velké množství nulových prvků. U~takových matic bereme pro~zefektivnění výpočtů do úvahy strukturu jejich nenulových prvků. Při výpočtu úplného rozkladu řídké matice může v~průběhu rozkladu docházet ke změnám ve~struktuře jejích nenulových prvků. Proces výpočtu úplného rozkladu může být pak výpočetně velmi náročný \cite{duiare:86}.
+V této práci nás budou zajímat především rozklady, které se týkají řídkých matic, tedy matic, které obsahují velké množství nulových prvků. U~takových matic bereme pro~zefektivnění výpočtů v úvahu strukturu jejich nenulových prvků. Při výpočtu úplného rozkladu řídké matice může v~průběhu rozkladu docházet ke změnám ve~struktuře jejích nenulových prvků. Proces výpočtu úplného rozkladu může být pak výpočetně velmi náročný \cite{duiare:86}.
 
 V námi popisovaném základním modelu rozkladů matic se omezíme na~úplný rozklad symetrické a~pozitivně definitní matice. Nejedná se o~samoúčelné omezení, při řešení mnoha praktických úloh se setkáváme právě s~maticemi splňujícími tyto podmínky. Navíc se ukazuje, že i~pro matice, které nejsou symetrické nebo pozitivně definitní, lze při jejich rozkladech vyjít z~tohoto modelu \cite{dara:16}.
 
@@ -708,19 +708,19 @@ Předpis pro~hledání těchto posloupností je následující:
 \begin{aligned}
 \label{SymEl}
 A_0 & = A = \left( \begin{matrix}
-               d_1 & v_1^T \\
-               v_1 & \bar{H}_1
+               d_1 & \vec{v}_1^T \\
+               \vec{v}_1 & \bar{H}_1
              \end{matrix} \right)
            =\left(\begin{matrix}
               1               & 0 \\
-              \frac{v_1}{d_1} & I_{N-1}
+              \frac{\vec{v}_1}{d_1} & I_{N-1}
             \end{matrix} \right)
             \left(\begin{matrix}
               d_1 & 0 \\
-              0   & \bar{H}_1-\frac{v_1v_1^T}{d_1}
+              0   & \bar{H}_1-\frac{\vec{v}_1\vec{v}_1^T}{d_1}
             \end{matrix} \right)
             \left(\begin{matrix}
-              1 & \frac{v_1^T}{d_1} \\
+              1 & \frac{\vec{v}_1^T}{d_1} \\
               0 & I_{N-1}
             \end{matrix} \right) \\
     &     = L_1
@@ -732,8 +732,8 @@ A_0 & = A = \left( \begin{matrix}
           = L_1 A_1 L_1^T \\
   A_1 & = \left( \begin{matrix}
                d_1 &  0   & 0 \\
-               0   &  d_2 & v_2^T \\
-               0   &  v_2 & \bar{H}_2
+               0   &  d_2 & \vec{v}_2^T \\
+               0   &  \vec{v}_2 & \bar{H}_2
              \end{matrix} \right)
         =  L_2 A_2 L_2^T \\
     & \vdots \\
@@ -741,8 +741,8 @@ A_0 & = A = \left( \begin{matrix}
 \end{aligned}
 \end{gather}
 
-kde $H_i=\bar{H}_i-\frac{v_i v_i^T}{d_i}$.
-Zřejmě pak $A = LDL^T$, kde $L:=L_1\cdots L_{N-1}$.
+kde $H_i=\bar{H}_i-\frac{\vec{v}_i \vec{v}_i^T}{d_i}$.
+Zřejmě pak $A = LDL^T$, kde $L:=L_1\ldots L_{N-1}$.
 
 \subsection{Choleského rozklad}
 \label{CholeskyChapter}
@@ -752,25 +752,25 @@ Zřejmě pak $A = LDL^T$, kde $L:=L_1\cdots L_{N-1}$.
   Pro~libovolnou pozitivně definitní matici $A$ existuje jednoznačný rozklad $A=LL^T$, kde L je dolní trojúhelníková matice s~kladnými prvky na~diagonále.
 \end{theorem}
 
-Pro výpočet Choleského rozkladu matice $A$ stačí modifikovat algoritmus \ref{SymEl} tak, aby matice $D$ vznikající při symetrické eliminaci matice $A$ byla rovná jednotkové matici. Toho dosáhneme následovně:
+Pro výpočet Choleského rozkladu matice $A$ stačí modifikovat algoritmus (\ref{SymEl}) tak, aby matice $D$ vznikající při symetrické eliminaci matice $A$ byla rovna jednotkové matici. Toho dosáhneme následovně:
 
 \begin{gather}
 \begin{aligned}
 \label{Cholesky}
 A_0 & = A = \left( \begin{matrix}
-               d_1 & v_1^T \\
-               v_1 & \bar{H}_1
+               d_1 & \vec{v}_1^T \\
+               \vec{v}_1 & \bar{H}_1
              \end{matrix} \right)
            =\left(\begin{matrix}
               \sqrt{d_1}      & 0 \\
-              \frac{v_1}{\sqrt{d_1}} & I_{N-1}
+              \frac{\vec{v}_1}{\sqrt{d_1}} & I_{N-1}
             \end{matrix} \right)
             \left(\begin{matrix}
               1   & 0 \\
-              0   & \bar{H}_1-\frac{v_1v_1^T}{d_1}
+              0   & \bar{H}_1-\frac{\vec{v}_1\vec{v}_1^T}{d_1}
             \end{matrix} \right)
             \left(\begin{matrix}
-              \sqrt{d_1} & \frac{v_1^T}{\sqrt{d_1}} \\
+              \sqrt{d_1} & \frac{\vec{v}_1^T}{\sqrt{d_1}} \\
               0 & I_{N-1}
             \end{matrix} \right) \\
     &     = L_1
@@ -782,8 +782,8 @@ A_0 & = A = \left( \begin{matrix}
           = L_1 A_1 L_1^T \\
   A_1 & = \left( \begin{matrix}
                1   &  0   & 0 \\
-               0   &  d_2 & v_2^T \\
-               0   &  v_2 & \bar{H}_2
+               0   &  d_2 & \vec{v}_2^T \\
+               0   &  \vec{v}_2 & \bar{H}_2
              \end{matrix} \right)
         =  L_2 A_2 L_2^T \\
     & \vdots \\
@@ -820,7 +820,7 @@ Matici $L$ můžeme však z~matic $L_1,\ldots,L_N$ vypočítat výrazně jednodu
   \end{matrix}
   \right).
   \]
-  Vynásobením matic $L_i$ a~$L_j$, kde $i < j$, zjevně dostanu
+  Vynásobením matic $L_i$ a~$L_j$, kde $i < j$, zjevně dostaneme
   \[
   \left(
   \begin{matrix}
@@ -838,13 +838,13 @@ Matici $L$ můžeme však z~matic $L_1,\ldots,L_N$ vypočítat výrazně jednodu
   Z~toho již plyne tvrzení lemmatu.
 \end{proof}
 
-Pro výpočet prvků matice $L$ existují tři základní postupy: submaticové schéma vyplývající přímo z~Lemmatu \ref{Lsoucet}, řádkové schéma s~použitím metody ohraničování a~sloupcové schéma. V~přesné aritmetice jsou všechna tři tato schémata ekvivalentní, ale v~případě aritmetiky v~konečné přesnosti, se~kterou se standardně při počítačových výpočtech setkáváme, můžou schémata dávat různé výsledky. Tato schémata napočítávají prvky matice $L$ v~různém pořadí.
+Pro výpočet prvků matice $L$ existují tři základní postupy: submaticové schéma vyplývající přímo z~Lemmatu \ref{Lsoucet}, řádkové schéma s~použitím metody ohraničování a~sloupcové schéma. V~přesné aritmetice jsou všechna tři tato schémata ekvivalentní, ale v~případě aritmetiky v~konečné přesnosti, se~kterou se standardně při počítačových výpočtech setkáváme, mohou schémata dávat různé výsledky. Tato schémata napočítávají prvky matice $L$ v~různém pořadí.
 
 \paragraph{Submaticové schéma}
-S pomocí Lemmatu \ref{Lsoucet} můžeme navrhnout submaticové schéma pro~výpočet faktoru $L$ následovně. Matici $L$ získáváme po sloupcích, ale při výpočtu $i$-tého sloupce zároveň počítáme submatici $H_i = \bar{H}_i-\frac{v_i v_i^T}{d_i}$ matice $A$, kterou potřebujeme pro~výpočet zbylých částí faktoru matice $A$ (viz algoritmus (\ref{Cholesky})).
+S pomocí Lemmatu \ref{Lsoucet} můžeme navrhnout submaticové schéma pro~výpočet faktoru $L$ následovně. Matici $L$ získáváme po sloupcích, ale při výpočtu $i$-tého sloupce zároveň počítáme submatici $H_i = \bar{H}_i-\frac{\vec{v}_i \vec{v}_i^T}{d_i}$ matice $A$, kterou potřebujeme pro~výpočet zbylých částí faktoru matice $A$ (viz algoritmus (\ref{Cholesky})).
 
-\paragraph{Řádkové schéma - metoda ovroubení}
-Jiným přístupem, který můžeme zvolit pro~získání Choleského rozkladu $L L^T$ matice $A$ je řádkové schéma využívající metodu ovroubení (bordering method) \cite{fad:59, ort:88}. Nejprve přepišme matici $A$ do tvaru
+\paragraph{Řádkové schéma -- metoda ovroubení}
+Jiným přístupem, který můžeme zvolit pro~získání Choleského rozkladu $L L^T$ matice $A$, je řádkové schéma využívající metodu ovroubení (bordering method) \cite{fad:59, ort:88}. Nejprve přepišme matici $A$ do tvaru
 \[
 A =
 \begin{pmatrix}
@@ -883,12 +883,12 @@ Pro získání Choleského rozkladu matice $M$, jehož znalost jsme výše před
   a_{i,1} \\
   \vdots \\
   a_{i,i-1}
-\end{pmatrix} \\
+\end{pmatrix}, \\
  l_{i,i} = \left(a_{i,i} - \sum_{j=1}^{i-1}{l_{i,j}^2}\right)^\frac12.
 \end{gather*}
 
 \paragraph{Sloupcové schéma}
-Jedná se o~obdobný postup jako v~řádkovém schématu, pouze napočítáváme prvky matice $L$ po sloupcích. Vzorce, které nám pro~výpočet prvků matice $L$ vzniknou jsou pro~$j = 1,2,\ldots, N$ a~pro $i = j+1,j+2,\ldots,N$ následující:
+Jedná se o~obdobný postup jako v~řádkovém schématu, pouze napočítáváme prvky matice $L$ po sloupcích. Vzorce, které nám pro~výpočet prvků matice $L$ vzniknou, jsou pro~$j = 1,2,\ldots, N$ a~pro $i = j+1,j+2,\ldots,N$ následující:
 \begin{align*}
   l_{j,j} &= \left(a_{j,j} - \sum_{k=1}^{j-1}{l_{j,k}^2}\right)^\frac12 \\
   l_{i,j} &= \left(a_{i,j} - \sum_{k=1}^{j-1}{l_{i,k}l_{j,k}}\right)/l_{j,j}.
@@ -899,20 +899,20 @@ Jedná se o~obdobný postup jako v~řádkovém schématu, pouze napočítáváme
 
 V praktických aplikacích Choleského rozkladu se často setkáváme s~řídkými maticemi, navíc jsou pro~nás řídké matice zajímavé i~z~hlediska dělení příslušných grafů. Pokud máme řídkou matici, v~optimálním případě bychom chtěli, aby i~její Choleského faktor byl řídká matice, jejíž dolní trojúhelníková část má stejnou strukturu jako dolní trojúhelníková část původní matice.
 
-Mějme čtvercovou matici $A$ o~rozměrech $N\times N$ a~její Choleského rozklad $LL^T$. Základním problémem výše zmíněných algoritmů je, že matice $L$ běžně obsahuje nenulové prvky na~místech, na~nichž měla matice $A$ nuly. Toto zaplňování je způsobeno při vytváření posloupnosti matic $H_i$ (viz Algoritmus \ref{Cholesky}), konkrétně při přechodu od matice $\bar{H}_i$ k matici $H_i$. Připomeňme, že mezi těmito dvěma maticemi platí vztah
+Mějme čtvercovou matici $A$ o~rozměrech $N\times N$ a~její Choleského rozklad $LL^T$. Základním problémem výše zmíněných algoritmů je, že matice $L$ běžně obsahuje nenulové prvky na~místech, na~nichž měla matice $A$ nuly. Toto zaplňování je způsobeno při vytváření posloupnosti matic $H_i$ (viz algoritmus $\bigl($\ref{Cholesky})$\bigr)$, konkrétně při přechodu od matice $\bar{H}_i$ k matici $H_i$. Připomeňme, že mezi těmito dvěma maticemi platí vztah
 \[
 H_i = \bar{H}_i - \frac{\vec{v_i}\vec{v_i}^T}{d_i}.
 \]
-Označme $\eta(A)$, resp. $\eta(\vec{v})$ počet nenulových prvků matice $A$, resp. vektoru $v$. Pak z~Lemmatu \ref{Lsoucet} a~ze vztahu pro~výpočet $L_i$ v~Choleského algoritmu \ref{Cholesky} zřejmě platí
+Označme $\eta(A)$, resp. $\eta(\vec{v})$ počet nenulových prvků matice $A$, resp. vektoru $\vec{v}$. Pak z~Lemmatu \ref{Lsoucet} a~ze vztahu pro~výpočet $L_i$ v~Choleského algoritmu (\ref{Cholesky}) zřejmě platí
 \[
 \eta(L) = N + \sum_{i=1}^{N-1}\eta(\vec{v_i}).
 \]
-Vyslovme větu, ze~které nám vyplyne počet informaci o~počtu multiplikativních operací (násobení a~dělení) potřebných pro~pro výpočet Choleského rozkladu matice $A$.
+Vyslovme větu, ze~které nám vyplyne informace o~počtu multiplikativních operací (násobení a~dělení) potřebných pro~výpočet Choleského rozkladu matice $A$.
 \begin{theorem}
 \label{Cholesky_operace}
   Počet multiplikativních operací potřebných pro~výpočet Choleského rozkladu $LL^T$ matice $A$ o~rozměrech $N \times N$ je roven
   \[
-  \frac12\sum_{i=1}^{N-1}\eta(v_i)\bigl(\eta(v_i)+3\bigr)=
+  \frac12\sum_{i=1}^{N-1}\eta(\vec{v}_i)\bigl(\eta(\vec{v}_i)+3\bigr)=
   \frac12\sum_{i=1}^{N-1}\bigl(\eta(L_{*i})-1\bigr)\bigl(\eta(L_{*i})+2\bigr),
   \]
   kde $L_{*i}$ označuje $i$-tý sloupec matice $L$.
@@ -920,7 +920,7 @@ Vyslovme větu, ze~které nám vyplyne počet informaci o~počtu multiplikativn�
 \begin{proof}
   Jednotlivá schémata pro~výpočet matice $L$ popsaná v~předchozí kapitole se liší pouze v~pořadí, v~němž výpočet prvků matice $L$ provádějí.
 
-  V~$i$-tém kroku algoritmu potřebujeme $\eta(\vec{v_i})$ operací pro~výpočet $v_i/\sqrt{d_i}$ a~$\frac12\eta(\vec{v_i})\bigl(\eta(\vec{v_i})+1\bigr)$ operací pro~vytvoření matice $\frac{\vec{v_i}\vec{v_i}^T}{d_i}$. Tvrzení věty dostaneme sečtením přes všechna $i$.
+  V~$i$-tém kroku algoritmu potřebujeme $\eta(\vec{v_i})$ operací pro~výpočet $\vec{v}_i/\sqrt{d_i}$ a~$\frac12\eta(\vec{v_i})\bigl(\eta(\vec{v_i})+1\bigr)$ operací pro~vytvoření matice $\frac{\vec{v_i}\vec{v_i}^T}{d_i}$. Tvrzení věty dostaneme sečtením přes všechna $i$.
 \end{proof}
 
 \begin{remark}
@@ -943,7 +943,7 @@ Dělení grafu lze využít jako nástroj pro~paralelizaci problémů, které lz
 
 Jak bylo zmíněno, při dělení grafu podle klasické definice bereme ohled pouze na~dvě kritéria: na~velikost separátoru a~na vyváženost jednotlivých částí rozdělení. V~případě, že dělení grafu využíváme jako součást komplexnějšího algoritmu, například pro~paralelizaci nějaké maticové úlohy, nemusí být rozdělení vytvořené s~ohledem na~tato kritéria optimální \cite{moka:01}. V~takovém případě je nutné brát ohled na~to, jaké operace budeme na~výsledných podgrafech provádět a~v~závislosti na~tom specifikovat nová kritéria. Pro~dělení grafu s~ohledem na~více než dvě základní kritéria popsaná výše existují dva základní přístupy. Můžeme hledat rozdělení grafu optimalizující všechna kritéria zároveň (apriorní přístup), nebo můžeme graf rozdělit pomocí některého ze~základních algoritmů pro~dělení grafu a~poté vzniklé rozdělení vylepšit tak, abychom optimalizovali vyváženost operací (aposteriorní přístup).
 
-V této práci se zaměříme na~situaci, kdy je dělení grafů použito jako nástroj pro~vyvažování počtu operací na~jednotlivých oblastech při paralelizaci Choleského rozkladu. Požadujeme tedy, aby počet operací potřebný pro~Choleského rozklad na~jednotlivých oblastech byl v~optimálním případě stejný a~zároveň co nejmenší. Zřejmě nám takto vzniká kritérium, které není zahrnuto v~kritériích podle klasické definice - ta totiž neberou v~potaz hustotu hran v~podgrafech vzniklých dělením původního grafu, neboli v~řeči matic počet nenulových prvků matic sousednosti jednotlivých podgrafů. Počet operací potřebných pro~vypočítání rozkladu na~jednotlivých oblastech může být kvůli tomu výrazně odlišný. Námi navržený algoritmus bude využívat aposteriorního přístupu, nejprve tedy nalezneme suboptimální řešení vzhledem k základním kritériím a~poté budeme hledat vhodné očíslování vrcholů daných podgrafů a~přesouvat vrcholy mezi jednotlivými částmi rozdělení s~cílem vylepšit jej vzhledem k Choleského rozkladu.
+V této práci se zaměříme na~situaci, kdy je dělení grafů použito jako nástroj pro~vyvažování počtu operací na~jednotlivých oblastech při paralelizaci Choleského rozkladu. Požadujeme tedy, aby počet operací potřebný pro~Choleského rozklad na~jednotlivých oblastech byl v~optimálním případě stejný a~zároveň co nejmenší. Zřejmě nám takto vzniká kritérium, které není zahrnuto v~kritériích podle klasické definice -- ta totiž neberou v~potaz hustotu hran v~podgrafech vzniklých dělením původního grafu, neboli v~řeči matic počet nenulových prvků matic sousednosti jednotlivých podgrafů. Počet operací potřebných pro~vypočítání rozkladu na~jednotlivých oblastech může být kvůli tomu výrazně odlišný. Námi navržený algoritmus bude využívat aposteriorního přístupu, nejprve tedy nalezneme suboptimální řešení vzhledem k základním kritériím a~poté budeme hledat vhodné očíslování vrcholů daných podgrafů a~přesouvat vrcholy mezi jednotlivými částmi rozdělení s~cílem vylepšit jej vzhledem k Choleského rozkladu.
 
 Mějme graf $G$ a~jeho rozdělení na~podgrafy $G_1, \ldots, G_k$ s~maticemi sousednosti $A_{G_1}, \ldots, A_{G_k}$. Provedeme Choleského rozklad matic $A_{G_1}, \ldots, A_{G_k}$, označme
 \[
@@ -1122,7 +1122,7 @@ Z definice eliminačních stromů je zřejmé, že budou obsahovat velké množs
 
 Tato věta nám dává návod, jak vypočítat počet nenulových prvků v~Choleského faktoru. Uveďme algoritmus popsaný v~\cite{liu:90}, který nám dává návod, jak napočítat počty nenulových prvků v~jednotlivých řádcích a~sloupcích Choleského faktoru. Obdobný algoritmus s~důrazem na~implementaci na~multiprocesorech můžeme nalézt v~\cite{zmgi:88}. Námi popsaný algoritmus je poměrně jednoduchý. Efektivnější, ale složitější algoritmus pro~výpočet počtu nenulových prvků můžeme najít v~\cite{gil:94}. Dále v~\cite{basm:87} můžeme najít postup, jakým napočítávat počet nenulových prvků ve~faktoru a~strukturu eliminačního stromu současně.
 
-V uvedeném Algoritmu \ref{nonzerosAlgorithm} je použit pracovní vektor \Marker, který složí k označování vrcholů eliminačního stromu, které byly v~dané iteraci již uvažovány - indexování vrcholů eliminačního stromu uvažujeme takové, aby odpovídalo vstupní matici. Eliminační strom je popsán pomocí vektoru $\texttt{PARENT}$, který byl zmíněn výše.
+V uvedeném Algoritmu \ref{nonzerosAlgorithm} je použit pracovní vektor \Marker, který složí k označování vrcholů eliminačního stromu, které byly v~dané iteraci již uvažovány -- indexování vrcholů eliminačního stromu uvažujeme takové, aby odpovídalo vstupní matici. Eliminační strom je popsán pomocí vektoru $\texttt{PARENT}$, který byl zmíněn výše.
 
 \begin{figure}[ht]
   \centering
@@ -1157,7 +1157,7 @@ V uvedeném Algoritmu \ref{nonzerosAlgorithm} je použit pracovní vektor \Marke
 
 Algoritmus \ref{nonzerosAlgorithm} nám dává návod jak vypočítat počet prvků v~jednotlivých řádcích a~sloupcích matice. Pokud nás zajímá pouze počet nenulových prvků v~celé matici, můžeme počítat pouze počet prvků v~řádcích, resp. sloupcích.
 
-Díky Algoritmu \ref{nonzerosAlgorithm} dostáváme odpověď na~otázku, jak zjistit počet nenulových prvků v~matici $L$ z~eliminačního stromu matice $A$. Pokud bychom eliminační strom vytvářeli přímo podle definice, museli bychom vypočítat Choleského rozklad. Proto potřebujeme algoritmus, který nám sestrojí Eliminační strom - tedy vektor $\texttt{PARENT}$ - bez toho.
+Díky Algoritmu \ref{nonzerosAlgorithm} dostáváme odpověď na~otázku, jak zjistit počet nenulových prvků v~matici $L$ z~eliminačního stromu matice $A$. Pokud bychom eliminační strom vytvářeli přímo podle definice, museli bychom vypočítat Choleského rozklad. Proto potřebujeme algoritmus, který nám sestrojí Eliminační strom -- tedy vektor $\texttt{PARENT}$ -- bez toho.
 
 Uveďme základní algoritmus pro~sestrojení eliminačního stromu matice bez výpočtu jejího Choleského rozkladu (Algoritmus \ref{eltree1Algorithm}). Dále popišme jeho vylepšení (Algoritmus \ref{eltree2Algorithm}), v~němž pro~zrychlení Algoritmu \ref{eltree1Algorithm} používáme pomocný vektor $\texttt{ANCSTR}$, který nám zkrátí procházení stromu směrem od listů ke kořeni. V~tomto pomocném vektoru je pro~každý vrchol zaznamenáván jeho poslední zpracovaný předek. Oba algoritmy jsou převzaté z~\cite{liu:86}. 
 

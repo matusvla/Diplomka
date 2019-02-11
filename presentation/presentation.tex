@@ -99,7 +99,7 @@ Obor Matematická informatika
 \end{frame}
 
 \begin{frame}
-  \frametitle{Dělení grafu jako nástroj pro manipulaci s maticemi}
+  \frametitle{Dělení grafu jako nástroj pro transformaci matic}
   \begin{itemize}
     \item Dělení grafu $G=(V,E)$ 
     \medskip
@@ -231,7 +231,7 @@ Obor Matematická informatika
 \begin{frame}
     \frametitle{Přesun separátoru}
     \begin{itemize}
-      \item Bez parametru $\texttt{-oe}$:
+      \item Číslování pouze v poslední iteraci:
       \begin{table}[ht]
         \tiny
         \centering
@@ -266,7 +266,7 @@ Obor Matematická informatika
         \hline
         \end{tabular}
       \end{table}
-    \item S parametrem \texttt{-oe}:
+    \item Číslování v každé iteraci:
     \begin{table}[ht]
       \tiny
       \centering
@@ -302,12 +302,12 @@ Obor Matematická informatika
     \begin{itemize}
       \item Paralelizace Choleského rozkladu pomocí dělení grafů
       \medskip
-      \item Předpodmínění pro skupinu úloh
+      \item Předpodmínění pro skupinu úloh -- nelineární problém
       \medskip
       \begin{itemize}
         \item Vzhledem k počtu úloh se vyplatí
         \medskip
-        \item Drobné změny v matici $\Rightarrow$ Drobné změny v Choleského faktoru
+        \item Drobné změny v matici $\Rightarrow$ Drobné změny ve struktuře Choleského faktoru
       \end{itemize}
       \medskip
       \item Analytický charakter $\rightarrow$ Efektivní implementace
